@@ -11,6 +11,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get('/', (_req, res) => {
+  res.send('Ora backend is running. Open <a href="http://localhost:5173">http://localhost:5173</a> to use the app.');
+});
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'Ora' });
 });
