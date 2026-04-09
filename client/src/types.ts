@@ -5,6 +5,12 @@ export type SessionStatus =
   | 'responding'
   | 'error';
 
+export type OraError =
+  | { kind: 'ws_connect'; msg: string }
+  | { kind: 'mic'; msg: string }
+  | { kind: 'server'; msg: string }
+  | { kind: 'unknown'; msg: string };
+
 export interface TranscriptEntry {
   id: string;
   role: 'user' | 'assistant';

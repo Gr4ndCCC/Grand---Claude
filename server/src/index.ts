@@ -29,6 +29,6 @@ wss.on('connection', (ws, req) => {
 });
 
 const PORT = parseInt(process.env.PORT ?? '3001', 10);
-httpServer.listen(PORT, () => {
+httpServer.listen(PORT, '0.0.0.0', () => {
   console.log(`Ora server listening on http://localhost:${PORT}`);
 });

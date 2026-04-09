@@ -6,6 +6,7 @@ import Controls from './components/Controls';
 export default function App() {
   const {
     status,
+    error,
     transcript,
     isMuted,
     isOraPlaying,
@@ -30,6 +31,13 @@ export default function App() {
 
       {/* Main */}
       <main className="main">
+        {/* Error banner */}
+        {status === 'error' && error && (
+          <div className="error-banner">
+            <strong>Error:</strong> {error.msg}
+          </div>
+        )}
+
         {/* Visualizer card */}
         <section className={`card visualizer-card ${isActive ? 'card--active' : ''} ${isOraPlaying ? 'card--ora-speaking' : ''}`}>
           <WaveformVisualizer

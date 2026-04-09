@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import type { SessionStatus, TranscriptEntry, ServerMessage } from '../types';
+import type { SessionStatus, TranscriptEntry, ServerMessage, OraError } from '../types';
 import { useAudioPlayer } from './useAudioPlayer';
 
-const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://localhost:3001';
+const WS_URL = import.meta.env.VITE_WS_URL ?? 'ws://127.0.0.1:3001';
 
 // Silence threshold for interruption detection (0–1 RMS)
 const INTERRUPT_THRESHOLD = 0.06;
@@ -11,6 +11,7 @@ const INTERRUPT_FRAMES = 4;
 
 export function useOraSession() {
   const [status, setStatus] = useState<SessionStatus>('idle');
+  const [error, setError] = useState<OraError | null>(null);
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [isOraPlaying, setIsOraPlaying] = useState(false);
@@ -86,6 +87,7 @@ export function useOraSession() {
 
   const startSession = useCallback(async () => {
     try {
+      setError(null);
       setStatus('connecting');
 
       // Mic access
@@ -219,21 +221,34 @@ export function useOraSession() {
 
           case 'error':
             console.error('[Server error]', msg.message);
+            setError({ kind: 'server', msg: msg.message ?? 'Unknown server error' });
             setStatus('error');
             break;
         }
       };
 
-      ws.onclose = () => {
-        setStatus('idle');
+      ws.onclose = (ev) => {
+        if (ev.code !== 1000 && status !== 'idle') {
+          setError({ kind: 'ws_connect', msg: `WebSocket closed (code ${ev.code}). Is the server running?` });
+          setStatus('error');
+        } else {
+          setStatus('idle');
+        }
         setIsOraPlaying(false);
       };
 
       ws.onerror = () => {
+        setError({ kind: 'ws_connect', msg: `Cannot connect to ws://127.0.0.1:3001 — make sure the server is running in Window 1.` });
         setStatus('error');
       };
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       console.error('[Ora] startSession error:', err);
+      if (msg.toLowerCase().includes('permission') || msg.toLowerCase().includes('notallowed')) {
+        setError({ kind: 'mic', msg: 'Microphone permission denied. Allow mic access and try again.' });
+      } else {
+        setError({ kind: 'unknown', msg });
+      }
       setStatus('error');
     }
   }, [player, captureFrame, appendTranscript]);
@@ -351,6 +366,7 @@ export function useOraSession() {
 
   return {
     status,
+    error,
     transcript,
     isMuted,
     isOraPlaying,
