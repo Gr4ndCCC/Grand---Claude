@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#E8341A"/>
+      <stop offset="50%" style="stop-color:#FF5C1A"/>
+      <stop offset="100%" style="stop-color:#FFAA33"/>
+    </linearGradient>
+  </defs>
+  <path d="M16 2C16 2 10 8 10 14C10 17.314 12.686 20 16 20C19.314 20 22 17.314 22 14C22 8 16 2 16 2Z" fill="url(#fireGrad)"/>
+  <path d="M16 12C16 12 13 15 13 17.5C13 19.433 14.343 21 16 21C17.657 21 19 19.433 19 17.5C19 15 16 12 16 12Z" fill="#FFD166" opacity="0.8"/>
+  <ellipse cx="16" cy="27" rx="8" ry="3" fill="url(#fireGrad)" opacity="0.3"/>
+  <rect x="8" y="24" width="16" height="2" rx="1" fill="#FF5C1A" opacity="0.6"/>
+</svg>

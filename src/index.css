@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-ember-bg text-ember-cream font-sans;
+    min-height: 100dvh;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-ember-surface;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-ember-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ember-subtle;
+  }
+
+  ::selection {
+    background: rgba(255, 92, 26, 0.25);
+    color: #F5EEE6;
+  }
+}
+
+@layer components {
+  /* Glassmorphism card */
+  .glass-card {
+    @apply bg-ember-surface/80 backdrop-blur-xl border border-ember-border/60 rounded-2xl shadow-card;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%);
+  }
+
+  /* Fire gradient text */
+  .fire-text {
+    @apply bg-fire-gradient bg-clip-text text-transparent;
+  }
+
+  /* Ember glow effect */
+  .ember-glow {
+    @apply shadow-ember;
+  }
+
+  /* Input field */
+  .ember-input {
+    @apply w-full bg-ember-surface2 border border-ember-border rounded-xl px-4 py-3
+           text-ember-cream placeholder-ember-subtle
+           focus:outline-none focus:ring-2 focus:ring-ember-orange/40 focus:border-ember-orange/60
+           transition-all duration-200;
+  }
+
+  /* Subtle divider */
+  .divider {
+    @apply border-t border-ember-border/50;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Particle / ember float animation */
+@keyframes emberFloat {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity: 0.8; }
+  25%  { transform: translateY(-20px) translateX(5px) scale(0.9); opacity: 0.6; }
+  50%  { transform: translateY(-40px) translateX(-5px) scale(0.8); opacity: 0.4; }
+  75%  { transform: translateY(-60px) translateX(3px) scale(0.6); opacity: 0.2; }
+  100% { transform: translateY(-80px) translateX(0) scale(0.4); opacity: 0; }
+}
+
+.ember-particle {
+  animation: emberFloat var(--duration, 3s) ease-out var(--delay, 0s) infinite;
+}
