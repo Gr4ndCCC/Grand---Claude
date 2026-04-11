@@ -3,3 +3,6 @@ dist/
 .env
 .env.local
 *.local
+backend/node_modules/
+backend/.env
+
