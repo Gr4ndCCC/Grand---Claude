@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Settings, Flame, Calendar, Users, Award, Edit2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { EventCard } from '../components/EventCard';
-import { CURRENT_USER, EVENTS } from '../data/mock';
+import { EVENTS } from '../data/mock';
+import { fetchEvents } from '../services/events';
+import { useAuth } from '../context/AuthContext';
+import type { Event } from '../types';
 
 const BADGE_COLORS: Record<string, 'orange' | 'amber' | 'green' | 'blue'> = {
   orange: 'orange',
@@ -23,11 +26,18 @@ const ACHIEVEMENTS = [
 ];
 
 export function Profile() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'events' | 'achievements'>('events');
-  const user = CURRENT_USER;
+  const [allEvents, setAllEvents] = useState<Event[]>(EVENTS);
 
-  const hostedEvents = EVENTS.filter(e => e.host.id === user.id);
-  const attendedEvents = EVENTS.filter(e =>
+  useEffect(() => {
+    fetchEvents().then(apiEvents => {
+      if (apiEvents && apiEvents.length > 0) setAllEvents(apiEvents);
+    });
+  }, []);
+
+  const hostedEvents = allEvents.filter(e => e.host.id === user.id);
+  const attendedEvents = allEvents.filter(e =>
     e.guests.some(g => g.user.id === user.id)
   );
 

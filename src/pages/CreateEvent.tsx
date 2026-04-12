@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
+import { createEvent, COVER_COLORS } from '../services/events';
 
 const COVER_OPTIONS = [
   { emoji: '🥩', gradient: 'from-ember-red via-ember-orange to-ember-amber' },
@@ -86,8 +87,27 @@ export function CreateEvent() {
 
   const handleSubmit = async () => {
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1200));
-    navigate('/events/e1');
+    try {
+      const dateTime = new Date(`${date}T${time}`).toISOString();
+      const coverColor = COVER_COLORS[selectedCover] ?? COVER_COLORS[7];
+
+      const newEvent = await createEvent({
+        title,
+        description: description || undefined,
+        location_name: location,
+        address: address || undefined,
+        date_time: dateTime,
+        max_participants: parseInt(maxGuests, 10),
+        is_private: !isPublic,
+        cover_color: coverColor,
+      });
+
+      navigate(newEvent ? `/events/${newEvent.id}` : '/events');
+    } catch {
+      navigate('/events');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const canNextStep1 = title.trim().length >= 3;

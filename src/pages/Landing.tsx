@@ -3,6 +3,7 @@ import { ArrowRight, Flame } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { EmberLogo } from '../components/EmberLogo';
 import { EventCard } from '../components/EventCard';
+import { SpinningEarth } from '../components/SpinningEarth';
 import { EVENTS, USERS } from '../data/mock';
 
 const FEATURES = [
@@ -62,7 +63,12 @@ export function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="relative z-10 text-center px-6 pt-16 pb-20 md:pt-24 md:pb-28">
+      <section className="relative z-10 text-center px-6 pt-10 pb-20 md:pt-14 md:pb-28">
+        {/* Spinning Earth globe */}
+        <div className="flex justify-center mb-4 animate-fade-in">
+          <SpinningEarth size={240} />
+        </div>
+
         {/* Pill badge */}
         <div className="inline-flex items-center gap-2 bg-ember-orange/10 border border-ember-orange/30
                         text-ember-orange text-sm font-semibold px-4 py-1.5 rounded-full mb-8

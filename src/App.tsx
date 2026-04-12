@@ -5,6 +5,7 @@ import { Events } from './pages/Events';
 import { CreateEvent } from './pages/CreateEvent';
 import { EventDetail } from './pages/EventDetail';
 import { Profile } from './pages/Profile';
+import { AuthProvider } from './context/AuthContext';
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
       <Routes>
         {/* Landing — no nav */}
@@ -43,5 +45,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </AuthProvider>
   );
 }

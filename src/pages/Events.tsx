@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, SlidersHorizontal, Flame, CalendarDays, UserCheck, TrendingUp } from 'lucide-react';
 import { EventCard } from '../components/EventCard';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { EVENTS, CURRENT_USER } from '../data/mock';
-import type { Tab } from '../types';
+import { EVENTS } from '../data/mock';
+import { fetchEvents } from '../services/events';
+import { useAuth } from '../context/AuthContext';
+import type { Event, Tab } from '../types';
 
 const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
   { id: 'discover',   label: 'Discover',   icon: <TrendingUp size={14} /> },
@@ -15,15 +17,23 @@ const TABS: Array<{ id: Tab; label: string; icon: React.ReactNode }> = [
 const FILTER_TAGS = ['All', 'This weekend', 'Backyard', 'Rooftop', 'Vegan', 'Family', 'Free'];
 
 export function Events() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('discover');
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [allEvents, setAllEvents] = useState<Event[]>(EVENTS);
 
-  const myEvents = EVENTS.filter(e => e.host.id === CURRENT_USER.id);
-  const invitedEvents = EVENTS.filter(e =>
-    e.guests.some(g => g.user.id === CURRENT_USER.id)
+  useEffect(() => {
+    fetchEvents().then(apiEvents => {
+      if (apiEvents && apiEvents.length > 0) setAllEvents(apiEvents);
+    });
+  }, []);
+
+  const myEvents = allEvents.filter(e => e.host.id === user.id);
+  const invitedEvents = allEvents.filter(e =>
+    e.guests.some(g => g.user.id === user.id)
   );
-  const discoverEvents = EVENTS.filter(e => e.isPublic);
+  const discoverEvents = allEvents.filter(e => e.isPublic);
 
   const sourceEvents =
     activeTab === 'my-events' ? myEvents :
@@ -31,7 +41,8 @@ export function Events() {
     discoverEvents;
 
   const filtered = sourceEvents.filter(e =>
-    !search || e.title.toLowerCase().includes(search.toLowerCase()) ||
+    !search ||
+    e.title.toLowerCase().includes(search.toLowerCase()) ||
     e.location.toLowerCase().includes(search.toLowerCase())
   );
 

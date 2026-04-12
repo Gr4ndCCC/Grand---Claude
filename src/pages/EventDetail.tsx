@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   MapPin, Clock, Users, Lock, Globe, Share2, ChevronLeft,
@@ -9,7 +9,10 @@ import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
 import { SatelliteMap } from '../components/SatelliteMap';
-import { EVENTS, CURRENT_USER } from '../data/mock';
+import { EVENTS } from '../data/mock';
+import { fetchEvent, joinEvent, leaveEvent } from '../services/events';
+import { useAuth } from '../context/AuthContext';
+import type { Event } from '../types';
 
 type RsvpStatus = 'going' | 'maybe' | 'declined' | null;
 
@@ -41,16 +44,29 @@ const MENU_CAT_ICONS: Record<string, string> = {
 export function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const event = EVENTS.find(e => e.id === id) ?? EVENTS[0];
+  const { user } = useAuth();
 
+  const [event, setEvent] = useState<Event>(EVENTS.find(e => e.id === id) ?? EVENTS[0]);
   const [rsvp, setRsvp] = useState<RsvpStatus>('going');
   const [activeSection, setActiveSection] = useState<'about' | 'guests' | 'menu'>('about');
   const [bringingText, setBringingText] = useState('');
 
+  useEffect(() => {
+    if (!id) return;
+    fetchEvent(id).then(apiEvent => { if (apiEvent) setEvent(apiEvent); });
+  }, [id]);
+
+  const handleRsvp = (status: RsvpStatus) => {
+    setRsvp(status);
+    if (!event?.id) return;
+    if (status === 'going') joinEvent(event.id);
+    else if (status === 'declined') leaveEvent(event.id);
+  };
+
   const goingGuests = event.guests.filter(g => g.rsvp === 'going');
   const maybeGuests = event.guests.filter(g => g.rsvp === 'maybe');
   const spotsLeft = event.maxGuests - goingGuests.length;
-  const isHost = event.host.id === CURRENT_USER.id;
+  const isHost = event.host.id === user.id;
 
   const groupedMenu = event.menu.reduce<Record<string, typeof event.menu>>((acc, item) => {
     if (!acc[item.category]) acc[item.category] = [];
@@ -177,7 +193,7 @@ export function EventDetail() {
                   return (
                     <button
                       key={key}
-                      onClick={() => setRsvp(key)}
+                      onClick={() => handleRsvp(key)}
                       className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl
                                   text-sm font-semibold border transition-all duration-200 ${
                         isActive ? config.active : config.inactive
