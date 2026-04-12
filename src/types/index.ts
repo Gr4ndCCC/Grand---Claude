@@ -26,6 +26,8 @@ export interface Event {
   time: string;
   location: string;
   address: string;
+  lat?: number;
+  lng?: number;
   coverEmoji: string;
   coverGradient: string;
   host: User;

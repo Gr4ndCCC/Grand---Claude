@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Avatar } from '../components/ui/Avatar';
+import { SatelliteMap } from '../components/SatelliteMap';
 import { EVENTS, CURRENT_USER } from '../data/mock';
 
 type RsvpStatus = 'going' | 'maybe' | 'declined' | null;
@@ -231,12 +232,33 @@ export function EventDetail() {
 
         {/* About */}
         {activeSection === 'about' && (
-          <div className="glass-card p-5 animate-fade-in">
-            <p className="text-ember-muted leading-relaxed">{event.description}</p>
-            {event.rsvpDeadline && (
-              <div className="mt-4 pt-4 border-t border-ember-border/50 flex items-center gap-2 text-xs text-ember-subtle">
-                <Clock size={12} />
-                RSVP by {format(new Date(event.rsvpDeadline), 'MMM d, yyyy')}
+          <div className="space-y-4 animate-fade-in">
+            <div className="glass-card p-5">
+              <p className="text-ember-muted leading-relaxed">{event.description}</p>
+              {event.rsvpDeadline && (
+                <div className="mt-4 pt-4 border-t border-ember-border/50 flex items-center gap-2 text-xs text-ember-subtle">
+                  <Clock size={12} />
+                  RSVP by {format(new Date(event.rsvpDeadline), 'MMM d, yyyy')}
+                </div>
+              )}
+            </div>
+
+            {/* Satellite map */}
+            {event.lat != null && event.lng != null && (
+              <div className="glass-card p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin size={14} className="text-ember-orange" />
+                  <span className="text-ember-cream text-sm font-semibold">Location</span>
+                </div>
+                <SatelliteMap
+                  lat={event.lat}
+                  lng={event.lng}
+                  label={event.location}
+                  address={event.address}
+                />
+                <p className="text-ember-subtle text-xs mt-2 text-center">
+                  Satellite imagery · Esri World Imagery
+                </p>
               </div>
             )}
           </div>
