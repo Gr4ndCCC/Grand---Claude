@@ -3,10 +3,10 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
-  { to: '/events', label: 'Events'  },
-  { to: '/vault',  label: 'Vault'   },
-  { to: '/hosts',  label: 'Hosts'   },
-  { to: '/about',  label: 'About'   },
+  { to: '/events', label: 'Events'    },
+  { to: '/vault',  label: 'Vault'     },
+  { to: '/about',  label: 'The Board' },
+  { to: '/hosts',  label: 'Hosts'     },
 ];
 
 export function Nav() {
