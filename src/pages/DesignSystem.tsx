@@ -26,7 +26,7 @@ function Section({ n, title, lede, children }: { n: number; title: string; lede?
     <section className="py-14 border-b border-line last:border-b-0">
       <div className="page-container">
         <div className="mb-6">
-          <p className="mono text-ember mb-2">{String(n).padStart(2, '0')} · Section</p>
+          <p className="mono text-ember mb-2">{String(n).padStart(2, '0')}</p>
           <h2 className="text-3xl mb-2">{title}</h2>
           {lede && <p className="text-ink-mid max-w-xl">{lede}</p>}
         </div>
@@ -62,10 +62,11 @@ export function DesignSystem() {
       <header className="page-container pt-28 pb-6">
         <p className="mono text-ember mb-2">Ember · Design system</p>
         <h1 className="text-4xl md:text-5xl mb-3">
-          The components, <span className="italic-accent">in plain sight.</span>
+          Every primitive on one page.
         </h1>
         <p className="text-ink-mid max-w-2xl">
-          Every primitive used on the landing page, in the order they appear in the handoff. This page is the verification surface — if it looks right here, it looks right everywhere.
+          The components used on the landing page, in the order they appear
+          in the handoff. If it looks right here, it looks right everywhere.
         </p>
       </header>
 
@@ -75,7 +76,7 @@ export function DesignSystem() {
           <div>
             <p className="mono text-ink-soft mb-3">Type</p>
             <p className="font-display text-5xl mb-1">Newsreader</p>
-            <p className="font-display italic text-2xl text-ember mb-1">Italic — emotional accent</p>
+            <p className="font-display italic text-2xl text-ember mb-1">Italic, used sparingly</p>
             <p className="mono">JetBrains Mono · system voice</p>
           </div>
           <div>
@@ -130,7 +131,7 @@ export function DesignSystem() {
       </Section>
 
       {/* 04 — Cards & elevation */}
-      <Section n={4} title="Cards" lede="Three elevations. Use sparingly — paper, raised, sunk.">
+      <Section n={4} title="Cards" lede="Three elevations: plain, raised, sunk. Use sparingly.">
         <div className="grid md:grid-cols-3 gap-4">
           <Card variant="plain"><p className="mono text-ink-soft mb-2">Plain</p><p>On paper, no shadow.</p></Card>
           <Card variant="raised"><p className="mono text-ink-soft mb-2">Raised</p><p>Default surface for content.</p></Card>
@@ -161,7 +162,7 @@ export function DesignSystem() {
       </Section>
 
       {/* 06 — Tabs, tooltip */}
-      <Section n={6} title="Tabs &amp; tooltip">
+      <Section n={6} title="Tabs and tooltip">
         <Tabs
           tabs={[
             { id: 'about', label: 'About', content: <p className="text-ink-mid">Quiet, dependable potlucks. No more guessing what to bring.</p> },
@@ -231,10 +232,10 @@ export function DesignSystem() {
       {/* 10 — MenuItem */}
       <Section n={10} title="Menu item" lede="Click to claim. 600ms flip-card.">
         <div className="grid md:grid-cols-2 gap-3 max-w-2xl">
-          <MenuItem name="Brisket, hot &amp; fast"   category="Main" />
+          <MenuItem name="Brisket, hot and fast"      category="Main" />
           <MenuItem name="Charred shishitos"          category="Veg" claimedBy={{ name: 'Marin K.' }} />
           <MenuItem name="Smoked stone fruit cobbler" category="Sweet" />
-          <MenuItem name="Sumac slaw"                  category="Side" />
+          <MenuItem name="Sumac slaw"                 category="Side" />
         </div>
       </Section>
 
@@ -242,7 +243,7 @@ export function DesignSystem() {
       <Section n={11} title="Event card" lede="The atom that the landing list is built from.">
         <div className="grid md:grid-cols-2 gap-4">
           <EventCard
-            title="Sunday brisket, hot &amp; fast"
+            title="Sunday brisket, hot and fast"
             host="Marin K."
             when="Sun · 4:00 PM"
             where="Backyard, Logan Square"

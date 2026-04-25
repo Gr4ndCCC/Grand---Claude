@@ -1,12 +1,12 @@
 :root {
-  /* ── Brand (only chromatic colors) ──────────────────────────── */
+  /* brand — only chromatic colors */
   --ember:        #b85332;
   --ember-hot:    #d96b48;
   --ember-deep:   #993f24;
   --maroon:       #550000;
   --maroon-deep:  #2e0000;
 
-  /* ── Char neutrals (warm, never blue-grey) ─────────────────── */
+  /* char neutrals (warm, never blue-grey) */
   --char-0:   #0c0a09;
   --char-1:   #14110f;
   --char-2:   #1c1815;
@@ -17,29 +17,29 @@
   --ash-2:    #e8e2dc;
   --paper:    #f6f1ea;
 
-  /* ── Surfaces ──────────────────────────────────────────────── */
+  /* surfaces */
   --surface:        var(--paper);
   --surface-raised: #ffffff;
   --surface-sunk:   #efe7dd;
   --surface-deep:   var(--char-0);
 
-  /* ── Text ──────────────────────────────────────────────────── */
+  /* text */
   --ink:         var(--char-0);
   --ink-mid:     var(--char-3);
   --ink-soft:    var(--char-5);
   --ink-inverse: var(--paper);
 
-  /* ── Lines ─────────────────────────────────────────────────── */
+  /* lines */
   --line:        rgba(20, 17, 15, 0.10);
   --line-soft:   rgba(20, 17, 15, 0.06);
   --line-strong: rgba(20, 17, 15, 0.22);
 
-  /* ── Type families ─────────────────────────────────────────── */
+  /* type families */
   --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
   --font-body:    'Newsreader', Georgia, serif;
   --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
-  /* ── Type scale ────────────────────────────────────────────── */
+  /* type scale */
   --t-mono:    11px;
   --t-xs:      12px;
   --t-sm:      14px;
@@ -52,19 +52,19 @@
   --t-5xl:     64px;
   --t-display: 88px;
 
-  /* ── Easing ────────────────────────────────────────────────── */
+  /* easing */
   --ease-spark: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-flame: cubic-bezier(0.4, 0, 0.2, 1);
   --ease-smoke: cubic-bezier(0.6, 0.05, 0.4, 1);
 
-  /* ── Shadows ───────────────────────────────────────────────── */
+  /* shadows */
   --shadow-1:     0 1px 0 rgba(20, 17, 15, 0.04), 0 1px 2px rgba(20, 17, 15, 0.06);
   --shadow-2:     0 2px 6px rgba(20, 17, 15, 0.08), 0 6px 20px rgba(20, 17, 15, 0.06);
   --shadow-3:     0 12px 36px rgba(20, 17, 15, 0.12);
   --shadow-ember: 0 8px 28px rgba(184, 83, 50, 0.30);
   --shadow-focus: 0 0 0 3px rgba(184, 83, 50, 0.30);
 
-  /* ── Radii ─────────────────────────────────────────────────── */
+  /* radii */
   --r-xs: 2px;
   --r-sm: 4px;
   --r-md: 8px;
@@ -72,6 +72,6 @@
   --r-xl: 20px;
   --r-pill: 999px;
 
-  /* ── Layout ────────────────────────────────────────────────── */
+  /* layout */
   --container: 1200px;
 }

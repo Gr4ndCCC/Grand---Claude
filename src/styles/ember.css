@@ -1,9 +1,7 @@
-/* ══════════════════════════════════════════════════════════════
-   Ember — signature motion + texture utilities
-   Each effect respects prefers-reduced-motion.
-   ══════════════════════════════════════════════════════════════ */
+/* Ember — signature motion + texture utilities.
+   Each effect respects prefers-reduced-motion. */
 
-/* ── Base ─────────────────────────────────────────────────── */
+/* base */
 *, *::before, *::after { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
 body {
@@ -29,7 +27,7 @@ p { margin: 0; }
 
 ::selection { background: var(--ember); color: var(--ink-inverse); }
 
-/* ── Mono / system voice ──────────────────────────────────── */
+/* mono / system voice */
 .mono {
   font-family: var(--font-mono);
   font-size: var(--t-mono);
@@ -38,14 +36,14 @@ p { margin: 0; }
   font-weight: 500;
 }
 
-/* ── Italic accent ────────────────────────────────────────── */
+/* italic accent */
 .italic-accent {
   font-style: italic;
   font-weight: 400;
   color: var(--ember);
 }
 
-/* ── Page container ───────────────────────────────────────── */
+/* page container */
 .page-container {
   width: 100%;
   max-width: var(--container);
@@ -53,9 +51,7 @@ p { margin: 0; }
   padding-inline: 24px;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Focus — ember pulse on keyboard focus
-   ══════════════════════════════════════════════════════════════ */
+/* focus — ember pulse on keyboard focus */
 .ember-focus { outline: none; }
 .ember-focus:focus-visible {
   box-shadow: var(--shadow-focus);
@@ -66,9 +62,7 @@ p { margin: 0; }
   50%      { box-shadow: 0 0 0 5px rgba(184, 83, 50, 0.20); }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Spark — particle that jumps between buttons on hover
-   ══════════════════════════════════════════════════════════════ */
+/* spark — radial highlight follows the cursor on hover */
 .spark { position: relative; isolation: isolate; }
 .spark::after {
   content: '';
@@ -83,9 +77,7 @@ p { margin: 0; }
 }
 .spark:hover::after { opacity: 1; }
 
-/* ══════════════════════════════════════════════════════════════
-   Grill-mark — skeleton loading shimmer (warm, char-on-paper)
-   ══════════════════════════════════════════════════════════════ */
+/* grill-mark — skeleton loading shimmer */
 .grill-mark {
   background:
     repeating-linear-gradient(
@@ -110,9 +102,7 @@ p { margin: 0; }
   to { background-position: 0 0, 100% 0; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Smoke wisp — drifts up + fades on RSVP "yes"
-   ══════════════════════════════════════════════════════════════ */
+/* smoke wisp — drifts up + fades on RSVP "yes" */
 .smoke-wisp {
   position: absolute;
   pointer-events: none;
@@ -129,9 +119,7 @@ p { margin: 0; }
   100% { transform: translate(-50%, -54px) scale(1.6); opacity: 0; }
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Char-noise — paper grain that intensifies on scroll
-   ══════════════════════════════════════════════════════════════ */
+/* char-noise — paper grain that intensifies on scroll */
 .char-noise {
   position: fixed;
   inset: 0;
@@ -143,9 +131,7 @@ p { margin: 0; }
   transition: opacity 240ms var(--ease-flame);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Flip-card — 600ms flip on MenuItem claim
-   ══════════════════════════════════════════════════════════════ */
+/* flip-card — 600ms flip on MenuItem claim */
 .flip-card { perspective: 800px; }
 .flip-card-inner {
   position: relative;
@@ -164,9 +150,7 @@ p { margin: 0; }
   transform: rotateY(180deg);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   Reduced motion — kill all decorative animation
-   ══════════════════════════════════════════════════════════════ */
+/* reduced motion — kill all decorative animation */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

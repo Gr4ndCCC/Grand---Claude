@@ -35,7 +35,7 @@ export function Landing() {
     <div className="bg-surface text-ink relative">
       <Nav />
 
-      {/* ── Sticky activity bar (appears after hero) ───────────── */}
+      {/* sticky activity bar (after hero) */}
       <StickyBar position="top" appearAt={520}>
         <div className="bg-paper/90 backdrop-blur border-b border-line">
           <div className="page-container h-12 flex items-center justify-between gap-4">
@@ -52,33 +52,21 @@ export function Landing() {
         </div>
       </StickyBar>
 
-      {/* ════════════════════════════════════════════════════════════
-         01 — HERO
-         A/B variants kept as comments per handoff.
-         ════════════════════════════════════════════════════════════ */}
+      {/* hero */}
       <section className="pt-32 pb-20">
         <div className="page-container">
-          <p className="mono text-ember mb-5">Backyard BBQ · Quietly coordinated</p>
+          <p className="mono text-ember mb-5">Backyard BBQ for the host who keeps doing the work</p>
 
-          {/* H1 — variant A (active) */}
           <h1 className="font-display text-5xl md:text-display leading-[1.02] tracking-tight max-w-4xl">
-            Three people <span className="italic-accent">flaked</span> last time.
+            Three people flaked last time.
             <br />
             Tonight, nobody does.
           </h1>
 
-          {/* H1 — variant B (commented per handoff)
-            <h1>Less group chat. <em>More charcoal.</em></h1>
-          */}
-
-          {/* H1 — variant C (commented per handoff)
-            <h1>The grill is the point. <em>Everything else is plumbing.</em></h1>
-          */}
-
           <p className="text-ink-mid text-lg max-w-xl mt-6 mb-8">
-            Ember is for the friend who hosts the BBQ — and for the eight people
-            who keep saying they'll bring something. RSVP, claim a dish, show up.
-            That's the whole app.
+            Ember is for the friend who hosts the BBQ, and for the eight
+            people who keep saying they'll bring something. RSVP, claim a
+            dish, show up. That's the whole app.
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mb-10">
@@ -98,21 +86,18 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         02 — THE PROBLEM (specific, punchy)
-         ════════════════════════════════════════════════════════════ */}
+      {/* the problem */}
       <section className="py-20 bg-surface-sunk border-y border-line">
         <div className="page-container grid md:grid-cols-12 gap-10 items-start">
           <div className="md:col-span-5">
-            <p className="mono text-ember mb-3">02 · The problem</p>
+            <p className="mono text-ember mb-3">The problem</p>
             <h2 className="text-4xl mb-4">
-              You said <span className="italic-accent">"I'll bring sides"</span>
-              <br /> and then so did three other people.
+              You said "I'll bring sides," and then so did three other people.
             </h2>
             <p className="text-ink-mid">
               Every group chat ends the same way. Six dishes nobody claimed,
-              two coolers of beer, one sad bag of buns. Ember exists because
-              the host shouldn't be the project manager.
+              two coolers of beer, one sad bag of buns. The host shouldn't
+              also be the project manager.
             </p>
           </div>
           <div className="md:col-span-7 grid sm:grid-cols-3 gap-3">
@@ -130,20 +115,18 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         03 — HOW IT WORKS (3 steps)
-         ════════════════════════════════════════════════════════════ */}
+      {/* how it works */}
       <section className="py-20">
         <div className="page-container">
-          <p className="mono text-ember mb-3">03 · How it works</p>
+          <p className="mono text-ember mb-3">How it works</p>
           <h2 className="text-4xl mb-12 max-w-2xl">
-            Three steps. <span className="italic-accent">No group chat.</span>
+            Three steps, no group chat.
           </h2>
           <ol className="grid md:grid-cols-3 gap-6">
             {[
-              { n: '01', t: 'Pick a date',       b: 'Set the time and place. We send a single text — no app to download.' },
-              { n: '02', t: 'Friends claim',     b: 'They tap a dish. Six different things show up. Nothing doubled.' },
-              { n: '03', t: 'Light the charcoal',b: 'Show up to a full table. We remind the flakes the morning of.' },
+              { n: '01', t: 'Pick a date',        b: 'Set the time and the place. We send one text. No app to download.' },
+              { n: '02', t: 'Friends claim',      b: 'They tap a dish. Six different things show up. Nothing doubled.' },
+              { n: '03', t: 'Light the charcoal', b: 'Show up to a full table. We remind the flakes the morning of.' },
             ].map(({ n, t, b }) => (
               <li key={n} className="border-l-2 border-ember pl-5">
                 <p className="mono text-ember mb-2">{n}</p>
@@ -155,17 +138,13 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         04 — LIVE PRODUCT (event cards)
-         ════════════════════════════════════════════════════════════ */}
+      {/* live this week */}
       <section className="py-20 bg-surface-sunk border-y border-line">
         <div className="page-container">
           <div className="flex items-end justify-between mb-8 flex-wrap gap-4">
             <div>
-              <p className="mono text-ember mb-3">04 · Live this week</p>
-              <h2 className="text-4xl">
-                Real grills, <span className="italic-accent">real people.</span>
-              </h2>
+              <p className="mono text-ember mb-3">Live this week</p>
+              <h2 className="text-4xl">Nine grills lit, three open seats.</h2>
             </div>
             <div className="flex flex-wrap gap-2">
               <Tag>backyard</Tag>
@@ -176,7 +155,7 @@ export function Landing() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             <EventCard
-              title="Sunday brisket, hot &amp; fast"
+              title="Sunday brisket, hot and fast"
               host="Marin K." when="Sun · 4:00 PM"
               where="Backyard, Logan Square"
               going={PEOPLE.slice(0, 5)} spotsLeft={3} pinX={120} pinY={70}
@@ -197,19 +176,16 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         05 — RSVP DEMO + MENU CLAIM
-         ════════════════════════════════════════════════════════════ */}
+      {/* rsvp + menu demo */}
       <section className="py-20">
         <div className="page-container grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <p className="mono text-ember mb-3">05 · The interaction</p>
-            <h2 className="text-4xl mb-4">
-              Tap once. <span className="italic-accent">You're in.</span>
-            </h2>
+            <p className="mono text-ember mb-3">The interaction</p>
+            <h2 className="text-4xl mb-4">Tap once. You're in.</h2>
             <p className="text-ink-mid mb-6">
               No accounts, no profiles, no notifications begging for attention.
-              Three buttons and a list. The whole product fits in a text message.
+              Three buttons and a list. The whole product fits in a text
+              message.
             </p>
             <div className="flex items-center gap-3 mb-4">
               <span className="mono text-ink-soft w-14">RSVP</span>
@@ -226,28 +202,26 @@ export function Landing() {
               <Badge tone="ember">Live</Badge>
             </div>
             <p className="mono text-ink-soft">Tap "I'll bring this" to claim a dish.</p>
-            <MenuItem name="Brisket, hot &amp; fast"   category="Main" />
+            <MenuItem name="Brisket, hot and fast"      category="Main" />
             <MenuItem name="Charred shishitos"          category="Veg" claimedBy={{ name: 'Marin K.' }} />
-            <MenuItem name="Sumac slaw"                  category="Side" />
+            <MenuItem name="Sumac slaw"                 category="Side" />
             <MenuItem name="Smoked stone fruit cobbler" category="Sweet" />
           </Card>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         06 — TESTIMONIALS
-         ════════════════════════════════════════════════════════════ */}
+      {/* testimonials */}
       <section className="py-20 bg-surface-sunk border-y border-line">
         <div className="page-container">
-          <p className="mono text-ember mb-3">06 · From hosts</p>
+          <p className="mono text-ember mb-3">From hosts</p>
           <h2 className="text-4xl mb-12 max-w-2xl">
-            Quiet wins. <span className="italic-accent">Full tables.</span>
+            What changed for them.
           </h2>
           <div className="grid md:grid-cols-3 gap-5">
             {[
               { q: 'Six people brought six different things. First time in years no one brought hummus.', n: 'Marin K.', c: 'Logan Square' },
               { q: "Stopped chasing RSVPs in the group chat. The text reminders are the entire reason it works.", n: 'Jules R.',  c: 'Greenpoint' },
-              { q: "I host two grills a month now. It used to be two a year. The friction was the chat.",          n: 'Tomás A.',  c: 'Highland' },
+              { q: "I host two grills a month now. Used to be two a year. The friction was the chat.",          n: 'Tomás A.',  c: 'Highland' },
             ].map(({ q, n, c }) => (
               <Card key={n} variant="raised" className="flex flex-col gap-4">
                 <p className="font-display italic text-xl text-ink leading-snug">"{q}"</p>
@@ -264,21 +238,19 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         07 — STATS / ANTI-BRAG
-         ════════════════════════════════════════════════════════════ */}
+      {/* by the numbers */}
       <section className="py-20">
         <div className="page-container">
-          <p className="mono text-ember mb-3">07 · By the numbers</p>
+          <p className="mono text-ember mb-3">By the numbers</p>
           <h2 className="text-4xl mb-12 max-w-3xl">
-            Specific. <span className="italic-accent">Not impressive on purpose.</span>
+            A small site doing a small thing.
           </h2>
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-px bg-line">
             {[
               { v: 142,    s: '',   l: 'RSVPs this week' },
               { v: 2841,   s: '',   l: 'Hosts this season' },
               { v: 87,     s: '%',  l: 'Of dishes claimed' },
-              { v: 0,      s: '',   l: 'Push notifications sent' },
+              { v: 1,      s: '',   l: 'Text per event' },
             ].map((x) => (
               <div key={x.l} className="bg-surface p-8">
                 <p className="text-5xl">
@@ -291,25 +263,21 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         08 — FAQ
-         ════════════════════════════════════════════════════════════ */}
+      {/* faq */}
       <section className="py-20 bg-surface-sunk border-y border-line">
         <div className="page-container max-w-3xl">
-          <p className="mono text-ember mb-3">08 · Plainly</p>
-          <h2 className="text-4xl mb-12">
-            Questions, <span className="italic-accent">answered.</span>
-          </h2>
+          <p className="mono text-ember mb-3">FAQ</p>
+          <h2 className="text-4xl mb-12">Questions we keep getting.</h2>
           <dl className="divide-y divide-line">
             {[
               { q: 'Is there an app?',
-                a: 'No. Ember sends a single SMS per event. Your friends tap a link and claim a dish. That is the entire interface.' },
+                a: 'No. Ember sends one SMS per event. Your friends tap the link and claim a dish. That is the entire interface.' },
               { q: 'Do my friends need an account?',
                 a: 'No accounts. They get a text. They tap "I\'ll bring slaw." They show up. The host sees who claimed what.' },
               { q: 'Why not Partiful or Paperless Post?',
-                a: 'Those are invitations. Ember is the menu, the reminder, and the gentle nudge to the flake. Different problem.' },
+                a: 'Those are invitations. Ember is the menu, the reminder, and the nudge to the flake. Different problem.' },
               { q: 'How much does it cost?',
-                a: 'Free for hosts under ten guests. $4 per event over that. We do not sell ads or your contacts.' },
+                a: 'Free for hosts with fewer than ten guests. $4 per event above that. We do not sell ads or your contacts.' },
             ].map(({ q, a }) => (
               <div key={q} className="py-5">
                 <dt className="text-xl mb-2 flex items-start gap-3">
@@ -323,19 +291,15 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════
-         09 — JOIN / FINAL CTA
-         ════════════════════════════════════════════════════════════ */}
+      {/* final cta */}
       <section id="join" className="py-24 bg-char-0 text-ink-inverse">
         <div className="page-container max-w-3xl text-center">
-          <p className="mono text-ember mb-4">09 · Light it</p>
+          <p className="mono text-ember mb-4">Get the next invite</p>
           <h2 className="font-display text-5xl md:text-6xl mb-4 leading-tight">
             Your next BBQ has a date.
-            <br />
-            <span className="italic text-ember">Pick the night.</span>
           </h2>
           <p className="text-ash-1 max-w-xl mx-auto mb-8">
-            Drop your email. We text you a link to start your first fire — no
+            Drop your email. We text you a link to start your first fire. No
             account, no setup. If it's not better than your group chat,
             ignore us.
           </p>
@@ -360,7 +324,7 @@ export function Landing() {
 
       <footer className="py-10">
         <div className="page-container flex items-center justify-between flex-wrap gap-3">
-          <p className="mono text-ink-soft">Ember · backyard BBQ, quietly coordinated</p>
+          <p className="mono text-ink-soft">Ember · backyard BBQ coordinator</p>
           <p className="mono text-ink-soft">© {new Date().getFullYear()}</p>
         </div>
       </footer>
