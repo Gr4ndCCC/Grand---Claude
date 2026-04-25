@@ -1,5 +1,6 @@
 // react-router-dom used by Nav internally
 import { motion } from 'framer-motion';
+import { Globe, Utensils, MessageCircle, Trophy, Smartphone } from 'lucide-react';
 import { PartnerForm } from '../components/PartnerForm';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -18,10 +19,10 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 }
 
 const HOST_BENEFITS = [
-  { icon: '🌍', title: 'Global discovery', body: 'Your event appears as a live pin on the Ember globe. Members nearby find you automatically.' },
-  { icon: '🥩', title: 'Contribution coordination', body: "Know exactly who's bringing what. Meat, drinks, charcoal — built in. No group chats needed." },
-  { icon: '💬', title: 'Group chat included', body: 'Every event gets a private group chat for your crew. No third-party apps. Just fire.' },
-  { icon: '🏆', title: 'Board ranking', body: 'Host great events, earn your rank. Ember, Iron, Gold, Legend. Your reputation is yours forever.' },
+  { Icon: Globe,          title: 'Global discovery',          body: 'Your event appears as a live pin on the Ember globe. Members nearby find you automatically.' },
+  { Icon: Utensils,       title: 'Contribution coordination', body: "Know exactly who's bringing what. Meat, drinks, charcoal — built in. No group chats needed." },
+  { Icon: MessageCircle,  title: 'Group chat included',       body: 'Every event gets a private group chat for your crew. No third-party apps. Just fire.' },
+  { Icon: Trophy,         title: 'Board ranking',             body: 'Host great events, earn your rank. Ember, Iron, Gold, Legend. Your reputation is yours forever.' },
 ];
 
 export function Hosts() {
@@ -73,7 +74,7 @@ export function Hosts() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(228,207,179,0.30)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
                 >
-                  <span style={{ fontSize: '20px' }}>🍎</span>
+                  <Smartphone size={20} color="#E4CFB3" strokeWidth={1.5} />
                   <div>
                     <div style={{ fontSize: '10px', color: '#5A5A5A', lineHeight: 1 }}>Download on the</div>
                     <div>App Store</div>
@@ -91,7 +92,7 @@ export function Hosts() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(228,207,179,0.30)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)')}
                 >
-                  <span style={{ fontSize: '20px' }}>🤖</span>
+                  <Smartphone size={20} color="#E4CFB3" strokeWidth={1.5} />
                   <div>
                     <div style={{ fontSize: '10px', color: '#5A5A5A', lineHeight: 1 }}>Get it on</div>
                     <div>Google Play</div>
@@ -106,7 +107,7 @@ export function Hosts() {
               transition={{ duration: 0.8, delay: 0.2 }}
               style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}
             >
-              {HOST_BENEFITS.map(({ icon, title, body }) => (
+              {HOST_BENEFITS.map(({ Icon, title, body }) => (
                 <div
                   key={title}
                   style={{
@@ -117,7 +118,7 @@ export function Hosts() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(128,0,0,0.35)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)')}
                 >
-                  <span style={{ fontSize: '24px', display: 'block', marginBottom: '12px' }}>{icon}</span>
+                  <span style={{ display: 'block', marginBottom: '12px' }}><Icon size={22} color="#E4CFB3" strokeWidth={1.5} /></span>
                   <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '15px', color: '#E4CFB3', marginBottom: '6px' }}>{title}</h3>
                   <p style={{ color: '#5A5A5A', fontSize: '12px', lineHeight: '1.6' }}>{body}</p>
                 </div>

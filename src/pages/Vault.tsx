@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, BookOpen, GraduationCap, Users, Trophy, Knife, CheckSquare } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 
@@ -20,32 +20,32 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 
 const VAULT_FEATURES = [
   {
-    icon: '📖',
+    Icon: BookOpen,
     title: 'Recipes',
     body: "Member-only recipes. Not on any food blog. Submitted by the brotherhood — pitmasters from 40 countries who've earned their stripes.",
   },
   {
-    icon: '🎓',
+    Icon: GraduationCap,
     title: 'Knowledge',
     body: "Live masterclasses filmed at real gatherings. Fire science. Wood & smoke theory. Dry-aging at home. The kind of knowledge that doesn't have a Wikipedia page.",
   },
   {
-    icon: '🤝',
+    Icon: Users,
     title: 'Brotherhood Network',
     body: 'Verified members worldwide. Show up as a stranger in any city on the map. Leave as a brother. The network is the feature.',
   },
   {
-    icon: '🏆',
+    Icon: Trophy,
     title: 'The Board',
     body: 'The host certification system. Four tiers — Ember, Iron, Gold, Legend — each earned through real events and real ratings. Your rank means something.',
   },
   {
-    icon: '🔪',
+    Icon: Knife,
     title: 'Partners',
     body: 'Premium butchers, charcoal suppliers, and knife makers vetted by the community. No ads. Only the best. Members get exclusive deals.',
   },
   {
-    icon: '🗳️',
+    Icon: CheckSquare,
     title: 'The Council',
     body: "Vote on platform direction. New features. Event formats. Annual Summit location. Your membership shapes Ember — this is your brotherhood to build.",
   },
@@ -169,7 +169,7 @@ export function Vault() {
       <section style={{ padding: '0 0 120px' }}>
         <div className="page-container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2px' }}>
-            {VAULT_FEATURES.map(({ icon, title, body }, i) => (
+            {VAULT_FEATURES.map(({ Icon, title, body }, i) => (
               <FadeUp key={title} delay={i * 0.08}>
                 <div
                   style={{
@@ -182,7 +182,7 @@ export function Vault() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(128,0,0,0.35)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}
                 >
-                  <span style={{ fontSize: '32px', display: 'block', marginBottom: '20px' }}>{icon}</span>
+                  <span style={{ display: 'block', marginBottom: '20px' }}><Icon size={32} color="#E4CFB3" strokeWidth={1.5} /></span>
                   <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '22px', color: '#E4CFB3', marginBottom: '12px' }}>{title}</h3>
                   <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.65' }}>{body}</p>
                 </div>

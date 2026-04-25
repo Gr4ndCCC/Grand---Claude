@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView } from 'framer-motion';
+import {
+  BookOpen, Flame, Users, Trophy, Knife, CheckSquare,
+  Shield, Medal, Crown, MapPin, Lock,
+} from 'lucide-react';
 import { Globe } from '../components/Globe';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -60,12 +64,12 @@ const HOW_STEPS = [
 ];
 
 const VAULT_FEATURES = [
-  { icon: '📖', title: 'Exclusive recipes',   body: 'Member-only. Not on any food blog. Submitted by the brotherhood and never published anywhere else.' },
-  { icon: '🔥', title: 'Knowledge',           body: 'Live masterclasses filmed at real gatherings. Fire science, binchotan, dry-aging. Craft, not content.' },
-  { icon: '🤝', title: 'Brotherhood Network', body: 'Verified members worldwide. Search by city. Show up a stranger, leave a brother.' },
-  { icon: '🏆', title: 'The Board',           body: 'Ember, Iron, Gold, Legend. Earned through real events, real ratings, real craft.' },
-  { icon: '🔪', title: 'Partners',            body: 'Premium butchers, charcoal, knife makers. Exclusive member discounts from suppliers who get it.' },
-  { icon: '🗳️', title: 'The Council',         body: 'Vote on platform direction. The brotherhood has a voice. Your membership shapes Ember.' },
+  { Icon: BookOpen,    title: 'Exclusive recipes',   body: 'Member-only. Not on any food blog. Submitted by the brotherhood and never published anywhere else.' },
+  { Icon: Flame,       title: 'Knowledge',           body: 'Live masterclasses filmed at real gatherings. Fire science, binchotan, dry-aging. Craft, not content.' },
+  { Icon: Users,       title: 'Brotherhood Network', body: 'Verified members worldwide. Search by city. Show up a stranger, leave a brother.' },
+  { Icon: Trophy,      title: 'The Board',           body: 'Ember, Iron, Gold, Legend. Earned through real events, real ratings, real craft.' },
+  { Icon: Knife,       title: 'Partners',            body: 'Premium butchers, charcoal, knife makers. Exclusive member discounts from suppliers who get it.' },
+  { Icon: CheckSquare, title: 'The Council',         body: 'Vote on platform direction. The brotherhood has a voice. Your membership shapes Ember.' },
 ];
 
 const EVENTS = [
@@ -103,18 +107,6 @@ function Avatar({ name, size = 28 }: { name: string; size?: number }) {
   );
 }
 
-const PinIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-    <circle cx="12" cy="9" r="2.5"/>
-  </svg>
-);
-const LockIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-    <rect x="3" y="11" width="18" height="11" rx="2"/>
-    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-  </svg>
-);
 
 export function Landing() {
   const navigate = useNavigate();
@@ -166,12 +158,12 @@ export function Landing() {
                 <button style={btnMaroon} onClick={() => navigate('/events')}
                   onMouseEnter={e => { e.currentTarget.style.background = '#990000'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = '#800000'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                  <PinIcon /> Find events near you
+                  <MapPin size={14} strokeWidth={2} /> Find events near you
                 </button>
                 <button style={btnDark} onClick={() => navigate('/vault')}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.11)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                  <LockIcon /> Explore the Vault
+                  <Lock size={14} strokeWidth={2} /> Explore the Vault
                 </button>
               </motion.div>
             </div>
@@ -300,11 +292,13 @@ export function Landing() {
             </FadeUp>
             <FadeUp delay={0.15}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {VAULT_FEATURES.map(({ icon, title, body }) => (
+                {VAULT_FEATURES.map(({ Icon, title, body }) => (
                   <div key={title} style={{ background: '#111', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '22px 18px', transition: 'border-color 0.25s' }}
                     onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(128,0,0,0.35)')}
                     onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}>
-                    <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(128,0,0,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 17, marginBottom: 14 }}>{icon}</div>
+                    <div style={{ width: 36, height: 36, borderRadius: 8, background: 'rgba(128,0,0,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+                      <Icon size={18} color="#E4CFB3" strokeWidth={1.5} />
+                    </div>
                     <p style={{ color: '#FFF', fontSize: 14, fontWeight: 600, marginBottom: 6 }}>{title}</p>
                     <p style={{ color: '#5A5A5A', fontSize: 12, lineHeight: 1.6 }}>{body}</p>
                   </div>
@@ -325,16 +319,16 @@ export function Landing() {
           </FadeUp>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
             {[
-              { icon: '🔥', tier: 'Ember',  color: '#800000', req: 'Join the Vault · Host your first event',      perks: 'Globe listing · Event chat · Contribution tracking' },
-              { icon: '🪨', tier: 'Iron',   color: '#6B7280', req: '5+ events · 4.5★ average rating',             perks: 'Priority discovery · Iron badge · Network access'   },
-              { icon: '🏅', tier: 'Gold',   color: '#B8860B', req: '20+ events · 4.8★ · Vault contributor',       perks: 'Featured host · Gold badge · Council vote weight'   },
-              { icon: '👑', tier: 'Legend', color: '#DAA520', req: 'Top 1% globally · Invitation only',           perks: 'Summit speaker · Legend profile · Founding status'  },
-            ].map(({ icon, tier, color, req, perks }, i) => (
+              { Icon: Flame,  tier: 'Ember',  color: '#800000', req: 'Join the Vault · Host your first event',      perks: 'Globe listing · Event chat · Contribution tracking' },
+              { Icon: Shield, tier: 'Iron',   color: '#6B7280', req: '5+ events · 4.5★ average rating',             perks: 'Priority discovery · Iron badge · Network access'   },
+              { Icon: Medal,  tier: 'Gold',   color: '#B8860B', req: '20+ events · 4.8★ · Vault contributor',       perks: 'Featured host · Gold badge · Council vote weight'   },
+              { Icon: Crown,  tier: 'Legend', color: '#DAA520', req: 'Top 1% globally · Invitation only',           perks: 'Summit speaker · Legend profile · Founding status'  },
+            ].map(({ Icon, tier, color, req, perks }, i) => (
               <FadeUp key={tier} delay={i * 0.08}>
                 <div style={{ padding: '32px 24px', background: '#111', border: `1px solid ${color}22`, borderRadius: 16, transition: 'all 0.3s' }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = `${color}55`; e.currentTarget.style.transform = 'translateY(-4px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = `${color}22`; e.currentTarget.style.transform = 'translateY(0)'; }}>
-                  <span style={{ fontSize: 30, display: 'block', marginBottom: 16 }}>{icon}</span>
+                  <span style={{ display: 'block', marginBottom: 16 }}><Icon size={28} color={color} strokeWidth={1.5} /></span>
                   <p style={{ fontFamily: serif, fontSize: 22, color, marginBottom: 8 }}>{tier}</p>
                   <p style={{ color: '#5A5A5A', fontSize: 12, lineHeight: 1.6, marginBottom: 10 }}>{req}</p>
                   <p style={{ color: '#2A2A2A', fontSize: 11, lineHeight: 1.6 }}>{perks}</p>
