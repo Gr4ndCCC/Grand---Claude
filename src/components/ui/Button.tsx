@@ -1,75 +1,70 @@
-import { type ButtonHTMLAttributes, type ReactNode } from 'react';
-import clsx from 'clsx';
+import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { cn } from '../../lib/cn';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
-  size?: 'sm' | 'md' | 'lg';
-  children: ReactNode;
+type Variant = 'primary' | 'secondary' | 'ghost' | 'link';
+type Size = 'sm' | 'md' | 'lg';
+
+interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: Variant;
+  size?: Size;
   loading?: boolean;
-  icon?: ReactNode;
+  iconLeft?: ReactNode;
   iconRight?: ReactNode;
-  fullWidth?: boolean;
 }
 
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  children,
-  loading = false,
-  icon,
-  iconRight,
-  fullWidth = false,
-  className,
-  disabled,
-  ...props
-}: ButtonProps) {
+const VARIANTS: Record<Variant, string> = {
+  primary:
+    'bg-ember text-ink-inverse hover:bg-ember-hot active:bg-ember-deep ' +
+    'shadow-ember disabled:bg-char-4 disabled:shadow-none',
+  secondary:
+    'bg-transparent text-ink border border-line-strong hover:bg-surface-sunk ' +
+    'active:bg-ash-2 disabled:text-ink-soft disabled:border-line',
+  ghost:
+    'bg-transparent text-ink hover:bg-surface-sunk active:bg-ash-2 ' +
+    'disabled:text-ink-soft',
+  link:
+    'bg-transparent text-ember hover:text-ember-hot underline underline-offset-4 ' +
+    'decoration-line-strong hover:decoration-ember p-0 h-auto',
+};
+
+const SIZES: Record<Size, string> = {
+  sm: 'h-8 px-3 text-sm gap-1.5',
+  md: 'h-10 px-4 text-base gap-2',
+  lg: 'h-12 px-6 text-lg gap-2.5',
+};
+
+export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
+  { variant = 'primary', size = 'md', loading, iconLeft, iconRight, children, className, disabled, onMouseMove, ...rest },
+  ref,
+) {
   return (
     <button
-      className={clsx(
-        'relative inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 select-none',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ember-orange/60 focus-visible:ring-offset-2 focus-visible:ring-offset-ember-bg',
-        'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
-        // Sizes
-        size === 'sm' && 'text-xs px-3 py-1.5 rounded-lg',
-        size === 'md' && 'text-sm px-5 py-2.5 rounded-xl',
-        size === 'lg' && 'text-base px-7 py-3.5 rounded-xl',
-        // Variants
-        variant === 'primary' && [
-          'bg-fire-gradient text-white',
-          'hover:opacity-90 active:scale-[0.98]',
-          'shadow-ember hover:shadow-ember-lg',
-        ],
-        variant === 'secondary' && [
-          'bg-ember-surface2 text-ember-cream border border-ember-border',
-          'hover:bg-ember-surface3 active:scale-[0.98]',
-          'shadow-inset-border',
-        ],
-        variant === 'ghost' && [
-          'bg-transparent text-ember-muted',
-          'hover:bg-ember-surface2 hover:text-ember-cream active:scale-[0.98]',
-        ],
-        variant === 'outline' && [
-          'bg-transparent text-ember-orange border border-ember-orange/50',
-          'hover:bg-ember-orange/10 active:scale-[0.98]',
-        ],
-        variant === 'danger' && [
-          'bg-red-600/20 text-red-400 border border-red-500/30',
-          'hover:bg-red-600/30 active:scale-[0.98]',
-        ],
-        fullWidth && 'w-full',
+      ref={ref}
+      disabled={disabled || loading}
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty('--spark-x', `${e.clientX - r.left}px`);
+        e.currentTarget.style.setProperty('--spark-y', `${e.clientY - r.top}px`);
+        onMouseMove?.(e);
+      }}
+      className={cn(
+        'spark ember-focus inline-flex items-center justify-center rounded-md font-medium ' +
+          'transition-colors duration-150 ease-flame disabled:cursor-not-allowed',
+        variant !== 'link' && SIZES[size],
+        VARIANTS[variant],
         className,
       )}
-      disabled={disabled || loading}
-      {...props}
+      {...rest}
     >
       {loading ? (
-        <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-        </svg>
-      ) : icon}
-      {children}
-      {!loading && iconRight}
+        <span className="grill-mark h-2 w-12 rounded-pill" aria-label="loading" />
+      ) : (
+        <>
+          {iconLeft}
+          {children}
+          {iconRight}
+        </>
+      )}
     </button>
   );
-}
+});

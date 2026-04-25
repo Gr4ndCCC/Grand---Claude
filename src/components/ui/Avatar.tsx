@@ -1,73 +1,43 @@
-import clsx from 'clsx';
+import { type HTMLAttributes } from 'react';
+import { cn } from '../../lib/cn';
 
-interface AvatarProps {
-  src: string;
+type Size = 'xs' | 'sm' | 'md' | 'lg';
+interface Props extends HTMLAttributes<HTMLDivElement> {
   name: string;
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  src?: string;
+  size?: Size;
   ring?: boolean;
-  ringColor?: 'orange' | 'amber' | 'green';
-  className?: string;
 }
 
-const SIZES = {
-  xs: 'w-6 h-6 text-[10px]',
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-10 h-10 text-sm',
-  lg: 'w-14 h-14 text-base',
-  xl: 'w-20 h-20 text-xl',
+const SIZES: Record<Size, { box: string; text: string }> = {
+  xs: { box: 'w-6  h-6  text-[10px]', text: '' },
+  sm: { box: 'w-8  h-8  text-xs',     text: '' },
+  md: { box: 'w-10 h-10 text-sm',     text: '' },
+  lg: { box: 'w-14 h-14 text-base',   text: '' },
 };
 
-const RINGS = {
-  orange: 'ring-2 ring-ember-orange ring-offset-2 ring-offset-ember-bg',
-  amber: 'ring-2 ring-ember-amber ring-offset-2 ring-offset-ember-bg',
-  green: 'ring-2 ring-ember-green ring-offset-2 ring-offset-ember-bg',
-};
+const initials = (name: string) =>
+  name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
 
-export function Avatar({ src, name, size = 'md', ring = false, ringColor = 'orange', className }: AvatarProps) {
+const HUES = ['#b85332', '#993f24', '#550000', '#423a35', '#6b6258'];
+
+export function Avatar({ name, src, size = 'md', ring, className, ...rest }: Props) {
+  const bg = HUES[name.charCodeAt(0) % HUES.length];
   return (
     <div
-      className={clsx(
-        'rounded-full overflow-hidden bg-ember-surface2 flex-shrink-0',
-        SIZES[size],
-        ring && RINGS[ringColor],
+      className={cn(
+        'inline-flex items-center justify-center rounded-pill text-ink-inverse font-medium select-none',
+        SIZES[size].box,
+        ring && 'ring-2 ring-paper ring-offset-2 ring-offset-surface',
         className,
       )}
-      title={name}
+      style={src ? undefined : { background: bg }}
+      {...rest}
     >
-      <img src={src} alt={name} className="w-full h-full object-cover" loading="lazy" />
-    </div>
-  );
-}
-
-interface AvatarGroupProps {
-  users: Array<{ name: string; avatar: string }>;
-  max?: number;
-  size?: 'xs' | 'sm' | 'md';
-}
-
-export function AvatarGroup({ users, max = 4, size = 'sm' }: AvatarGroupProps) {
-  const visible = users.slice(0, max);
-  const extra = users.length - max;
-
-  return (
-    <div className="flex items-center">
-      {visible.map((u, i) => (
-        <div key={i} className={clsx('rounded-full border-2 border-ember-bg -ml-2 first:ml-0', SIZES[size])}>
-          <img src={u.avatar} alt={u.name} className="w-full h-full object-cover rounded-full" />
-        </div>
-      ))}
-      {extra > 0 && (
-        <div
-          className={clsx(
-            'rounded-full border-2 border-ember-bg -ml-2 bg-ember-surface2 flex items-center justify-center',
-            'text-ember-muted font-semibold',
-            size === 'xs' && 'w-6 h-6 text-[9px]',
-            size === 'sm' && 'w-8 h-8 text-xs',
-            size === 'md' && 'w-10 h-10 text-sm',
-          )}
-        >
-          +{extra}
-        </div>
+      {src ? (
+        <img src={src} alt={name} className="w-full h-full object-cover rounded-pill" />
+      ) : (
+        initials(name)
       )}
     </div>
   );

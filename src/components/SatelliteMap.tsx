@@ -1,58 +1,70 @@
-import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
+import { type SVGProps } from 'react';
+import { cn } from '../lib/cn';
 
-// Fix default marker icon broken by webpack/vite bundling
-const markerIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-
-interface SatelliteMapProps {
-  lat: number;
-  lng: number;
-  label: string;
-  address?: string;
+interface Props extends SVGProps<SVGSVGElement> {
+  width?: number;
+  height?: number;
+  pinX?: number;
+  pinY?: number;
 }
 
-export function SatelliteMap({ lat, lng, label, address }: SatelliteMapProps) {
-  // Invalidate map size after mount so tiles render correctly inside flex containers
-  useEffect(() => {
-    window.dispatchEvent(new Event('resize'));
-  }, []);
-
+export function SatelliteMap({
+  width = 320,
+  height = 200,
+  pinX = 60,
+  pinY = 50,
+  className,
+  ...rest
+}: Props) {
   return (
-    <div className="rounded-xl overflow-hidden border border-ember-border/40" style={{ height: 220 }}>
-      <MapContainer
-        center={[lat, lng]}
-        zoom={17}
-        scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%' }}
-        attributionControl={false}
-      >
-        {/* Esri World Imagery — true satellite tiles, no API key needed */}
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution="Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
-          maxZoom={19}
-        />
-        {/* Labels overlay on top of satellite */}
-        <TileLayer
-          url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
-          opacity={0.6}
-        />
-        <Marker position={[lat, lng]} icon={markerIcon}>
-          <Popup>
-            <div className="text-sm font-semibold">{label}</div>
-            {address && <div className="text-xs text-gray-500 mt-0.5">{address}</div>}
-          </Popup>
-        </Marker>
-      </MapContainer>
-    </div>
+    <svg
+      role="img"
+      aria-label="Map preview"
+      viewBox="0 0 320 200"
+      width={width}
+      height={height}
+      className={cn('block', className)}
+      preserveAspectRatio="xMidYMid slice"
+      {...rest}
+    >
+      <defs>
+        <linearGradient id="sat-bg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stopColor="#efe7dd" />
+          <stop offset="100%" stopColor="#e8e2dc" />
+        </linearGradient>
+        <pattern id="sat-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(20,17,15,0.05)" strokeWidth="1" />
+        </pattern>
+      </defs>
+
+      <rect width="320" height="200" fill="url(#sat-bg)" />
+      <rect width="320" height="200" fill="url(#sat-grid)" />
+
+      <path
+        d="M 0 130 C 60 110, 120 150, 200 120 S 320 100, 320 100"
+        fill="none"
+        stroke="rgba(20,17,15,0.15)"
+        strokeWidth="22"
+        strokeLinecap="round"
+        opacity="0.5"
+      />
+      <path
+        d="M 0 130 C 60 110, 120 150, 200 120 S 320 100, 320 100"
+        fill="none"
+        stroke="#b85332"
+        strokeWidth="2"
+        strokeDasharray="4 4"
+        opacity="0.7"
+      />
+
+      <path d="M 60 60 q 30 -20 70 0 t 80 30 v 50 q -50 -10 -90 5 t -60 -25 z"
+        fill="rgba(20,17,15,0.06)" />
+
+      <g transform={`translate(${pinX} ${pinY})`}>
+        <circle r="14" fill="#b85332" opacity="0.18" />
+        <circle r="6" fill="#b85332" />
+        <circle r="2" fill="#f6f1ea" />
+      </g>
+    </svg>
   );
 }

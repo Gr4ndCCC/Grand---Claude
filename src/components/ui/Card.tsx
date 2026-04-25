@@ -1,27 +1,33 @@
-import { type ReactNode } from 'react';
-import clsx from 'clsx';
+import { forwardRef, type HTMLAttributes } from 'react';
+import { cn } from '../../lib/cn';
 
-interface CardProps {
-  children: ReactNode;
-  className?: string;
-  hover?: boolean;
-  glow?: boolean;
-  onClick?: () => void;
+type Variant = 'plain' | 'raised' | 'sunk';
+interface Props extends HTMLAttributes<HTMLDivElement> {
+  variant?: Variant;
+  interactive?: boolean;
 }
 
-export function Card({ children, className, hover = false, glow = false, onClick }: CardProps) {
+const VARIANTS: Record<Variant, string> = {
+  plain:  'bg-surface border border-line',
+  raised: 'bg-surface-raised border border-line shadow-1',
+  sunk:   'bg-surface-sunk border border-line',
+};
+
+export const Card = forwardRef<HTMLDivElement, Props>(function Card(
+  { variant = 'raised', interactive, className, ...rest },
+  ref,
+) {
   return (
     <div
-      onClick={onClick}
-      className={clsx(
-        'glass-card transition-all duration-300',
-        hover && 'hover:border-ember-border hover:shadow-card-hover hover:-translate-y-0.5 cursor-pointer',
-        glow && 'animate-pulse-ember',
-        onClick && 'cursor-pointer',
+      ref={ref}
+      className={cn(
+        'rounded-lg p-5',
+        VARIANTS[variant],
+        interactive &&
+          'transition ease-flame duration-200 hover:-translate-y-0.5 hover:shadow-2 cursor-pointer',
         className,
       )}
-    >
-      {children}
-    </div>
+      {...rest}
+    />
   );
-}
+});

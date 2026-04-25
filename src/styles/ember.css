@@ -1,0 +1,181 @@
+/* ══════════════════════════════════════════════════════════════
+   Ember — signature motion + texture utilities
+   Each effect respects prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { min-height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--t-base);
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+p { margin: 0; }
+
+::selection { background: var(--ember); color: var(--ink-inverse); }
+
+/* ── Mono / system voice ──────────────────────────────────── */
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--t-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ── Italic accent ────────────────────────────────────────── */
+.italic-accent {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ember);
+}
+
+/* ── Page container ───────────────────────────────────────── */
+.page-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Focus — ember pulse on keyboard focus
+   ══════════════════════════════════════════════════════════════ */
+.ember-focus { outline: none; }
+.ember-focus:focus-visible {
+  box-shadow: var(--shadow-focus);
+  animation: ember-pulse 1.6s var(--ease-flame) infinite;
+}
+@keyframes ember-pulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(184, 83, 50, 0.30); }
+  50%      { box-shadow: 0 0 0 5px rgba(184, 83, 50, 0.20); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Spark — particle that jumps between buttons on hover
+   ══════════════════════════════════════════════════════════════ */
+.spark { position: relative; isolation: isolate; }
+.spark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--spark-x, 50%) var(--spark-y, 50%),
+              rgba(255, 217, 168, 0.45) 0%, transparent 30%);
+  opacity: 0;
+  transition: opacity 220ms var(--ease-spark);
+}
+.spark:hover::after { opacity: 1; }
+
+/* ══════════════════════════════════════════════════════════════
+   Grill-mark — skeleton loading shimmer (warm, char-on-paper)
+   ══════════════════════════════════════════════════════════════ */
+.grill-mark {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(20, 17, 15, 0.08) 0,
+      rgba(20, 17, 15, 0.08) 6px,
+      rgba(20, 17, 15, 0.04) 6px,
+      rgba(20, 17, 15, 0.04) 18px
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(184, 83, 50, 0.18) 50%,
+      transparent 100%
+    );
+  background-size: 100% 100%, 200% 100%;
+  background-position: 0 0, -100% 0;
+  animation: grill-shimmer 1.6s linear infinite;
+  border-radius: var(--r-md);
+}
+@keyframes grill-shimmer {
+  to { background-position: 0 0, 100% 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Smoke wisp — drifts up + fades on RSVP "yes"
+   ══════════════════════════════════════════════════════════════ */
+.smoke-wisp {
+  position: absolute;
+  pointer-events: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(248, 240, 230, 0.7) 0%, transparent 65%);
+  filter: blur(6px);
+  animation: smoke-rise 1.4s var(--ease-smoke) forwards;
+}
+@keyframes smoke-rise {
+  0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
+  20%  { opacity: 0.9; }
+  100% { transform: translate(-50%, -54px) scale(1.6); opacity: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Char-noise — paper grain that intensifies on scroll
+   ══════════════════════════════════════════════════════════════ */
+.char-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--noise-opacity, 0.04);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 0 0.06  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  transition: opacity 240ms var(--ease-flame);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Flip-card — 600ms flip on MenuItem claim
+   ══════════════════════════════════════════════════════════════ */
+.flip-card { perspective: 800px; }
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  transition: transform 600ms var(--ease-flame);
+  transform-style: preserve-3d;
+}
+.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+.flip-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Reduced motion — kill all decorative animation
+   ══════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .grill-mark { animation: none; }
+  .smoke-wisp { display: none; }
+  .ember-focus:focus-visible { animation: none; box-shadow: var(--shadow-focus); }
+  .flip-card-inner { transition: none; }
+}
