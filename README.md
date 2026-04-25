@@ -38,11 +38,25 @@ If your environment hits peer-dep noise, use `npm install --legacy-peer-deps`.
 ### Deploy (Vercel)
 
 ```bash
-npx vercel
+npx vercel              # first preview
+npx vercel --prod       # promote to production
 ```
 
-`vercel.json` handles SPA rewrites. Set `VITE_API_URL` to the deployed
-backend URL when you wire the frontend to the API.
+`vercel.json` handles SPA rewrites, security headers (HSTS, CSP-lite,
+nosniff, frame, referrer, permissions), and asset caching. After the
+first preview, set these env vars in Vercel → Settings → Environment
+Variables, then redeploy:
+
+| Var               | What                                                       |
+|-------------------|------------------------------------------------------------|
+| `VITE_SITE_URL`   | Your final origin, e.g. `https://ember.app`                |
+| `VITE_GA_ID`      | Google Analytics 4 measurement ID, e.g. `G-XXXXXXXXXX`     |
+| `VITE_API_URL`    | Backend base URL, only when wiring to the API              |
+
+`VITE_SITE_URL` flows into the canonical link, the Open Graph URL +
+image, and the JSON-LD WebSite payload. With it unset, those fall
+back to `/`, which is fine for the very first preview but should be
+replaced before production.
 
 ### Deploy (GitHub Pages)
 
