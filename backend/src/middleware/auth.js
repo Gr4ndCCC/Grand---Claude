@@ -63,4 +63,32 @@ async function optionalAuth(req, res, next) {
   }
 }
 
-module.exports = { requireAuth, optionalAuth };
+/**
+ * requireVaultMember — must run AFTER requireAuth.
+ * Checks that the authenticated user has vault_member = true.
+ */
+async function requireVaultMember(req, res, next) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, error: 'Authentication required' });
+    }
+    const { data, error } = await supabaseAdmin
+      .from('users')
+      .select('vault_member')
+      .eq('id', req.user.id)
+      .single();
+
+    if (error || !data) {
+      return res.status(403).json({ success: false, error: 'Vault membership check failed' });
+    }
+    if (!data.vault_member) {
+      return res.status(403).json({ success: false, error: 'Vault membership required' });
+    }
+    next();
+  } catch (err) {
+    console.error('[requireVaultMember]', err.message);
+    return res.status(500).json({ success: false, error: 'Authorization check failed' });
+  }
+}
+
+module.exports = { requireAuth, optionalAuth, requireVaultMember };

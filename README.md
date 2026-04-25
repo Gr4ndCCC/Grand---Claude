@@ -1,8 +1,16 @@
 # Ember
 
-Backyard BBQ, quietly coordinated. RSVP, claim a dish, show up.
+Backyard BBQ, quietly coordinated. Two apps:
 
-## Stack
+- **`/` (root)** — marketing site (Vite + React). Deploys to Vercel.
+- **`backend/`** — REST API + Socket.io chat (Express + Supabase + Stripe).
+  Deploys to Railway / Render.
+
+---
+
+## Frontend
+
+### Stack
 
 - Vite + React 18 + TypeScript (strict)
 - Tailwind CSS, custom token system (`src/styles/tokens.css`)
@@ -11,7 +19,7 @@ Backyard BBQ, quietly coordinated. RSVP, claim a dish, show up.
 - `lucide-react` for icons, `clsx` for class composition
 - No runtime maps lib, no 3D, no animation lib — inline SVG + CSS
 
-## Setup
+### Setup
 
 ```bash
 npm install            # install deps
@@ -22,66 +30,133 @@ npm run preview        # serve the build
 
 If your environment hits peer-dep noise, use `npm install --legacy-peer-deps`.
 
-## Routes
+### Routes
 
 - `/` — landing, 9 sections, sticky activity bar, ~2400px tall
 - `/design-system` — 11 numbered sections covering every primitive
 
-## Deploy
-
-### Vercel
+### Deploy (Vercel)
 
 ```bash
-npx vercel               # follow prompts; vercel.json handles SPA rewrites
+npx vercel
 ```
 
-### GitHub Pages
+`vercel.json` handles SPA rewrites. Set `VITE_API_URL` to the deployed
+backend URL when you wire the frontend to the API.
+
+### Deploy (GitHub Pages)
 
 ```bash
 DEPLOY_TARGET=gh-pages npm run build
-# then publish dist/ to a gh-pages branch
+# publish dist/ to a gh-pages branch
 ```
 
-The `DEPLOY_TARGET=gh-pages` env var sets Vite's `base` to
-`/Grand---Claude/`. For any other host, leave it unset.
+`DEPLOY_TARGET=gh-pages` sets Vite's `base` to `/Grand---Claude/`.
 
-## Project layout
-
-```
-src/
-  components/
-    ui/                # atoms: Button, Input, Modal, Toast, …
-    EventCard.tsx      # product
-    MenuItem.tsx
-    RSVPPill.tsx
-    EmberScore.tsx
-    LiveCounter.tsx
-    SatelliteMap.tsx
-    StickyBar.tsx
-    Nav.tsx
-    CharNoise.tsx
-  pages/
-    Landing.tsx
-    DesignSystem.tsx
-  styles/
-    tokens.css         # CSS variables — colors, type, easing, shadows
-    ember.css          # base styles + signature motion
-  lib/
-    cn.ts              # clsx wrapper
-  App.tsx
-  main.tsx
-```
-
-## Brand discipline
+### Brand discipline
 
 - Newsreader serif everywhere. No Inter, no Geist, no system-ui.
-- Italic serif = emotional accent. Mono uppercase = system voice.
+- Italic serif used sparingly. Mono uppercase = system voice.
 - Two chromatic colors only: `--ember` (#b85332), `--maroon` (#550000).
 - Surfaces default to paper (#f6f1ea), not black.
 - No emoji UI, no spinning globe, no fintech gradients, no purple.
 
+---
+
+## Backend
+
+REST API for events, users, posts, vault, partners, and Stripe
+subscriptions. Socket.io powers per-event chat.
+
+### Setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env   # fill in Supabase + Stripe keys
+npm run dev            # nodemon, http://localhost:3000
+```
+
+### Database
+
+Open the [Supabase SQL Editor](https://supabase.com/dashboard) and run
+`backend/supabase/schema.sql` in one go. It enables PostGIS, creates all
+tables, and applies row-level security policies.
+
+### Deploy (Railway / Render)
+
+Both platforms autodetect Node:
+
+1. Connect this repo, set the **root directory** to `backend/`.
+2. Set env vars from `backend/.env.example` (production values).
+3. **Critical**: set `CORS_ORIGIN` to your real frontend URL —
+   never leave it as `*` in production.
+4. Set `NODE_ENV=production` so the boot sanity-checks run.
+5. Start command: `node src/app.js` (already in `Procfile`).
+
+For local Stripe webhook testing:
+
+```bash
+stripe listen --forward-to http://localhost:3000/api/stripe/webhook
+# copy the printed whsec_… into STRIPE_WEBHOOK_SECRET
+```
+
+### Security posture
+
+- **helmet** sets standard hardening headers
+- **CORS** is allow-list based (`CORS_ORIGIN`, comma-separated) with
+  credentials support — never wildcard with credentials
+- **express-rate-limit** — 200 req / 15 min globally, 20 req / 15 min
+  on `/api/auth/*`
+- **express-validator** — body / param validators on every mutating
+  endpoint
+- Stripe **webhook signature** is verified before any side effect
+- Stripe webhook handler runs on a raw body parser; all other routes
+  use a 2 MB JSON cap
+- Supabase **service role key** stays server-side — only `supabaseAdmin`
+  has it, never returned in any response
+- Vault routes pass through `requireAuth` then `requireVaultMember`
+- Boot fails fast in production if `SUPABASE_URL` is missing
+- **Row-Level Security** is enabled on every table in `schema.sql`
+- `app.set('trust proxy', 1)` in production so rate limits work behind
+  Railway / Render's TLS termination
+- Error handler hides stack traces in production
+
+### `.env` discipline
+
+`.env` is in `.gitignore`. Only `.env.example` is committed. If you
+ever leak a key: rotate it in Stripe / Supabase first, then patch.
+
+---
+
+## Project layout
+
+```
+.
+├── src/                       # frontend
+│   ├── components/
+│   ├── pages/
+│   ├── styles/
+│   └── lib/
+├── backend/
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── config/supabase.js
+│   │   ├── middleware/auth.js
+│   │   ├── routes/{auth,users,events,posts,partners,vault,stripe}.js
+│   │   └── controllers/
+│   ├── supabase/schema.sql
+│   ├── .env.example
+│   ├── package.json
+│   └── Procfile
+├── public/
+├── index.html
+├── package.json
+├── vercel.json
+└── tailwind.config.js
+```
+
 ## See also
 
-- [`IMPLEMENTATION_NOTES.md`](./IMPLEMENTATION_NOTES.md) — every place
-  the handoff was ambiguous (or in this case, not delivered) and what I
-  decided instead.
+- [`IMPLEMENTATION_NOTES.md`](./IMPLEMENTATION_NOTES.md) — places the
+  handoff was ambiguous and what was decided instead.
