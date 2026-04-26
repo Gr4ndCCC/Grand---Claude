@@ -211,6 +211,26 @@ p { margin: 0; }
 }
 
 
+/* ember-pulse — used for live fire indicator dot */
+@keyframes ember-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px #cc2200; }
+  50%       { opacity: 0.4; box-shadow: 0 0 12px #cc2200; }
+}
+
+/* about split — responsive */
+.about-split {
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 768px) {
+  .about-split {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .about-split > * {
+    order: unset !important;
+  }
+}
+
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

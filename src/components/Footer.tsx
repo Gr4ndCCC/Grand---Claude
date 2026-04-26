@@ -1,5 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
+const LEGAL = [
+  { label: 'Privacy', to: '/privacy' },
+  { label: 'Terms',   to: '/terms'   },
+  { label: 'Contact', to: '/contact' },
+];
+
 const PLATFORM = [
   { label: 'Events',  to: '/events' },
   { label: 'Vault',   to: '/vault'  },
@@ -76,11 +82,13 @@ export function Footer() {
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <p className="mono" style={{ color: '#5A5A5A' }}>© {new Date().getFullYear()} Ember · The world grills.</p>
           <div className="flex gap-6">
-            {['Privacy', 'Terms', 'Contact'].map(l => (
-              <button key={l} className="ember-focus mono" style={{ color: '#5A5A5A', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
+            {LEGAL.map(({ label, to }) => (
+              <button key={label} className="ember-focus mono"
+                onClick={() => navigate(to)}
+                style={{ color: '#5A5A5A', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = '#A0A0A0')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#5A5A5A')}
-              >{l}</button>
+              >{label}</button>
             ))}
           </div>
         </div>

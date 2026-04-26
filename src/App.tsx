@@ -11,6 +11,11 @@ import { Summit }       from './pages/Summit';
 import { Council }      from './pages/Council';
 import { Partners }     from './pages/Partners';
 import { Network }      from './pages/Network';
+import { Privacy }      from './pages/Privacy';
+import { Terms }        from './pages/Terms';
+import { Contact }      from './pages/Contact';
+import { AuthProvider } from './lib/auth';
+import { AuthModal }    from './components/AuthModal';
 import { initAnalytics, trackPageview } from './lib/analytics';
 
 function RouteTracker() {
@@ -29,23 +34,29 @@ export default function App() {
   useEffect(() => { initAnalytics(); }, []);
 
   return (
-    <BrowserRouter>
-      <RouteTracker />
-      <ScrollToTop />
-      <Routes>
-        <Route path="/"         element={<Landing />}  />
-        <Route path="/events"   element={<Events />}   />
-        <Route path="/vault"    element={<Vault />}    />
-        <Route path="/hosts"    element={<Hosts />}    />
-        <Route path="/about"    element={<About />}    />
-        <Route path="/faq"      element={<FAQ />}      />
-        <Route path="/board"    element={<Board />}    />
-        <Route path="/summit"   element={<Summit />}   />
-        <Route path="/council"  element={<Council />}  />
-        <Route path="/partners" element={<Partners />} />
-        <Route path="/network"  element={<Network />}  />
-        <Route path="*"         element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <RouteTracker />
+        <ScrollToTop />
+        <AuthModal />
+        <Routes>
+          <Route path="/"         element={<Landing />}  />
+          <Route path="/events"   element={<Events />}   />
+          <Route path="/vault"    element={<Vault />}    />
+          <Route path="/hosts"    element={<Hosts />}    />
+          <Route path="/about"    element={<About />}    />
+          <Route path="/faq"      element={<FAQ />}      />
+          <Route path="/board"    element={<Board />}    />
+          <Route path="/summit"   element={<Summit />}   />
+          <Route path="/council"  element={<Council />}  />
+          <Route path="/partners" element={<Partners />} />
+          <Route path="/network"  element={<Network />}  />
+          <Route path="/privacy"  element={<Privacy />}  />
+          <Route path="/terms"    element={<Terms />}    />
+          <Route path="/contact"  element={<Contact />}  />
+          <Route path="*"         element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
