@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { cn } from '../lib/cn';
+import { Logo } from './Logo';
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -21,8 +22,7 @@ export function Nav() {
     >
       <div className="page-container h-14 flex items-center justify-between">
         <Link to="/" className="ember-focus inline-flex items-center gap-2">
-          <span className="block w-2 h-2 rounded-pill bg-ember" />
-          <span className="font-display text-xl text-ink">Ember</span>
+          <Logo size={22} withWord />
         </Link>
         <nav className="flex items-center gap-1">
           <NavLink
