@@ -147,6 +147,70 @@ p { margin: 0; }
   animation: fade-up 0.65s var(--ease-spark) both;
 }
 
+/* ── fire burst — click effect on primary CTAs ─────────────── */
+.fire-burst-wrap {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+}
+.fire-burst {
+  position: absolute;
+  pointer-events: none;
+  left: 50%; top: 50%;
+  width: 0; height: 0;
+  z-index: 0;
+}
+.fire-burst::before,
+.fire-burst::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.fire-burst::before {
+  width: 8px; height: 8px;
+  background: radial-gradient(circle,
+    rgba(228,207,179,0.9) 0%,
+    rgba(184,83,50,0.7) 40%,
+    rgba(128,0,0,0.4) 70%,
+    transparent 100%);
+  animation: fire-burst-grow 700ms var(--ease-spark) forwards;
+}
+.fire-burst::after {
+  width: 6px; height: 6px;
+  background: radial-gradient(circle, rgba(255,200,140,0.95) 0%, rgba(255,140,60,0.5) 60%, transparent 100%);
+  animation: fire-burst-core 500ms var(--ease-spark) forwards;
+}
+@keyframes fire-burst-grow {
+  0%   { width: 8px;   height: 8px;   opacity: 0;   }
+  20%  { opacity: 1; }
+  100% { width: 220px; height: 220px; opacity: 0;   }
+}
+@keyframes fire-burst-core {
+  0%   { width: 6px;   height: 6px;   opacity: 1;   }
+  100% { width: 80px;  height: 80px;  opacity: 0;   }
+}
+
+/* fire-spark — tiny rising particles */
+.fire-spark {
+  position: absolute;
+  pointer-events: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,180,80,0.95) 0%, rgba(184,83,50,0.6) 50%, transparent 100%);
+  box-shadow: 0 0 8px rgba(255,140,60,0.7);
+  animation: fire-spark-rise 900ms var(--ease-smoke) forwards;
+}
+@keyframes fire-spark-rise {
+  0%   { transform: translate(0, 0)        scale(0.6); opacity: 0;   }
+  15%  {                                                opacity: 1;   }
+  100% { transform: translate(var(--sx, 0), -90px) scale(0.2); opacity: 0; }
+}
+
+
 /* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

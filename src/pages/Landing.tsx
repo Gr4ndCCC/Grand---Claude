@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { Check } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { FireButton } from '../components/FireButton';
 
 /* ── animated counter ──────────────────────────────────────── */
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
@@ -151,6 +153,193 @@ function RankBadge({ rank }: { rank: string }) {
   );
 }
 
+/* ── RSVP pill + Menu claim — dark/maroon edition ─────────── */
+function RSVPMenu() {
+  const [rsvp, setRsvp] = useState<'in' | 'maybe' | 'cant'>();
+  const [score] = useState(84);
+
+  const initialMenu = [
+    { id: 'm1', name: 'Brisket, hot and fast',  cat: 'MAIN',  claimed: false, by: '' },
+    { id: 'm2', name: 'Charred shishitos',      cat: 'VEG',   claimed: true,  by: 'Marin K.' },
+    { id: 'm3', name: 'Sumac slaw',             cat: 'SIDE',  claimed: false, by: '' },
+    { id: 'm4', name: 'Smoked stone fruit cobbler', cat: 'SWEET', claimed: false, by: '' },
+  ];
+  const [menu, setMenu] = useState(initialMenu);
+
+  const claim = (id: string) => {
+    setMenu(m => m.map(x => x.id === id ? { ...x, claimed: !x.claimed, by: x.claimed ? '' : 'You' } : x));
+  };
+
+  const RSVPS = [
+    { id: 'in',    label: "I'm in"   },
+    { id: 'maybe', label: 'Maybe'    },
+    { id: 'cant',  label: "Can't"    },
+  ] as const;
+
+  /* circular score svg */
+  const radius = 22, circ = 2 * Math.PI * radius;
+  const offset = circ - (score / 100) * circ;
+
+  return (
+    <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* left — copy */}
+      <div>
+        <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The interaction</p>
+        <span className="maroon-rule" />
+        <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}>
+          Tap once.<br />
+          <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>You're in.</span>
+        </h2>
+        <p style={{ color: '#A0A0A0', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px', maxWidth: '440px' }}>
+          No accounts. No profiles. No notifications. Three buttons and a list.
+          The whole product fits in a text message.
+        </p>
+
+        {/* RSVP row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '28px' }}>
+          <span className="mono" style={{ color: '#5A5A5A', width: '60px' }}>RSVP</span>
+          <div style={{
+            display: 'inline-flex', gap: '4px',
+            background: '#111', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '999px', padding: '4px',
+          }}>
+            {RSVPS.map(r => (
+              <button key={r.id} onClick={() => setRsvp(r.id)}
+                className="ember-focus"
+                style={{
+                  background: rsvp === r.id ? 'var(--maroon)' : 'transparent',
+                  color: rsvp === r.id ? '#fff' : '#A0A0A0',
+                  border: 'none', borderRadius: '999px',
+                  padding: '8px 18px', fontSize: '14px',
+                  cursor: 'pointer', fontFamily: 'Playfair Display, Georgia, serif',
+                  transition: 'all 0.2s',
+                }}
+              >{r.label}</button>
+            ))}
+          </div>
+        </div>
+
+        {/* Score row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <span className="mono" style={{ color: '#5A5A5A', width: '60px' }}>SCORE</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="28" cy="28" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+              <circle cx="28" cy="28" r={radius} fill="none" stroke="var(--maroon)" strokeWidth="3"
+                strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
+              <text x="28" y="28" textAnchor="middle" dominantBaseline="central"
+                style={{ fontFamily: 'Playfair Display, Georgia, serif', fill: '#fff', fontSize: '15px', transform: 'rotate(90deg)', transformOrigin: '28px 28px' }}>
+                {score}
+              </text>
+            </svg>
+            <div>
+              <p className="mono" style={{ color: 'var(--beige)', marginBottom: '2px' }}>Ember score</p>
+              <p style={{ color: '#A0A0A0', fontSize: '14px' }}>Reliable host</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* right — menu card */}
+      <div className="card-glow" style={{
+        background: '#111',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '16px',
+        padding: '28px',
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff' }}>The menu so far</h3>
+          <span className="mono" style={{
+            background: 'rgba(128,0,0,0.2)', color: 'var(--maroon)',
+            padding: '4px 10px', borderRadius: '6px', fontSize: '10px',
+            border: '1px solid rgba(128,0,0,0.4)',
+          }}>
+            <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--maroon)', marginRight: '6px', verticalAlign: 'middle' }} />
+            LIVE
+          </span>
+        </div>
+        <p className="mono" style={{ color: '#5A5A5A', marginBottom: '20px' }}>
+          Tap "I'll bring this" to claim a dish
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {menu.map(item => (
+            <button key={item.id} onClick={() => claim(item.id)}
+              className="ember-focus"
+              style={{
+                width: '100%', textAlign: 'left',
+                background: item.claimed ? 'var(--maroon)' : 'rgba(255,255,255,0.04)',
+                border: item.claimed ? '1px solid var(--maroon-light)' : '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '12px', padding: '16px 18px',
+                cursor: 'pointer', transition: 'all 0.25s var(--ease-flame)',
+                position: 'relative', overflow: 'hidden',
+                fontFamily: 'inherit',
+              }}
+              onMouseEnter={e => {
+                if (!item.claimed) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
+                  e.currentTarget.style.borderColor = 'rgba(228,207,179,0.18)';
+                }
+              }}
+              onMouseLeave={e => {
+                if (!item.claimed) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                }
+              }}
+            >
+              <AnimatePresence mode="wait">
+                {item.claimed ? (
+                  <motion.div
+                    key="claimed"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <Check size={16} style={{ color: '#fff' }} />
+                      <span className="mono" style={{ color: '#fff', fontSize: '12px', letterSpacing: '0.16em' }}>CLAIMED</span>
+                    </div>
+                    {item.by && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px' }}>{item.by}</span>
+                        <span style={{
+                          width: '24px', height: '24px', borderRadius: '50%',
+                          background: 'rgba(0,0,0,0.35)', color: 'var(--beige)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '10px', fontFamily: 'Playfair Display, Georgia, serif',
+                          fontWeight: 600,
+                        }}>
+                          {item.by.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="open"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                  >
+                    <p className="mono" style={{ color: 'var(--maroon)', fontSize: '10px', marginBottom: '4px' }}>
+                      {item.cat}
+                    </p>
+                    <p style={{ color: '#fff', fontFamily: 'Playfair Display, Georgia, serif', fontSize: '17px' }}>
+                      {item.name}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const btn = {
   primary: {
     background: 'var(--maroon)', color: '#fff', border: 'none',
@@ -223,18 +412,12 @@ export function Landing() {
                 transition={{ delay: 0.35 }}
                 style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px' }}
               >
-                <button
-                  style={btn.primary}
-                  onClick={() => navigate('/events')}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                >Find events near you</button>
-                <button
-                  style={btn.outline}
-                  onClick={() => navigate('/vault')}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(228,207,179,0.07)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                >Explore the Vault</button>
+                <FireButton variant="primary" onClick={() => navigate('/events')}>
+                  Find events near you
+                </FireButton>
+                <FireButton variant="outline" onClick={() => navigate('/hosts')}>
+                  Host an event
+                </FireButton>
               </motion.div>
 
               {/* stats bar */}
@@ -377,12 +560,9 @@ export function Landing() {
                       {guests}/{max} going
                     </p>
                   </div>
-                  <button
-                    style={{ ...btn.primary, padding: '10px 20px', fontSize: '14px', width: '100%' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; }}
-                    onClick={() => navigate('/events')}
-                  >View event</button>
+                  <FireButton variant="primary" size="sm" fullWidth onClick={() => navigate('/events')}>
+                    Join event
+                  </FireButton>
                 </div>
               </FadeUp>
             ))}
@@ -396,6 +576,15 @@ export function Landing() {
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >See all events →</button>
           </div>
+        </div>
+      </section>
+
+      {/* ── THE INTERACTION (RSVP + MENU) ─────────────────────── */}
+      <section style={{ padding: '100px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="page-container">
+          <FadeUp>
+            <RSVPMenu />
+          </FadeUp>
         </div>
       </section>
 
@@ -502,14 +691,9 @@ export function Landing() {
               Location revealed exclusively to Vault members. Your subscription
               is your ticket. Every year, a different city. Always unforgettable.
             </p>
-            <button
-              style={{ ...btn.primary, fontSize: '16px', padding: '16px 36px' }}
-              onClick={() => navigate('/vault')}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-maroon)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
+            <FireButton variant="primary" size="lg" onClick={() => navigate('/vault')}>
               Join the Vault · Get Summit access
-            </button>
+            </FireButton>
           </FadeUp>
         </div>
       </section>

@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { FireButton } from '../components/FireButton';
 
 const VAULT_FEATURES = [
   { title: 'Recipes',            body: "Member-only. Not on any food blog. Submitted by the brotherhood — pitmasters from 40 countries who've earned their stripes." },
@@ -58,13 +59,7 @@ export function Vault() {
             ))}
           </motion.div>
           <br />
-          <button
-            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 40px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-maroon)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
-          >
-            Join the Vault
-          </button>
+          <FireButton variant="primary" size="lg">Join the Vault</FireButton>
           <p className="mono" style={{ color: '#5A5A5A', marginTop: '16px' }}>Cancel anytime · No contracts · Instant access</p>
         </div>
       </section>
@@ -74,7 +69,15 @@ export function Vault() {
         <div className="page-container">
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>What's inside</p>
           <span className="maroon-rule" />
-          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', color: '#fff', marginBottom: '48px' }}>Six reasons.</h2>
+          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', marginBottom: '20px', lineHeight: 1.06 }}>
+            Behind the door.<br />
+            <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Six things you can't get anywhere else.</span>
+          </h2>
+          <p style={{ color: '#A0A0A0', maxWidth: '520px', marginBottom: '48px', fontSize: '17px', lineHeight: '1.7' }}>
+            Recipes that don't exist on any blog. Live masterclasses from real
+            gatherings. Verified members worldwide. The Board, The Council, and
+            the Annual Summit. One membership. Everything.
+          </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {VAULT_FEATURES.map(({ title, body }, i) => (
               <motion.div

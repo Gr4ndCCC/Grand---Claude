@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { Flame } from 'lucide-react';
 
 const PLATFORM = [
   { label: 'Events',  to: '/events' },
@@ -7,6 +6,14 @@ const PLATFORM = [
   { label: 'Hosts',   to: '/hosts'  },
   { label: 'About',   to: '/about'  },
   { label: 'FAQ',     to: '/faq'    },
+];
+
+const BROTHERHOOD = [
+  { label: 'The Board',           to: '/board'    },
+  { label: 'Annual Summit',       to: '/summit'   },
+  { label: 'The Council',         to: '/council'  },
+  { label: 'Partners',            to: '/partners' },
+  { label: 'Brotherhood Network', to: '/network'  },
 ];
 
 export function Footer() {
@@ -19,11 +26,10 @@ export function Footer() {
           <div>
             <button
               onClick={() => navigate('/')}
-              className="flex items-center gap-2 ember-focus mb-4"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+              className="ember-focus mb-4"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block' }}
             >
-              <Flame size={18} strokeWidth={1.5} style={{ color: 'var(--maroon)' }} />
-              <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: 'var(--beige)' }}>
+              <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: 'var(--beige)' }}>
                 Ember
               </span>
             </button>
@@ -52,9 +58,15 @@ export function Footer() {
           <div>
             <p className="mono mb-4" style={{ color: '#5A5A5A' }}>The Brotherhood</p>
             <ul className="flex flex-col gap-3">
-              {['The Board', 'Annual Summit', 'The Council', 'Partners', 'Brotherhood Network'].map(l => (
-                <li key={l}>
-                  <span style={{ color: '#A0A0A0', fontSize: '14px' }}>{l}</span>
+              {BROTHERHOOD.map(({ label, to }) => (
+                <li key={label}>
+                  <button
+                    onClick={() => navigate(to)}
+                    className="ember-focus"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#A0A0A0', fontSize: '14px', transition: 'color 0.2s', textAlign: 'left' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                  >{label}</button>
                 </li>
               ))}
             </ul>

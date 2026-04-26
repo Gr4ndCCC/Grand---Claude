@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, Flame } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 const NAV_LINKS = [
   { to: '/events', label: 'Events' },
@@ -34,13 +34,12 @@ export function Nav() {
         <div className="page-container flex items-center justify-between h-16">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 ember-focus"
+            className="ember-focus"
             style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           >
-            <Flame size={18} strokeWidth={1.5} style={{ color: 'var(--maroon)' }} />
             <span style={{
               fontFamily: 'Playfair Display, Georgia, serif',
-              fontSize: '20px', fontWeight: '400',
+              fontSize: '22px', fontWeight: '400',
               color: 'var(--beige)', letterSpacing: '-0.3px',
             }}>Ember</span>
           </button>
