@@ -1,655 +1,520 @@
-import { useState } from 'react';
-import { Flame, ArrowRight, Check } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, useInView } from 'framer-motion';
 import { Nav } from '../components/Nav';
-import { StickyBar } from '../components/StickyBar';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { Tag } from '../components/ui/Tag';
-import { AvatarStack } from '../components/ui/AvatarStack';
-import { Avatar } from '../components/ui/Avatar';
-import { EventCard } from '../components/EventCard';
-import { MenuItem } from '../components/MenuItem';
-import { RSVPPill } from '../components/RSVPPill';
-import { EmberScore } from '../components/EmberScore';
-import { LiveCounter } from '../components/LiveCounter';
-import { useToast } from '../components/ui/Toast';
+import { Footer } from '../components/Footer';
 
-const PEOPLE = [
-  { name: 'Marin K.' },
-  { name: 'Jules R.' },
-  { name: 'Tomás A.' },
-  { name: 'Esme P.' },
-  { name: 'Niko V.' },
-  { name: 'Sade L.' },
-  { name: 'Owen B.' },
-];
+/* ── animated counter ──────────────────────────────────────── */
+function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const [val, setVal] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true });
+  useEffect(() => {
+    if (!inView) return;
+    let cur = 0;
+    const inc = to / (1400 / 16);
+    const id = setInterval(() => {
+      cur = Math.min(cur + inc, to);
+      setVal(Math.round(cur));
+      if (cur >= to) clearInterval(id);
+    }, 16);
+    return () => clearInterval(id);
+  }, [inView, to]);
+  return <span ref={ref}>{val}{suffix}</span>;
+}
 
-const CITIES = [
-  'Brooklyn', 'Logan Square', 'Highland Park', 'Mission District',
-  'Greenpoint', 'East Nashville', 'Silver Lake', 'Wicker Park',
-  'Capitol Hill', 'Bushwick', 'Oak Cliff', 'Pilsen',
-];
-
-/* ── inline SMS mockup ──────────────────────────────────────────── */
-function HeroPhone() {
+/* ── fade-up wrapper ───────────────────────────────────────── */
+function FadeUp({ children, delay = 0, className = '' }: {
+  children: React.ReactNode; delay?: number; className?: string;
+}) {
   return (
-    <div className="relative w-full max-w-xs mx-auto lg:mx-0 select-none" aria-hidden="true">
-      {/* smoke drifts behind phone */}
-      <span className="smoke-drift smoke-a" />
-      <span className="smoke-drift smoke-b" />
-      <span className="smoke-drift smoke-c" />
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
+    >{children}</motion.div>
+  );
+}
 
-      {/* phone shell */}
-      <div
-        className="relative z-10 rounded-[2.5rem] border border-line bg-white shadow-3 overflow-hidden"
-        style={{ aspectRatio: '9/19' }}
-      >
-        {/* status bar */}
-        <div className="flex justify-between items-center px-6 pt-4 pb-2">
-          <span className="mono text-xs text-char-4">9:41</span>
-          <span className="w-14 h-5 rounded-pill bg-char-0 mx-auto absolute left-1/2 -translate-x-1/2 top-3" />
-          <div className="flex gap-1 items-center">
-            <span className="block w-3 h-2 rounded-sm bg-char-3" />
-            <span className="block w-3 h-2 rounded-sm bg-char-3" />
-          </div>
-        </div>
+/* ── world map — inline SVG with event pins ────────────────── */
+function WorldMap() {
+  const pins = [
+    { cx: 320, cy: 155, city: 'New York'    },
+    { cx: 290, cy: 170, city: 'Chicago'     },
+    { cx: 480, cy: 130, city: 'London'      },
+    { cx: 510, cy: 125, city: 'Amsterdam'   },
+    { cx: 520, cy: 135, city: 'Berlin'      },
+    { cx: 530, cy: 145, city: 'Rome'        },
+    { cx: 500, cy: 145, city: 'Lisbon'      },
+    { cx: 690, cy: 155, city: 'Tokyo'       },
+    { cx: 665, cy: 168, city: 'Shanghai'    },
+    { cx: 620, cy: 175, city: 'Mumbai'      },
+    { cx: 535, cy: 200, city: 'Johannesburg'},
+    { cx: 380, cy: 230, city: 'São Paulo'   },
+    { cx: 710, cy: 215, city: 'Sydney'      },
+    { cx: 570, cy: 130, city: 'Warsaw'      },
+    { cx: 600, cy: 135, city: 'Istanbul'    },
+  ];
 
-        {/* sms header */}
-        <div className="bg-surface-sunk border-b border-line px-5 py-3 flex items-center gap-3">
-          <span className="w-8 h-8 rounded-full bg-ember flex items-center justify-center shrink-0">
-            <Flame size={14} strokeWidth={1.5} className="text-paper" />
-          </span>
-          <div>
-            <p className="text-sm font-semibold text-ink">Ember</p>
-            <p className="mono text-xs text-ink-soft">Today</p>
-          </div>
-        </div>
+  return (
+    <div className="relative" style={{ background: 'rgba(128,0,0,0.04)', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(228,207,179,0.08)' }}>
+      <svg viewBox="0 50 900 360" style={{ width: '100%', opacity: 0.85 }}>
+        {/* very simplified world outline paths */}
+        <g fill="none" stroke="rgba(228,207,179,0.15)" strokeWidth="0.8">
+          {/* North America */}
+          <path d="M180,100 L320,80 L370,90 L380,130 L340,160 L310,180 L280,200 L240,220 L210,200 L180,170 L160,140 Z" />
+          {/* South America */}
+          <path d="M280,210 L340,200 L370,230 L360,280 L330,310 L300,300 L270,260 Z" />
+          {/* Europe */}
+          <path d="M440,80 L540,75 L560,90 L550,120 L510,135 L480,125 L450,115 L440,100 Z" />
+          {/* Africa */}
+          <path d="M470,140 L560,140 L580,170 L570,220 L540,250 L510,245 L490,220 L475,190 Z" />
+          {/* Asia */}
+          <path d="M560,75 L720,70 L760,90 L750,140 L700,160 L640,165 L600,150 L570,130 L555,105 Z" />
+          {/* Australia */}
+          <path d="M670,210 L750,205 L760,235 L730,260 L690,255 L670,235 Z" />
+          {/* Russia */}
+          <path d="M540,60 L760,55 L770,85 L720,90 L640,85 L560,90 L545,75 Z" />
+        </g>
 
-        {/* messages */}
-        <div className="p-4 space-y-3 flex-1">
-          {/* incoming */}
-          <div className="flex justify-start">
-            <div className="bg-surface-sunk rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-              <p className="text-sm text-ink leading-snug">
-                Marin's throwing a brisket night — Sunday at 4pm. You in?
-              </p>
-            </div>
-          </div>
-          {/* incoming */}
-          <div className="flex justify-start">
-            <div className="bg-surface-sunk rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-              <p className="text-sm text-ink leading-snug">
-                <strong>3 spots left.</strong> Reply with what you're bringing or tap: <span className="text-ember underline">ember.app/b7k2</span>
-              </p>
-            </div>
-          </div>
-          {/* outgoing */}
-          <div className="flex justify-end">
-            <div className="bg-ember rounded-2xl rounded-tr-sm px-4 py-3 max-w-[80%]">
-              <p className="text-sm text-paper leading-snug">Yes! I'll bring sumac slaw 🥗</p>
-            </div>
-          </div>
-          {/* incoming confirm */}
-          <div className="flex justify-start">
-            <div className="bg-surface-sunk rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-              <p className="text-sm text-ink leading-snug flex items-center gap-2">
-                <Check size={14} className="text-ember shrink-0" />
-                <span>Locked in. See you Sunday.</span>
-              </p>
-            </div>
-          </div>
-          {/* morning reminder */}
-          <div className="flex justify-start">
-            <div className="bg-surface-sunk rounded-2xl rounded-tl-sm px-4 py-3 max-w-[80%]">
-              <p className="text-sm text-ink leading-snug">
-                <em>Reminder:</em> Brisket night is tonight at 4pm. 6 people confirmed. You're on slaw.
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* graticule lines */}
+        <g stroke="rgba(228,207,179,0.04)" strokeWidth="0.5">
+          {[80,120,160,200,240].map(y => <line key={y} x1="150" y1={y} x2="780" y2={y} />)}
+          {[200,280,360,440,520,600,680,760].map(x => <line key={x} x1={x} y1="60" x2={x} y2="260" />)}
+        </g>
 
-        {/* input */}
-        <div className="px-4 pb-6 pt-2 border-t border-line flex items-center gap-2">
-          <div className="flex-1 bg-ash-2 rounded-pill h-9" />
-          <div className="w-9 h-9 rounded-full bg-ember flex items-center justify-center shrink-0">
-            <ArrowRight size={14} strokeWidth={2} className="text-paper" />
-          </div>
-        </div>
+        {/* event pins */}
+        {pins.map(({ cx, cy, city }) => (
+          <g key={city}>
+            <circle cx={cx} cy={cy} r="10" fill="rgba(128,0,0,0.15)" />
+            <circle cx={cx} cy={cy} r="4" fill="var(--maroon)" opacity="0.9" />
+            <circle cx={cx} cy={cy} r="4" fill="var(--maroon)">
+              <animate attributeName="r" values="4;10;4" dur="3s" repeatCount="indefinite" begin={`${Math.random() * 2}s`} />
+              <animate attributeName="opacity" values="0.9;0;0.9" dur="3s" repeatCount="indefinite" begin={`${Math.random() * 2}s`} />
+            </circle>
+          </g>
+        ))}
+      </svg>
+      <div style={{ position: 'absolute', bottom: '12px', right: '16px' }}>
+        <p className="mono" style={{ color: '#5A5A5A', fontSize: '10px' }}>
+          {pins.length} live events across 40+ countries
+        </p>
       </div>
     </div>
   );
 }
 
-/* ── ember-rule heading helper ─────────────────────────────────── */
-function SectionHead({ label, title, light = false }: { label: string; title: React.ReactNode; light?: boolean }) {
+const STATS = [
+  { value: 15,  suffix: '',  label: 'Live events'   },
+  { value: 40,  suffix: '+', label: 'Countries'     },
+  { value: 4,   suffix: '',  label: 'Board tiers'   },
+  { value: 1,   suffix: '',  label: 'Annual Summit' },
+];
+
+const HOW_STEPS = [
+  { n: '01', title: 'Discover', body: 'Find BBQ gatherings near you on the live map. Every pin is a real event, a real host, a real fire.' },
+  { n: '02', title: 'Join & Contribute', body: "RSVP, tell the host what you're bringing — meat, charcoal, drinks. No doubling up. No gaps." },
+  { n: '03', title: 'Level up', body: "Host. Get rated. Earn your rank on The Board. Build a reputation that follows you everywhere fire burns." },
+];
+
+const BOARD_RANKS = [
+  { tier: 'Ember',  color: '#800000', req: 'Join the Vault · Host your first event' },
+  { tier: 'Iron',   color: '#6B7280', req: '5+ events · 4.5★ average rating' },
+  { tier: 'Gold',   color: '#B8860B', req: '20+ events · 4.8★ · Vault contributor' },
+  { tier: 'Legend', color: '#DAA520', req: 'Top 1% globally · Invitation only' },
+];
+
+const EVENTS = [
+  { city: 'Amsterdam', flag: '🇳🇱', title: 'Amsterdam Sunset BBQ',     host: 'Lars V.',    rank: 'Gold',   date: 'Sat, Apr 19', time: '18:00', guests: 8,  max: 12 },
+  { city: 'Tokyo',     flag: '🇯🇵', title: 'Tokyo Garden Grill',        host: 'Hiro M.',    rank: 'Iron',   date: 'Sun, Apr 20', time: '17:00', guests: 6,  max: 10 },
+  { city: 'New York',  flag: '🇺🇸', title: 'Brooklyn Smokehouse Night', host: 'Marcus B.',  rank: 'Legend', date: 'Fri, Apr 25', time: '19:00', guests: 14, max: 20 },
+];
+
+const TESTIMONIALS = [
+  { quote: "I flew to Amsterdam for an Ember gathering. Left with four guys I'll grill with for life. That doesn't happen on Eventbrite.", name: 'Kofi A.',  city: 'Accra → Amsterdam', rank: 'Iron'   },
+  { quote: "The Board made me take hosting seriously. I went from a backyard weekend thing to something people actually talk about.",         name: 'Marco T.', city: 'Rome',              rank: 'Gold'   },
+  { quote: "I've used every events app. None of them care about the food. Ember understands that the grill is the whole point.",             name: 'Yuto K.',  city: 'Tokyo',             rank: 'Ember'  },
+];
+
+const RANK_COLOR: Record<string, string> = { Ember: '#800000', Iron: '#6B7280', Gold: '#B8860B', Legend: '#DAA520' };
+
+const CITIES = ['Amsterdam', 'Tokyo', 'New York', 'Rome', 'Lisbon', 'Johannesburg', 'São Paulo', 'Singapore', 'Barcelona', 'Berlin', 'Istanbul', 'Sydney', 'Chicago', 'Mumbai', 'Warsaw'];
+
+function RankBadge({ rank }: { rank: string }) {
+  const c = RANK_COLOR[rank] ?? '#555';
   return (
-    <div className="mb-10">
-      <p className={`mono mb-1 ${light ? 'text-ember-hot' : 'text-ember'}`}>{label}</p>
-      <span className="ember-rule" />
-      <h2 className={`text-4xl md:text-5xl max-w-2xl ${light ? 'text-ink-inverse' : ''}`}>{title}</h2>
-    </div>
+    <span className="rank-badge" style={{ color: c, background: `${c}18`, border: `1px solid ${c}44` }}>
+      {rank}
+    </span>
   );
 }
 
+const btn = {
+  primary: {
+    background: 'var(--maroon)', color: '#fff', border: 'none',
+    borderRadius: '10px', padding: '14px 28px', fontSize: '15px',
+    fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s',
+    fontFamily: 'inherit',
+  } as React.CSSProperties,
+  outline: {
+    background: 'transparent', color: 'var(--beige)',
+    border: '1px solid rgba(228,207,179,0.25)',
+    borderRadius: '10px', padding: '14px 28px', fontSize: '15px',
+    fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s',
+    fontFamily: 'inherit',
+  } as React.CSSProperties,
+};
+
 export function Landing() {
-  const [rsvp, setRsvp] = useState<'yes' | 'maybe' | 'no'>();
-  const [email, setEmail] = useState('');
-  const { push } = useToast();
+  const navigate = useNavigate();
 
   return (
-    <div className="bg-surface text-ink relative">
+    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       <Nav />
 
-      {/* sticky bar */}
-      <StickyBar position="top" appearAt={520}>
-        <div className="bg-paper/90 backdrop-blur border-b border-line">
-          <div className="page-container h-12 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="block w-2 h-2 rounded-pill bg-ember animate-pulse" />
-              <p className="mono text-ink-soft truncate">
-                <LiveCounter to={142} /> RSVPs this week · 9 grills lit tonight
-              </p>
-            </div>
-            <a href="#join" className="ember-focus mono text-ember whitespace-nowrap">
-              Get the next invite →
-            </a>
-          </div>
-        </div>
-      </StickyBar>
+      {/* ── HERO ──────────────────────────────────────────────── */}
+      <section style={{ position: 'relative', paddingTop: '120px', paddingBottom: '80px', overflow: 'hidden' }}>
+        <div className="maroon-glow smoke-pulse" />
 
-      {/* ── hero ────────────────────────────────────────────────── */}
-      <section className="relative pt-32 pb-20 overflow-hidden">
-        {/* background glow */}
-        <div className="hero-glow" />
-
-        <div className="page-container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* left */}
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="mono text-ember mb-5">Backyard BBQ, quietly coordinated</p>
+              <motion.p
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="mono"
+                style={{ color: 'var(--maroon)', marginBottom: '16px' }}
+              >
+                The global BBQ brotherhood
+              </motion.p>
 
-              <h1 className="font-display text-5xl md:text-6xl lg:text-display leading-[1.02] tracking-tight max-w-2xl">
-                Three people{' '}
-                <em className="italic-accent">flaked</em>{' '}
-                last time.
+              <motion.h1
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+                style={{
+                  fontFamily: 'Playfair Display, Georgia, serif',
+                  fontSize: 'clamp(42px, 6vw, 80px)',
+                  fontWeight: '400', lineHeight: '1.06',
+                  color: '#fff', marginBottom: '24px',
+                }}
+              >
+                The world grills.
                 <br />
-                Tonight, nobody does.
-              </h1>
+                <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>
+                  Join the brotherhood.
+                </span>
+              </motion.h1>
 
-              <p className="text-ink-mid text-lg max-w-xl mt-6 mb-8 leading-relaxed">
-                Ember is for the friend who hosts the BBQ, and for the eight
-                people who keep saying they'll bring something.{' '}
-                <strong>RSVP, claim a dish, show up.</strong>{' '}
-                That's the whole product.
-              </p>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                style={{ color: '#A0A0A0', fontSize: '17px', lineHeight: '1.7', maxWidth: '480px', marginBottom: '40px' }}
+              >
+                Discover BBQ events in 40+ countries. Host your own gathering.
+                Build your rank. Connect with pitmasters worldwide.
+              </motion.p>
 
-              <div className="flex flex-wrap items-center gap-3 mb-10">
-                <Button size="lg" iconRight={<ArrowRight size={18} strokeWidth={1.75} />}>
-                  Start a fire
-                </Button>
-                <Button size="lg" variant="secondary">See how it works</Button>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35 }}
+                style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px' }}
+              >
+                <button
+                  style={btn.primary}
+                  onClick={() => navigate('/events')}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >Find events near you</button>
+                <button
+                  style={btn.outline}
+                  onClick={() => navigate('/vault')}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(228,207,179,0.07)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                >Explore the Vault</button>
+              </motion.div>
 
-              <div className="flex items-center gap-4 flex-wrap">
-                <AvatarStack people={PEOPLE} max={5} />
-                <div>
-                  <p className="text-ink font-semibold">
-                    <LiveCounter to={2841} /> hosts this season
-                  </p>
-                  <p className="mono text-ink-soft">across 14 cities · no app required</p>
-                </div>
-              </div>
+              {/* stats bar */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ delay: 0.55 }}
+                style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}
+              >
+                {STATS.map(({ value, suffix, label }) => (
+                  <div key={label}>
+                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', fontWeight: '400', color: '#fff', lineHeight: 1 }}>
+                      <Counter to={value} suffix={suffix} />
+                    </p>
+                    <p className="mono" style={{ color: '#5A5A5A', marginTop: '4px' }}>{label}</p>
+                  </div>
+                ))}
+              </motion.div>
             </div>
 
-            {/* right — phone mockup */}
-            <HeroPhone />
+            {/* world map */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3, duration: 0.9 }}
+            >
+              <WorldMap />
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── cities strip ─────────────────────────────────────────── */}
-      <div className="border-b border-line bg-surface-sunk py-4 overflow-hidden">
-        <div className="page-container flex items-center gap-2 flex-wrap">
-          <span className="mono text-ink-soft shrink-0">Hosts in</span>
-          {CITIES.map((city, i) => (
-            <span key={city} className="mono text-ink flex items-center gap-2">
+      {/* ── CITIES SCROLL ─────────────────────────────────────── */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '16px 0' }}>
+        <div className="city-scroll">
+          {[...CITIES, ...CITIES].map((city, i) => (
+            <span key={i} className="mono" style={{ color: '#5A5A5A', padding: '0 24px', whiteSpace: 'nowrap' }}>
               {city}
-              {i < CITIES.length - 1 && <span className="text-ember">·</span>}
+              <span style={{ color: 'var(--maroon)', marginLeft: '24px' }}>·</span>
             </span>
           ))}
         </div>
       </div>
 
-      {/* ── the problem ──────────────────────────────────────────── */}
-      <section className="py-24 bg-surface-sunk border-b border-line">
+      {/* ── HOW IT WORKS ──────────────────────────────────────── */}
+      <section style={{ padding: '100px 0' }}>
         <div className="page-container">
-          <div className="grid md:grid-cols-12 gap-12 items-start">
-            <div className="md:col-span-5">
-              <SectionHead
-                label="The problem"
-                title={<>You said "I'll bring sides," and then so did three other people.</>}
-              />
-              <p className="text-ink-mid text-lg leading-relaxed">
-                Every group chat ends the same way. Six dishes nobody claimed,
-                two coolers of beer, one sad bag of buns. The host shouldn't
-                also be the project manager.
-              </p>
-            </div>
+          <FadeUp>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>How it works</p>
+            <span className="maroon-rule" />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '60px', maxWidth: '600px' }}>
+              Three steps. One fire.
+            </h2>
+          </FadeUp>
 
-            <div className="md:col-span-7 grid sm:grid-cols-3 gap-4">
-              {[
-                { k: '3 people',  v: 'who said yes and ghosted' },
-                { k: '6 sides',   v: 'and zero proteins' },
-                { k: '2 hours',   v: 'wasted chasing RSVPs' },
-              ].map(({ k, v }) => (
-                <Card key={k} variant="raised" className="text-center py-8">
-                  <p className="font-display text-4xl text-ember mb-2">{k}</p>
-                  <p className="mono text-ink-soft">{v}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── how it works ─────────────────────────────────────────── */}
-      <section className="py-24">
-        <div className="page-container">
-          <SectionHead label="How it works" title="Three steps, no group chat." />
-          <ol className="grid md:grid-cols-3 gap-8">
-            {[
-              { n: '01', t: 'Pick a date',        b: 'Set the time and the place. We send one text. No app to download, no account required.' },
-              { n: '02', t: 'Friends claim',      b: 'They tap a dish. Six different things show up. Nothing doubled up, nobody texting "what are you bringing?"' },
-              { n: '03', t: 'Light the charcoal', b: 'Show up to a full table. We remind the flakes the morning of, so you don\'t have to.' },
-            ].map(({ n, t, b }) => (
-              <li key={n} className="border-l-2 border-ember pl-6 py-1">
-                <p className="mono text-ember mb-3">{n}</p>
-                <h3 className="text-2xl mb-3">{t}</h3>
-                <p className="text-ink-mid leading-relaxed">{b}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── live this week ───────────────────────────────────────── */}
-      <section className="py-24 bg-surface-sunk border-y border-line">
-        <div className="page-container">
-          <div className="flex items-end justify-between mb-10 flex-wrap gap-6">
-            <SectionHead label="Live this week" title="Nine grills lit, three open seats." />
-            <div className="flex flex-wrap gap-2 pb-2">
-              <Tag>backyard</Tag>
-              <Tag>weeknight</Tag>
-              <Tag>charcoal</Tag>
-              <Tag>kid-friendly</Tag>
-            </div>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <EventCard
-              title="Sunday brisket, hot and fast"
-              host="Marin K." when="Sun · 4:00 PM"
-              where="Backyard, Logan Square"
-              going={PEOPLE.slice(0, 5)} spotsLeft={3} pinX={120} pinY={70}
-            />
-            <EventCard
-              title="Weeknight pork shoulder"
-              host="Jules R." when="Thu · 6:30 PM"
-              where="Roof, Greenpoint"
-              going={PEOPLE.slice(0, 3)} spotsLeft={6} pinX={220} pinY={50}
-            />
-            <EventCard
-              title="Charred-everything potluck"
-              host="Tomás A." when="Sat · 5:00 PM"
-              where="Park grill, Highland"
-              going={PEOPLE.slice(2, 7)} spotsLeft={2} pinX={80} pinY={130}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── rsvp + menu demo ─────────────────────────────────────── */}
-      <section className="py-24">
-        <div className="page-container grid md:grid-cols-2 gap-14 items-center">
-          <div>
-            <SectionHead label="The interaction" title="Tap once. You're in." />
-            <p className="text-ink-mid text-lg mb-8 leading-relaxed">
-              No accounts, no profiles, no notifications begging for attention.
-              Three buttons and a list. The whole product fits in a text message.
-            </p>
-            <div className="flex items-center gap-4 mb-5">
-              <span className="mono text-ink-soft w-16 shrink-0">RSVP</span>
-              <RSVPPill
-                value={rsvp}
-                onChange={(s) => {
-                  setRsvp(s);
-                  push(s === 'yes' ? "You're in." : `Marked ${s}.`, 'positive');
-                }}
-              />
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="mono text-ink-soft w-16 shrink-0">SCORE</span>
-              <EmberScore score={84} label="Reliable host" size="md" />
-            </div>
-          </div>
-
-          <Card variant="raised" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-2xl">The menu so far</h3>
-              <Badge tone="ember">Live</Badge>
-            </div>
-            <p className="mono text-ink-soft">Tap "I'll bring this" to claim a dish.</p>
-            <div className="space-y-2">
-              <MenuItem name="Brisket, hot and fast"      category="Main" />
-              <MenuItem name="Charred shishitos"          category="Veg" claimedBy={{ name: 'Marin K.' }} />
-              <MenuItem name="Sumac slaw"                 category="Side" />
-              <MenuItem name="Smoked stone fruit cobbler" category="Sweet" />
-            </div>
-          </Card>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── testimonials ─────────────────────────────────────────── */}
-      <section className="py-24 bg-surface-sunk border-y border-line">
-        <div className="page-container">
-          <SectionHead label="From hosts" title="What changed for them." />
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                q: 'Six people brought six different things. First time in years no one brought hummus.',
-                n: 'Marin K.', c: 'Logan Square', score: 91,
-              },
-              {
-                q: "Stopped chasing RSVPs in the group chat. The text reminders are the entire reason it works.",
-                n: 'Jules R.', c: 'Greenpoint', score: 88,
-              },
-              {
-                q: "I host two grills a month now. Used to be two a year. The friction was the chat.",
-                n: 'Tomás A.', c: 'Highland Park', score: 84,
-              },
-            ].map(({ q, n, c, score }) => (
-              <Card key={n} variant="raised" className="flex flex-col gap-5">
-                <div className="flex gap-2 pt-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Flame key={i} size={14} strokeWidth={1.5} className="text-ember" />
-                  ))}
+          <div className="grid md:grid-cols-3 gap-8">
+            {HOW_STEPS.map(({ n, title, body }, i) => (
+              <FadeUp key={n} delay={i * 0.12}>
+                <div style={{ borderLeft: '2px solid var(--maroon)', paddingLeft: '24px' }}>
+                  <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>{n}</p>
+                  <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '12px' }}>{title}</h3>
+                  <p style={{ color: '#A0A0A0', lineHeight: '1.7' }}>{body}</p>
                 </div>
-                <p className="font-display italic text-xl text-ink leading-snug flex-1">
-                  "{q}"
-                </p>
-                <div className="flex items-center gap-3 pt-4 border-t border-line">
-                  <Avatar name={n} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-ink font-medium">{n}</p>
-                    <p className="mono text-ink-soft">{c}</p>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── THE BOARD ─────────────────────────────────────────── */}
+      <section style={{ padding: '100px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="page-container">
+          <FadeUp>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Board</p>
+            <span className="maroon-rule" />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '16px' }}>
+              Rank earned. Not bought.
+            </h2>
+            <p style={{ color: '#A0A0A0', maxWidth: '520px', marginBottom: '56px', lineHeight: '1.7' }}>
+              Four tiers. Each earned through real events, real ratings, real craft.
+              Your rank follows you everywhere fire burns.
+            </p>
+          </FadeUp>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {BOARD_RANKS.map(({ tier, color, req }, i) => (
+              <FadeUp key={tier} delay={i * 0.1}>
+                <div className="card-glow" style={{
+                  background: '#111',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '14px',
+                  padding: '28px 24px',
+                }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: `${color}22`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: color }} />
                   </div>
-                  <EmberScore score={score} size="sm" />
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff', marginBottom: '10px' }}>{tier}</p>
+                  <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{req}</p>
                 </div>
-              </Card>
+              </FadeUp>
             ))}
           </div>
         </div>
       </section>
 
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── by the numbers ───────────────────────────────────────── */}
-      <section className="py-24">
+      {/* ── LIVE EVENTS ───────────────────────────────────────── */}
+      <section style={{ padding: '100px 0' }}>
         <div className="page-container">
-          <SectionHead label="By the numbers" title={<>A small site doing a <em className="italic-accent">small</em> thing.</>} />
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-px bg-line rounded-lg overflow-hidden">
-            {[
-              { v: 142,  s: '',  l: 'RSVPs this week' },
-              { v: 2841, s: '',  l: 'Hosts this season' },
-              { v: 87,   s: '%', l: 'Dishes claimed on time' },
-              { v: 14,   s: '',  l: 'Cities with active hosts' },
-            ].map((x) => (
-              <div key={x.l} className="bg-surface p-10">
-                <p className="font-display text-5xl md:text-6xl text-ember">
-                  <LiveCounter to={x.v} format={(n) => `${n.toLocaleString()}${x.s}`} />
-                </p>
-                <p className="mono text-ink-soft mt-3">{x.l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── pricing ──────────────────────────────────────────────── */}
-      <section className="py-24 bg-surface-sunk border-y border-line">
-        <div className="page-container">
-          <SectionHead label="Pricing" title="One price. No tricks." />
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl">
-            {/* free */}
-            <Card variant="raised" className="space-y-5">
-              <div>
-                <p className="mono text-ink-soft mb-1">Free forever</p>
-                <p className="font-display text-5xl">$0</p>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  'Up to 10 guests per event',
-                  'Dish claim + RSVP',
-                  'One SMS per event',
-                  'Morning-of reminder',
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-ink-mid">
-                    <Check size={15} strokeWidth={2} className="text-ember shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button variant="secondary" className="w-full">Start for free</Button>
-            </Card>
-
-            {/* per event */}
-            <Card variant="raised" className="space-y-5 border-ember" style={{ borderColor: 'var(--ember)' }}>
-              <div>
-                <p className="mono text-ember mb-1">Per event, 10+ guests</p>
-                <div className="flex items-baseline gap-2">
-                  <p className="font-display text-5xl">$4</p>
-                  <p className="text-ink-mid">per event</p>
-                </div>
-              </div>
-              <ul className="space-y-3">
-                {[
-                  'Unlimited guests',
-                  'Everything in free',
-                  'Priority SMS delivery',
-                  'No subscription required',
-                  'We do not sell your contacts',
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-ink-mid">
-                    <Check size={15} strokeWidth={2} className="text-ember shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full" iconRight={<ArrowRight size={16} strokeWidth={2} />}>
-                Start a fire
-              </Button>
-            </Card>
-          </div>
-
-          <p className="mono text-ink-soft mt-6 max-w-lg">
-            Pay only when you host a big one. No monthly fee. No annual contract.
-            No ads. No selling your contacts. That is the entire business model.
-          </p>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── faq ──────────────────────────────────────────────────── */}
-      <section className="py-24">
-        <div className="page-container max-w-3xl">
-          <SectionHead label="FAQ" title="Questions we keep getting." />
-          <dl className="divide-y divide-line">
-            {[
-              {
-                q: 'Is there an app?',
-                a: 'No. Ember sends one SMS per event. Your friends tap the link and claim a dish. That is the entire interface.',
-              },
-              {
-                q: 'Do my friends need an account?',
-                a: "No accounts. They get a text. They tap \"I'll bring slaw.\" They show up. The host sees who claimed what.",
-              },
-              {
-                q: 'Why not Partiful or Paperless Post?',
-                a: 'Those are invitations. Ember is the menu, the reminder, and the nudge to the flake. Different problem.',
-              },
-              {
-                q: 'How much does it cost?',
-                a: 'Free for hosts with fewer than ten guests. $4 per event above that. We do not sell ads or your contacts.',
-              },
-              {
-                q: 'What if someone changes their dish?',
-                a: 'They tap the link again and update it. The host sees the change in real time. No chasing, no group chat.',
-              },
-            ].map(({ q, a }) => (
-              <div key={q} className="py-6">
-                <dt className="text-xl mb-3 flex items-start gap-3">
-                  <Flame size={18} strokeWidth={1.5} className="text-ember mt-1 shrink-0" />
-                  {q}
-                </dt>
-                <dd className="text-ink-mid text-lg leading-relaxed pl-8">{a}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
-
-      {/* grill divider */}
-      <div className="grill-grate" />
-
-      {/* ── final cta ────────────────────────────────────────────── */}
-      <section id="join" className="relative py-28 bg-char-0 text-ink-inverse overflow-hidden">
-        {/* background ember glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(50% 60% at 50% 100%, rgba(184,83,50,0.28) 0%, transparent 70%)',
-          }}
-        />
-
-        <div className="page-container max-w-3xl text-center relative z-10">
-          <p className="mono text-ember-hot mb-4">Get the next invite</p>
-          <span className="ember-rule mx-auto mb-2" />
-          <h2 className="font-display text-5xl md:text-6xl mb-4 leading-tight">
-            Your next BBQ has a{' '}
-            <em style={{ color: 'var(--ember-hot)', fontStyle: 'italic' }}>date.</em>
-          </h2>
-          <p className="text-ash-1 max-w-xl mx-auto mb-10 text-lg leading-relaxed">
-            Drop your email. We text you a link to start your first fire. No
-            account, no setup. If it's not better than your group chat,
-            ignore us.
-          </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              push("Sent. Check your inbox.", 'positive');
-              setEmail('');
-            }}
-            className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-          >
-            <div className="flex-1 [&_input]:bg-char-1 [&_input]:text-ink-inverse [&_input]:border-char-3">
-              <Input
-                placeholder="you@somewhere"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                aria-label="Email address"
-              />
-            </div>
-            <Button type="submit" size="md">Get the link</Button>
-          </form>
-          <p className="mono text-char-5 mt-5">
-            No spam · One text per event · Cancel any time
-          </p>
-        </div>
-      </section>
-
-      {/* ── footer ───────────────────────────────────────────────── */}
-      <footer className="border-t border-line bg-surface-sunk py-16">
-        <div className="page-container">
-          <div className="grid md:grid-cols-4 gap-10 mb-12">
-            {/* brand */}
-            <div className="md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="w-8 h-8 rounded-md bg-ember flex items-center justify-center">
-                  <Flame size={16} strokeWidth={1.5} className="text-paper" />
-                </span>
-                <span className="font-display text-xl text-ink">Ember</span>
-              </div>
-              <p className="text-ink-mid max-w-xs leading-relaxed">
-                Backyard BBQ, quietly coordinated. RSVP, claim a dish, show up.
-                The grill is the point.
-              </p>
-              <p className="mono text-ink-soft mt-4">No app · No ads · No selling your contacts</p>
-            </div>
-
-            {/* product */}
-            <div>
-              <p className="mono text-ink-soft mb-4">Product</p>
-              <ul className="space-y-3">
-                {['How it works', 'Pricing', 'FAQ', 'Design system'].map((l) => (
-                  <li key={l}>
-                    <a href={l === 'Design system' ? '/design-system' : '#'} className="text-ink-mid hover:text-ink transition-colors ember-focus">
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* hosts */}
-            <div>
-              <p className="mono text-ink-soft mb-4">For hosts</p>
-              <ul className="space-y-3">
-                {['Start a fire', 'Invite guests', 'Build a menu', 'Track RSVPs'].map((l) => (
-                  <li key={l}>
-                    <a href="#join" className="text-ink-mid hover:text-ink transition-colors ember-focus">
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-line pt-8 flex items-center justify-between flex-wrap gap-4">
-            <p className="mono text-ink-soft">
-              © {new Date().getFullYear()} Ember · backyard BBQ coordinator
+          <FadeUp>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Live this week</p>
+            <span className="maroon-rule" />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '16px' }}>
+              Fires burning near you.
+            </h2>
+            <p style={{ color: '#A0A0A0', marginBottom: '48px' }}>
+              Real events, real hosts. Join a gathering or{' '}
+              <button onClick={() => navigate('/hosts')} style={{ color: 'var(--beige)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', textUnderlineOffset: '3px', fontFamily: 'inherit', fontSize: 'inherit' }}>
+                start your own.
+              </button>
             </p>
-            <div className="flex gap-6">
-              <a href="#" className="mono text-ink-soft hover:text-ink transition-colors ember-focus">Privacy</a>
-              <a href="#" className="mono text-ink-soft hover:text-ink transition-colors ember-focus">Terms</a>
-              <a href="mailto:hello@ember.app" className="mono text-ink-soft hover:text-ink transition-colors ember-focus">Contact</a>
-            </div>
+          </FadeUp>
+
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
+            {EVENTS.map(({ city, flag, title, host, rank, date, time, guests, max }, i) => (
+              <FadeUp key={title} delay={i * 0.1}>
+                <div className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <p className="mono" style={{ color: '#5A5A5A', marginBottom: '6px' }}>{flag} {city}</p>
+                      <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff', lineHeight: 1.3 }}>{title}</h3>
+                    </div>
+                    <RankBadge rank={rank} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <span className="mono" style={{ color: '#A0A0A0' }}>{date}</span>
+                    <span className="mono" style={{ color: '#A0A0A0' }}>{time}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p style={{ color: '#A0A0A0', fontSize: '14px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{host}</span></p>
+                    <p className="mono" style={{ color: guests >= max - 2 ? 'var(--gold)' : '#5A5A5A' }}>
+                      {guests}/{max} going
+                    </p>
+                  </div>
+                  <button
+                    style={{ ...btn.primary, padding: '10px 20px', fontSize: '14px', width: '100%' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; }}
+                    onClick={() => navigate('/events')}
+                  >View event</button>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <button
+              style={btn.outline}
+              onClick={() => navigate('/events')}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(228,207,179,0.07)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+            >See all events →</button>
           </div>
         </div>
-      </footer>
+      </section>
+
+      {/* ── THE VAULT ─────────────────────────────────────────── */}
+      <section style={{ padding: '100px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="page-container">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <FadeUp>
+              <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Vault</p>
+              <span className="maroon-rule" />
+              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '20px' }}>
+                The inner circle.
+              </h2>
+              <p style={{ color: '#A0A0A0', lineHeight: '1.8', marginBottom: '40px', fontSize: '17px' }}>
+                Exclusive recipes, live masterclasses, The Board certification,
+                Brotherhood Network, vetted partner deals, The Council, and
+                Annual Summit access. Everything the grill deserves.
+              </p>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '40px' }}>
+                <div style={{ textAlign: 'center', background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 28px' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€12</p>
+                  <p className="mono" style={{ color: '#5A5A5A' }}>per month</p>
+                </div>
+                <div style={{ textAlign: 'center', background: 'rgba(128,0,0,0.15)', border: '1px solid rgba(128,0,0,0.3)', borderRadius: '12px', padding: '20px 28px' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€89</p>
+                  <p className="mono" style={{ color: 'var(--maroon)' }}>annual · best value</p>
+                </div>
+              </div>
+              <button
+                style={btn.primary}
+                onClick={() => navigate('/vault')}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+              >Join the Vault →</button>
+            </FadeUp>
+
+            <FadeUp delay={0.15}>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { title: 'Recipes',            body: 'Member-only. Not on any food blog.' },
+                  { title: 'Knowledge',           body: 'Live masterclasses from real gatherings.' },
+                  { title: 'Brotherhood Network', body: 'Verified members worldwide.' },
+                  { title: 'The Board',           body: 'Four tiers. Earned through craft.' },
+                  { title: 'Partners',            body: 'Premium suppliers, exclusive deals.' },
+                  { title: 'The Council',         body: 'Vote on platform direction.' },
+                ].map(({ title, body }) => (
+                  <div key={title} className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '20px' }}>
+                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '15px', color: 'var(--beige)', marginBottom: '6px' }}>{title}</p>
+                    <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{body}</p>
+                  </div>
+                ))}
+              </div>
+            </FadeUp>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ──────────────────────────────────────── */}
+      <section style={{ padding: '100px 0' }}>
+        <div className="page-container">
+          <FadeUp>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>From the brotherhood</p>
+            <span className="maroon-rule" />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '56px' }}>
+              Show up a stranger.
+              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}> Leave a brother.</span>
+            </h2>
+          </FadeUp>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {TESTIMONIALS.map(({ quote, name, city, rank }, i) => (
+              <FadeUp key={name} delay={i * 0.1}>
+                <div className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '18px', color: 'var(--beige)', lineHeight: '1.6', flex: 1 }}>
+                    "{quote}"
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div>
+                      <p style={{ color: '#fff', fontWeight: '500', marginBottom: '2px' }}>{name}</p>
+                      <p className="mono" style={{ color: '#5A5A5A' }}>{city}</p>
+                    </div>
+                    <RankBadge rank={rank} />
+                  </div>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ANNUAL SUMMIT CTA ─────────────────────────────────── */}
+      <section style={{ padding: '100px 0', background: 'linear-gradient(135deg, #0D0000 0%, #0A0A0A 50%, #000D00 100%)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.20) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <FadeUp>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Annual Summit</p>
+            <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', marginBottom: '20px', lineHeight: 1.1 }}>
+              One city. One weekend.
+              <br />
+              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>The whole brotherhood.</span>
+            </h2>
+            <p style={{ color: '#A0A0A0', maxWidth: '520px', margin: '0 auto 40px', fontSize: '17px', lineHeight: '1.7' }}>
+              Location revealed exclusively to Vault members. Your subscription
+              is your ticket. Every year, a different city. Always unforgettable.
+            </p>
+            <button
+              style={{ ...btn.primary, fontSize: '16px', padding: '16px 36px' }}
+              onClick={() => navigate('/vault')}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-maroon)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+            >
+              Join the Vault · Get Summit access
+            </button>
+          </FadeUp>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

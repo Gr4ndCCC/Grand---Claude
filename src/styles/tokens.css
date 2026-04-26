@@ -1,42 +1,30 @@
 :root {
-  /* brand — only chromatic colors */
-  --ember:        #b85332;
-  --ember-hot:    #d96b48;
-  --ember-deep:   #993f24;
-  --maroon:       #550000;
-  --maroon-deep:  #2e0000;
+  /* brand — earth palette */
+  --maroon:       #800000;
+  --maroon-light: #990000;
+  --maroon-deep:  #550000;
+  --beige:        #E4CFB3;
+  --beige-soft:   #C8B090;
+  --beige-muted:  #8A7A65;
+  --gold:         #B8860B;
+  --gold-bright:  #DAA520;
 
-  /* char neutrals (warm, never blue-grey) */
-  --char-0:   #0c0a09;
-  --char-1:   #14110f;
-  --char-2:   #1c1815;
-  --char-3:   #2a2521;
-  --char-4:   #423a35;
-  --char-5:   #6b6258;
-  --ash-1:    #b8aea4;
-  --ash-2:    #e8e2dc;
-  --paper:    #f6f1ea;
-
-  /* surfaces */
-  --surface:        var(--paper);
-  --surface-raised: #ffffff;
-  --surface-sunk:   #efe7dd;
-  --surface-deep:   var(--char-0);
+  /* surfaces — dark luxury */
+  --bg:           #0A0A0A;
+  --bg-raised:    #111111;
+  --bg-card:      #141414;
+  --bg-border:    rgba(255, 255, 255, 0.06);
+  --bg-hover:     rgba(255, 255, 255, 0.05);
 
   /* text */
-  --ink:         var(--char-0);
-  --ink-mid:     var(--char-3);
-  --ink-soft:    var(--char-5);
-  --ink-inverse: var(--paper);
-
-  /* lines */
-  --line:        rgba(20, 17, 15, 0.10);
-  --line-soft:   rgba(20, 17, 15, 0.06);
-  --line-strong: rgba(20, 17, 15, 0.22);
+  --text:         #FFFFFF;
+  --text-mid:     #A0A0A0;
+  --text-soft:    #5A5A5A;
+  --text-beige:   #E4CFB3;
 
   /* type families */
-  --font-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
-  --font-body:    'Newsreader', Georgia, serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-body:    'Playfair Display', Georgia, serif;
   --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
   /* type scale */
@@ -58,20 +46,26 @@
   --ease-smoke: cubic-bezier(0.6, 0.05, 0.4, 1);
 
   /* shadows */
-  --shadow-1:     0 1px 0 rgba(20, 17, 15, 0.04), 0 1px 2px rgba(20, 17, 15, 0.06);
-  --shadow-2:     0 2px 6px rgba(20, 17, 15, 0.08), 0 6px 20px rgba(20, 17, 15, 0.06);
-  --shadow-3:     0 12px 36px rgba(20, 17, 15, 0.12);
-  --shadow-ember: 0 8px 28px rgba(184, 83, 50, 0.30);
-  --shadow-focus: 0 0 0 3px rgba(184, 83, 50, 0.30);
+  --shadow-1:      0 1px 0 rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-2:      0 2px 6px rgba(0,0,0,0.5), 0 6px 20px rgba(0,0,0,0.3);
+  --shadow-3:      0 12px 36px rgba(0,0,0,0.6);
+  --shadow-maroon: 0 8px 28px rgba(128, 0, 0, 0.40);
+  --shadow-focus:  0 0 0 3px rgba(128, 0, 0, 0.45);
 
   /* radii */
-  --r-xs: 2px;
-  --r-sm: 4px;
-  --r-md: 8px;
-  --r-lg: 14px;
-  --r-xl: 20px;
+  --r-xs:   2px;
+  --r-sm:   4px;
+  --r-md:   8px;
+  --r-lg:   14px;
+  --r-xl:   20px;
   --r-pill: 999px;
 
   /* layout */
   --container: 1200px;
+
+  /* rank colors */
+  --rank-ember:  #800000;
+  --rank-iron:   #6B7280;
+  --rank-gold:   #B8860B;
+  --rank-legend: #DAA520;
 }

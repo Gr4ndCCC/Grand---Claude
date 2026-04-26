@@ -1,23 +1,21 @@
-/* Ember — signature motion + texture utilities.
-   Each effect respects prefers-reduced-motion. */
+/* Ember — base styles + motion utilities */
 
-/* base */
 *, *::before, *::after { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
 body {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--t-base);
-  line-height: 1.55;
-  color: var(--ink);
-  background: var(--surface);
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.05;
   margin: 0;
@@ -25,22 +23,21 @@ h1, h2, h3, h4 {
 
 p { margin: 0; }
 
-::selection { background: var(--ember); color: var(--ink-inverse); }
+::selection { background: var(--maroon); color: #fff; }
 
 /* mono / system voice */
 .mono {
   font-family: var(--font-mono);
   font-size: var(--t-mono);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 500;
 }
 
-/* italic accent */
-.italic-accent {
+/* beige italic — the brand's emotional register */
+.beige-italic {
+  color: var(--beige);
   font-style: italic;
-  font-weight: 400;
-  color: var(--ember);
 }
 
 /* page container */
@@ -51,48 +48,44 @@ p { margin: 0; }
   padding-inline: 24px;
 }
 
-/* focus — ember pulse on keyboard focus */
+/* focus ring */
 .ember-focus { outline: none; }
 .ember-focus:focus-visible {
   box-shadow: var(--shadow-focus);
-  animation: ember-pulse 1.6s var(--ease-flame) infinite;
-}
-@keyframes ember-pulse {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(184, 83, 50, 0.30); }
-  50%      { box-shadow: 0 0 0 5px rgba(184, 83, 50, 0.20); }
+  border-radius: var(--r-sm);
 }
 
-/* spark — radial highlight follows the cursor on hover */
-.spark { position: relative; isolation: isolate; }
-.spark::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(circle at var(--spark-x, 50%) var(--spark-y, 50%),
-              rgba(255, 217, 168, 0.45) 0%, transparent 30%);
-  opacity: 0;
-  transition: opacity 220ms var(--ease-spark);
+/* maroon rule — section heading underline */
+.maroon-rule {
+  display: block;
+  height: 1px;
+  width: 48px;
+  background: linear-gradient(90deg, var(--maroon) 0%, transparent 100%);
+  margin-block: 8px 16px;
 }
-.spark:hover::after { opacity: 1; }
 
-/* grill-mark — skeleton loading shimmer */
+/* rank badge */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--r-sm);
+}
+
+/* grill-mark shimmer — loading state */
 .grill-mark {
   background:
     repeating-linear-gradient(
       90deg,
-      rgba(20, 17, 15, 0.08) 0,
-      rgba(20, 17, 15, 0.08) 6px,
-      rgba(20, 17, 15, 0.04) 6px,
-      rgba(20, 17, 15, 0.04) 18px
+      rgba(255,255,255,0.04) 0, rgba(255,255,255,0.04) 6px,
+      rgba(255,255,255,0.02) 6px, rgba(255,255,255,0.02) 18px
     ),
-    linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(184, 83, 50, 0.18) 50%,
-      transparent 100%
-    );
+    linear-gradient(90deg, transparent 0%, rgba(228,207,179,0.12) 50%, transparent 100%);
   background-size: 100% 100%, 200% 100%;
   background-position: 0 0, -100% 0;
   animation: grill-shimmer 1.6s linear infinite;
@@ -102,125 +95,63 @@ p { margin: 0; }
   to { background-position: 0 0, 100% 0; }
 }
 
-/* smoke wisp — drifts up + fades on RSVP "yes" */
-.smoke-wisp {
+/* maroon glow radial — behind hero heading */
+.maroon-glow {
   position: absolute;
-  pointer-events: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(248, 240, 230, 0.7) 0%, transparent 65%);
-  filter: blur(6px);
-  animation: smoke-rise 1.4s var(--ease-smoke) forwards;
-}
-@keyframes smoke-rise {
-  0%   { transform: translate(-50%, 0) scale(0.6); opacity: 0; }
-  20%  { opacity: 0.9; }
-  100% { transform: translate(-50%, -54px) scale(1.6); opacity: 0; }
-}
-
-/* smoke-drift — slow rising columns behind the hero artifact */
-.smoke-drift {
-  position: absolute;
-  bottom: 0;
-  width: 80px;
-  height: 140px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center,
-              rgba(184, 83, 50, 0.12) 0%,
-              rgba(184, 83, 50, 0.04) 40%,
-              transparent 70%);
-  filter: blur(8px);
-  opacity: 0;
-  animation: smoke-drift 6s var(--ease-smoke) infinite;
-}
-.smoke-a { left: 18%; animation-delay: 0s;   }
-.smoke-b { left: 48%; animation-delay: 2s;   }
-.smoke-c { left: 75%; animation-delay: 4s;   }
-@keyframes smoke-drift {
-  0%   { transform: translateY(0)    scale(0.7); opacity: 0;    }
-  20%  {                                          opacity: 0.9; }
-  100% { transform: translateY(-120px) scale(1.6); opacity: 0;  }
-}
-
-/* hero glow — soft ember radial behind the H1 */
-.hero-glow {
-  position: absolute;
-  inset: -10% -20% auto -20%;
-  height: 140%;
-  background: radial-gradient(60% 50% at 30% 30%,
-              rgba(184, 83, 50, 0.16) 0%,
-              rgba(85, 0, 0, 0.04) 40%,
-              transparent 70%);
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse at 50% 0%,
+    rgba(128,0,0,0.22) 0%, rgba(128,0,0,0.06) 40%, transparent 70%);
   pointer-events: none;
   z-index: 0;
 }
 
-/* grill grate — repeating thin bars used as a section divider */
-.grill-grate {
-  height: 14px;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      transparent 0,
-      transparent 18px,
-      rgba(20, 17, 15, 0.30) 18px,
-      rgba(20, 17, 15, 0.30) 20px
-    );
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+/* card border glow on hover */
+.card-glow {
+  transition: border-color 300ms var(--ease-flame), box-shadow 300ms var(--ease-flame);
+}
+.card-glow:hover {
+  border-color: rgba(228,207,179,0.15) !important;
+  box-shadow: 0 0 0 1px rgba(228,207,179,0.08), 0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* ember-rule — section title underline that fades from ember to transparent */
-.ember-rule {
-  display: block;
-  height: 2px;
-  width: 56px;
-  background: linear-gradient(90deg, var(--ember) 0%, transparent 100%);
-  margin-block: 8px 14px;
+/* city scroll animation */
+@keyframes scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.city-scroll {
+  animation: scroll-left 28s linear infinite;
+  display: flex;
+  width: max-content;
+}
+.city-scroll:hover { animation-play-state: paused; }
+
+/* smoke pulse — very subtle atmospheric */
+@keyframes smoke-pulse {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50%       { opacity: 0.14; transform: scale(1.06); }
+}
+.smoke-pulse {
+  animation: smoke-pulse 8s var(--ease-smoke) infinite;
 }
 
-/* char-noise — paper grain that intensifies on scroll */
-.char-noise {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: var(--noise-opacity, 0.04);
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.08  0 0 0 0 0.07  0 0 0 0 0.06  0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  transition: opacity 240ms var(--ease-flame);
+/* fade-in for when framer-motion isn't available */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.65s var(--ease-spark) both;
 }
 
-/* flip-card — 600ms flip on MenuItem claim */
-.flip-card { perspective: 800px; }
-.flip-card-inner {
-  position: relative;
-  width: 100%;
-  transition: transform 600ms var(--ease-flame);
-  transform-style: preserve-3d;
-}
-.flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-.flip-face {
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-.flip-back {
-  position: absolute;
-  inset: 0;
-  transform: rotateY(180deg);
-}
-
-/* reduced motion — kill all decorative animation */
+/* reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
   }
-  .grill-mark { animation: none; }
-  .smoke-wisp { display: none; }
-  .ember-focus:focus-visible { animation: none; box-shadow: var(--shadow-focus); }
-  .flip-card-inner { transition: none; }
 }
