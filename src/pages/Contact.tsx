@@ -107,7 +107,7 @@ export function Contact() {
                   {errors.message && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.message}</p>}
                 </div>
 
-                <FireButton variant="primary" size="lg" onClick={() => {}}>
+                <FireButton variant="primary" size="lg" onClick={() => submit({ preventDefault: () => {} } as React.FormEvent)}>
                   Send message
                 </FireButton>
               </form>
