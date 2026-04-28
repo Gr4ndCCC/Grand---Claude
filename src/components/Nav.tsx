@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut } from 'lucide-react';
+import { Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 
 const NAV_LINKS = [
@@ -56,9 +56,16 @@ export function Nav() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <span className="mono" style={{ color: '#A0A0A0', fontSize: '12px' }}>{user.name}</span>
+                <button onClick={() => navigate('/account')} className="ember-focus"
+                  style={{ color: '#A0A0A0', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', transition: 'color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                >
+                  <Settings size={14} />
+                  <span className="mono">{user.name}</span>
+                </button>
                 <button onClick={signOut} className="ember-focus"
-                  style={{ color: '#666', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
+                  style={{ color: '#555', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
                   title="Sign out"
                 ><LogOut size={16} /></button>
               </>

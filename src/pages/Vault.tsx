@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, Crown } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { FireButton } from '../components/FireButton';
+import { useAuth } from '../lib/auth';
 
 const VAULT_FEATURES = [
   { title: 'Recipes',            body: "Member-only. Not on any food blog. Submitted by the brotherhood — pitmasters from 40 countries who've earned their stripes." },
@@ -23,6 +24,100 @@ const INCLUDED = [
   'Annual Summit access',
   'Priority event discovery',
 ];
+
+const PREMIUM_EXTRAS = [
+  'Dedicated host concierge',
+  'Private event hosting tools',
+  'Legend-track fast lane',
+  'Early summit seat allocation',
+  'Featured on Brotherhood Network',
+];
+
+function VaultPricing() {
+  const { openAuth, user } = useAuth();
+
+  const handleJoin = () => {
+    if (!user) openAuth('Create your Ember account to join the Vault.');
+  };
+
+  return (
+    <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      {/* monthly */}
+      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '36px' }}>
+        <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>Monthly</p>
+        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff', marginBottom: '4px' }}>€15</p>
+        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per month, cancel anytime</p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+          {INCLUDED.slice(0, 6).map(f => (
+            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleJoin}
+          style={{ width: '100%', background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', transition: 'all 0.2s' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.10)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+        >Start monthly</button>
+      </div>
+
+      {/* annual */}
+      <div style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.35)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
+        <span className="mono" style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--maroon)', background: 'rgba(128,0,0,0.15)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
+          Best value
+        </span>
+        <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>Annual</p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
+          <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff' }}>€99</p>
+          <p style={{ color: '#5A5A5A', textDecoration: 'line-through', fontSize: '14px' }}>€180</p>
+        </div>
+        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per year · save 45%</p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+          {INCLUDED.map(f => (
+            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleJoin}
+          style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
+        >Start annual</button>
+      </div>
+
+      {/* premium */}
+      <div style={{ background: 'linear-gradient(135deg, #0D0800, #120A00)', border: '1px solid rgba(218,165,32,0.3)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', alignItems: 'center', gap: '4px', color: '#DAA520', background: 'rgba(218,165,32,0.1)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
+          <Crown size={10} />
+          <span className="mono">Legend tier</span>
+        </div>
+        <p className="mono" style={{ color: '#B8860B', marginBottom: '12px' }}>Premium</p>
+        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff', marginBottom: '4px' }}>€249</p>
+        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per year · for serious hosts</p>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+          {INCLUDED.map(f => (
+            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
+              <Check size={12} style={{ color: '#B8860B', flexShrink: 0 }} />{f}
+            </li>
+          ))}
+        </ul>
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+          {PREMIUM_EXTRAS.map(f => (
+            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#DAA520', fontSize: '13px' }}>
+              <Crown size={11} style={{ flexShrink: 0 }} />{f}
+            </li>
+          ))}
+        </ul>
+        <button onClick={handleJoin}
+          style={{ width: '100%', background: 'linear-gradient(135deg, #B8860B, #DAA520)', color: '#000', border: 'none', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s' }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
+          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+        >Unlock Premium</button>
+      </div>
+    </div>
+  );
+}
 
 export function Vault() {
   return (
@@ -54,7 +149,7 @@ export function Vault() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}
             style={{ display: 'inline-flex', gap: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '6px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '48px' }}
           >
-            {['Monthly · €12', 'Annual · €89 · Save 38%'].map((l, i) => (
+            {['Monthly · €15', 'Annual · €99 · Save 45%'].map((l, i) => (
               <div key={l} style={{ padding: '10px 20px', borderRadius: '8px', background: i === 1 ? 'var(--maroon)' : 'transparent', color: i === 1 ? '#fff' : '#A0A0A0', fontSize: '14px', fontWeight: i === 1 ? 600 : 400 }}>{l}</div>
             ))}
           </motion.div>
@@ -94,56 +189,33 @@ export function Vault() {
               </motion.div>
             ))}
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            style={{ textAlign: 'center', marginTop: '48px' }}
+          >
+            <FireButton variant="primary" size="lg">
+              Join the Vault for more
+            </FireButton>
+            <p className="mono" style={{ color: '#5A5A5A', marginTop: '12px' }}>Cancel anytime · Instant access</p>
+          </motion.div>
         </div>
       </section>
 
       {/* pricing */}
       <section style={{ padding: '100px 0' }}>
         <div className="page-container">
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-            {/* monthly */}
-            <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '36px' }}>
-              <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>Monthly</p>
-              <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', color: '#fff', marginBottom: '4px' }}>€12</p>
-              <p style={{ color: '#5A5A5A', marginBottom: '32px' }}>per month, cancel anytime</p>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                {INCLUDED.map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '14px' }}>
-                    <Check size={14} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
-                  </li>
-                ))}
-              </ul>
-              <button style={{ width: '100%', background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '14px', cursor: 'pointer', fontSize: '15px', fontFamily: 'inherit', transition: 'all 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'}
-              >Start monthly</button>
-            </div>
-
-            {/* annual */}
-            <div style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.35)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
-              <span className="mono" style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--maroon)', background: 'rgba(128,0,0,0.15)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
-                Best value
-              </span>
-              <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>Annual</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-                <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', color: '#fff' }}>€89</p>
-                <p style={{ color: '#5A5A5A', textDecoration: 'line-through' }}>€144</p>
-              </div>
-              <p style={{ color: '#5A5A5A', marginBottom: '32px' }}>per year · save 38%</p>
-              <ul style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                {INCLUDED.map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '14px' }}>
-                    <Check size={14} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', cursor: 'pointer', fontSize: '15px', fontWeight: '600', fontFamily: 'inherit', transition: 'all 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--maroon-light)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--maroon)'}
-              >Start annual</button>
-            </div>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Membership</p>
+            <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
+            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(28px, 4vw, 48px)', color: '#fff', marginBottom: '8px' }}>
+              Choose your tier.
+            </h2>
+            <p style={{ color: '#A0A0A0', fontSize: '16px' }}>Every plan unlocks the full Vault.</p>
           </div>
+          <VaultPricing />
         </div>
       </section>
 

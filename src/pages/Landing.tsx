@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense, Component } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -6,29 +6,39 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { FireButton } from '../components/FireButton';
 
-/* ── animated counter ──────────────────────────────────────── */
-/* ── world map — inline SVG with event pins ────────────────── */
+const GlobeCanvas = lazy(() =>
+  import('../components/GlobeCanvas').then(m => ({ default: m.GlobeCanvas }))
+);
+
+class GlobeErrorBoundary extends Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
+
+/* ── fallback SVG map (shown while globe loads / on error) ─── */
 function WorldMap() {
   const pins = [
     { cx: 320, cy: 155, city: 'New York'    },
-    { cx: 290, cy: 170, city: 'Chicago'     },
     { cx: 480, cy: 130, city: 'London'      },
     { cx: 510, cy: 125, city: 'Amsterdam'   },
     { cx: 520, cy: 135, city: 'Berlin'      },
-    { cx: 530, cy: 145, city: 'Rome'        },
-    { cx: 500, cy: 145, city: 'Lisbon'      },
     { cx: 690, cy: 155, city: 'Tokyo'       },
-    { cx: 665, cy: 168, city: 'Shanghai'    },
-    { cx: 620, cy: 175, city: 'Mumbai'      },
-    { cx: 535, cy: 200, city: 'Johannesburg'},
     { cx: 380, cy: 230, city: 'São Paulo'   },
+    { cx: 535, cy: 200, city: 'Johannesburg'},
     { cx: 710, cy: 215, city: 'Sydney'      },
-    { cx: 570, cy: 130, city: 'Warsaw'      },
     { cx: 600, cy: 135, city: 'Istanbul'    },
   ];
-
   return (
-    <div className="relative" style={{ background: 'rgba(128,0,0,0.04)', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(228,207,179,0.08)' }}>
+    <div style={{ background: 'rgba(128,0,0,0.04)', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(228,207,179,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
       <svg viewBox="0 50 900 360" style={{ width: '100%', opacity: 0.85 }}>
         <g fill="none" stroke="rgba(228,207,179,0.15)" strokeWidth="0.8">
           <path d="M180,100 L320,80 L370,90 L380,130 L340,160 L310,180 L280,200 L240,220 L210,200 L180,170 L160,140 Z" />
@@ -37,28 +47,14 @@ function WorldMap() {
           <path d="M470,140 L560,140 L580,170 L570,220 L540,250 L510,245 L490,220 L475,190 Z" />
           <path d="M560,75 L720,70 L760,90 L750,140 L700,160 L640,165 L600,150 L570,130 L555,105 Z" />
           <path d="M670,210 L750,205 L760,235 L730,260 L690,255 L670,235 Z" />
-          <path d="M540,60 L760,55 L770,85 L720,90 L640,85 L560,90 L545,75 Z" />
-        </g>
-        <g stroke="rgba(228,207,179,0.04)" strokeWidth="0.5">
-          {[80,120,160,200,240].map(y => <line key={y} x1="150" y1={y} x2="780" y2={y} />)}
-          {[200,280,360,440,520,600,680,760].map(x => <line key={x} x1={x} y1="60" x2={x} y2="260" />)}
         </g>
         {pins.map(({ cx, cy, city }) => (
           <g key={city}>
             <circle cx={cx} cy={cy} r="10" fill="rgba(128,0,0,0.15)" />
             <circle cx={cx} cy={cy} r="4" fill="var(--maroon)" opacity="0.9" />
-            <circle cx={cx} cy={cy} r="4" fill="var(--maroon)">
-              <animate attributeName="r" values="4;10;4" dur="3s" repeatCount="indefinite" begin={`${Math.random() * 2}s`} />
-              <animate attributeName="opacity" values="0.9;0;0.9" dur="3s" repeatCount="indefinite" begin={`${Math.random() * 2}s`} />
-            </circle>
           </g>
         ))}
       </svg>
-      <div style={{ position: 'absolute', bottom: '12px', right: '16px' }}>
-        <p className="mono" style={{ color: '#5A5A5A', fontSize: '10px' }}>
-          {pins.length} live events across 40+ countries
-        </p>
-      </div>
     </div>
   );
 }
@@ -426,13 +422,17 @@ export function Landing() {
               </motion.div>
             </div>
 
-            {/* world map */}
+            {/* 3D globe */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.9 }}
             >
-              <WorldMap />
+              <GlobeErrorBoundary fallback={<WorldMap />}>
+                <Suspense fallback={<WorldMap />}>
+                  <GlobeCanvas />
+                </Suspense>
+              </GlobeErrorBoundary>
             </motion.div>
           </div>
         </div>
@@ -594,11 +594,11 @@ export function Landing() {
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '40px' }}>
                 <div style={{ textAlign: 'center', background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 28px' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€12</p>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€15</p>
                   <p className="mono" style={{ color: '#5A5A5A' }}>per month</p>
                 </div>
                 <div style={{ textAlign: 'center', background: 'rgba(128,0,0,0.15)', border: '1px solid rgba(128,0,0,0.3)', borderRadius: '12px', padding: '20px 28px' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€89</p>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€99</p>
                   <p className="mono" style={{ color: 'var(--maroon)' }}>annual · best value</p>
                 </div>
               </div>
