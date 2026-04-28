@@ -22,6 +22,6 @@ export default defineConfig(({ mode }) => {
   const siteUrl = env.VITE_SITE_URL || ''
   return {
     plugins: [react(), htmlEnvSubstitute(siteUrl)],
-    base: isGhPages ? '/Grand---Claude/' : '/',
+    base: isGhPages ? './' : '/',
   }
 })
