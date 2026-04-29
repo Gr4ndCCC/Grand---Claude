@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Check, Crown } from 'lucide-react';
+import { Check, Crown, Shield, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { FireButton } from '../components/FireButton';
@@ -35,9 +36,15 @@ const PREMIUM_EXTRAS = [
 
 function VaultPricing() {
   const { openAuth, user } = useAuth();
+  const navigate = useNavigate();
 
   const handleJoin = () => {
-    if (!user) openAuth('Create your Ember account to join the Vault.');
+    if (!user) return openAuth('Create your Ember account to join the Vault.');
+    if (user.verifyStatus !== 'verified') {
+      navigate('/verify');
+      return;
+    }
+    alert('Checkout flow — coming soon. Phase 3 will add Lemon Squeezy payment.');
   };
 
   return (
@@ -119,10 +126,44 @@ function VaultPricing() {
   );
 }
 
+function VerifyBanner() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  if (!user) return null;
+  const status = user.verifyStatus ?? 'unverified';
+  if (status === 'verified') return null;
+
+  const isPending = status === 'pending';
+  return (
+    <div style={{
+      background: isPending ? 'rgba(218,165,32,0.10)' : 'rgba(128,0,0,0.10)',
+      borderBottom: isPending ? '1px solid rgba(218,165,32,0.25)' : '1px solid rgba(128,0,0,0.25)',
+      padding: '14px 0', marginTop: '64px',
+    }}>
+      <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Shield size={16} style={{ color: isPending ? '#DAA520' : 'var(--maroon)', flexShrink: 0 }} />
+          <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.5 }}>
+            {isPending
+              ? 'Your verification is under review. You\'ll get full access as soon as it\'s approved.'
+              : 'The Vault requires ID verification. It takes 2 minutes.'}
+          </p>
+        </div>
+        {!isPending && (
+          <button onClick={() => navigate('/verify')}
+            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
+          >Verify now <ChevronRight size={14} /></button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function Vault() {
   return (
     <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
       <Nav />
+      <VerifyBanner />
 
       {/* hero */}
       <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>

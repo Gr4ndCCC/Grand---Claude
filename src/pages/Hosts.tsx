@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { useAuth } from '../lib/auth';
 
 const HOST_BENEFITS = [
   { title: 'Global discovery',         body: 'Your event appears on the live map. Members nearby find you automatically.' },
@@ -19,6 +20,11 @@ const STEPS = [
 
 export function Hosts() {
   const navigate = useNavigate();
+  const { user, openAuth } = useAuth();
+  const handleCreate = () => {
+    if (!user) return openAuth('Sign in to create your first event.');
+    alert('Event creation flow — coming soon. Phase 4 will add the full host studio.');
+  };
 
   return (
     <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
@@ -49,7 +55,7 @@ export function Hosts() {
               </motion.p>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <button
-                  onClick={() => navigate('/events')}
+                  onClick={handleCreate}
                   style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px 28px', fontSize: '15px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'none'; }}

@@ -15,6 +15,7 @@ import { Privacy }       from './pages/Privacy';
 import { Terms }         from './pages/Terms';
 import { Contact }       from './pages/Contact';
 import { Account }       from './pages/Account';
+import { Verify }        from './pages/Verify';
 import { AuthProvider }  from './lib/auth';
 import { AuthModal }     from './components/AuthModal';
 import { CookieBanner }  from './components/CookieBanner';
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/terms"    element={<Terms />}    />
           <Route path="/contact"  element={<Contact />}  />
           <Route path="/account"  element={<Account />}  />
+          <Route path="/verify"   element={<Verify />}   />
           <Route path="*"         element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

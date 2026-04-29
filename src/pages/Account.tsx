@@ -5,6 +5,7 @@ import {
   Settings, Palette, Bell, Mic, Eye, Shield,
   LogOut, ChevronRight, User, Globe, Moon,
   Volume2, Trash2, Download, ToggleLeft, ToggleRight,
+  CheckCircle2, Clock, AlertTriangle,
 } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -85,7 +86,40 @@ function DangerBtn({ label, icon: Icon, onClick }: { label: string; icon: React.
   );
 }
 
+function VerificationCard({ status, onAction }: { status: string; onAction: () => void }) {
+  const isVerified = status === 'verified';
+  const isPending  = status === 'pending';
+  const tone =
+    isVerified ? { bg: 'rgba(60,140,80,0.10)', border: 'rgba(60,140,80,0.30)', icon: CheckCircle2, color: '#5cb85c' } :
+    isPending  ? { bg: 'rgba(218,165,32,0.10)', border: 'rgba(218,165,32,0.30)', icon: Clock,         color: '#DAA520' } :
+                 { bg: 'rgba(128,0,0,0.10)',    border: 'rgba(128,0,0,0.30)',    icon: AlertTriangle, color: 'var(--maroon)' };
+  const Icon = tone.icon;
+  return (
+    <div style={{ background: tone.bg, border: `1px solid ${tone.border}`, borderRadius: '12px', padding: '18px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+      <Icon size={20} style={{ color: tone.color, flexShrink: 0 }} />
+      <div style={{ flex: 1, minWidth: '160px' }}>
+        <p style={{ color: '#fff', fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>
+          {isVerified ? 'Identity verified' : isPending ? 'Verification pending' : 'Verify your identity'}
+        </p>
+        <p style={{ color: '#888', fontSize: '12px' }}>
+          {isVerified ? 'You have full access to the Vault and Brotherhood Network.'
+           : isPending ? 'We\'re reviewing your documents. Usually takes 24 hours.'
+           : 'Required for Vault access and Brotherhood Network features.'}
+        </p>
+      </div>
+      {!isVerified && !isPending && (
+        <button onClick={onAction}
+          style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', flexShrink: 0 }}
+        >Start →</button>
+      )}
+    </div>
+  );
+}
+
 function GeneralSection({ user }: { user: NonNullable<ReturnType<typeof useAuth>['user']> }) {
+  const navigate = useNavigate();
+  const status = user.verifyStatus ?? 'unverified';
+
   return (
     <div>
       <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>General</h2>
@@ -95,11 +129,19 @@ function GeneralSection({ user }: { user: NonNullable<ReturnType<typeof useAuth>
         <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <User size={22} style={{ color: '#fff' }} />
         </div>
-        <div>
+        <div style={{ flex: 1 }}>
           <p style={{ color: '#fff', fontWeight: 500 }}>{user.name}</p>
           <p style={{ color: '#666', fontSize: '13px' }}>{user.email}</p>
         </div>
+        {status === 'verified' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(60,140,80,0.12)', border: '1px solid rgba(60,140,80,0.3)', borderRadius: '999px', padding: '4px 10px' }}>
+            <CheckCircle2 size={12} style={{ color: '#5cb85c' }} />
+            <span className="mono" style={{ color: '#5cb85c', fontSize: '10px' }}>VERIFIED</span>
+          </div>
+        )}
       </div>
+
+      <VerificationCard status={status} onAction={() => navigate('/verify')} />
 
       <Row label="Display name" desc="Shown to other members on the platform">
         <input

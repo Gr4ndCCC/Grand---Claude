@@ -4,6 +4,7 @@ import { Search, Calendar, Users, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { useAuth } from '../lib/auth';
 
 const RANK_COLORS: Record<string, string> = {
   Legend: '#DAA520', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
@@ -38,8 +39,18 @@ function RankBadge({ rank }: { rank: string }) {
 
 export function Events() {
   const navigate = useNavigate();
+  const { user, openAuth } = useAuth();
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+
+  const handleJoin = (eventTitle: string) => {
+    if (!user) return openAuth(`Sign in to join "${eventTitle}".`);
+    alert(`RSVP confirmed for ${eventTitle}.\nThe host has been notified.`);
+  };
+  const handleHostNav = () => {
+    if (!user) return openAuth('Sign in to host an event.');
+    navigate('/hosts');
+  };
 
   const filters = ['All', 'Nearby', 'This weekend', 'Public', 'Private'];
   const filtered = SAMPLE_EVENTS.filter(e =>
@@ -87,7 +98,7 @@ export function Events() {
                 Open your grill to the brotherhood. Build your rank. Earn your place on The Board.
               </p>
               <button
-                onClick={() => navigate('/hosts')}
+                onClick={handleHostNav}
                 style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', transition: 'background 0.2s' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
@@ -165,6 +176,7 @@ export function Events() {
                 <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#A0A0A0', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{host}</span></span>
                   <button
+                    onClick={() => handleJoin(title)}
                     style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', transition: 'background 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--maroon-light)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'var(--maroon)'}

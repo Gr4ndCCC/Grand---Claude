@@ -5,6 +5,7 @@ import { Check } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { FireButton } from '../components/FireButton';
+import { useAuth } from '../lib/auth';
 
 const GlobeCanvas = lazy(() =>
   import('../components/GlobeCanvas').then(m => ({ default: m.GlobeCanvas }))
@@ -140,6 +141,7 @@ function RankBadge({ rank }: { rank: string }) {
 
 /* ── RSVP pill + Menu claim — dark/maroon edition ─────────── */
 function RSVPMenu() {
+  const { user, openAuth } = useAuth();
   const [rsvp, setRsvp] = useState<'in' | 'maybe' | 'cant'>();
   const [score] = useState(84);
 
@@ -151,7 +153,13 @@ function RSVPMenu() {
   ];
   const [menu, setMenu] = useState(initialMenu);
 
+  const handleRsvp = (id: 'in' | 'maybe' | 'cant') => {
+    if (!user) return openAuth('Sign in to RSVP for events.');
+    setRsvp(id);
+  };
+
   const claim = (id: string) => {
+    if (!user) return openAuth('Sign in to claim a menu item.');
     setMenu(m => m.map(x => x.id === id ? { ...x, claimed: !x.claimed, by: x.claimed ? '' : 'You' } : x));
   };
 
@@ -189,7 +197,7 @@ function RSVPMenu() {
             borderRadius: '999px', padding: '4px',
           }}>
             {RSVPS.map(r => (
-              <button key={r.id} onClick={() => setRsvp(r.id)}
+              <button key={r.id} onClick={() => handleRsvp(r.id)}
                 className="ember-focus"
                 style={{
                   background: rsvp === r.id ? 'var(--maroon)' : 'transparent',
@@ -343,6 +351,15 @@ const btn = {
 
 export function Landing() {
   const navigate = useNavigate();
+  const { user, openAuth } = useAuth();
+  const handleJoinEvent = () => {
+    if (!user) return openAuth('Sign in to join events near you.');
+    navigate('/events');
+  };
+  const handleHostEvent = () => {
+    if (!user) return openAuth('Sign in to host an event.');
+    navigate('/hosts');
+  };
 
   return (
     <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -397,10 +414,10 @@ export function Landing() {
                 transition={{ delay: 0.35 }}
                 style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px' }}
               >
-                <FireButton variant="primary" onClick={() => navigate('/events')}>
+                <FireButton variant="primary" onClick={handleJoinEvent}>
                   Find events near you
                 </FireButton>
-                <FireButton variant="outline" onClick={() => navigate('/hosts')}>
+                <FireButton variant="outline" onClick={handleHostEvent}>
                   Host an event
                 </FireButton>
               </motion.div>
@@ -549,7 +566,7 @@ export function Landing() {
                       {guests}/{max} going
                     </p>
                   </div>
-                  <FireButton variant="primary" size="sm" fullWidth onClick={() => navigate('/events')}>
+                  <FireButton variant="primary" size="sm" fullWidth onClick={handleJoinEvent}>
                     Join event
                   </FireButton>
                 </div>
