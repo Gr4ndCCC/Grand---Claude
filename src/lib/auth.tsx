@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 export type VerifyStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
+export type SubPlan = 'monthly' | 'annual' | null;
 
 export interface User {
   email: string;
@@ -9,6 +10,9 @@ export interface User {
   joinedAt: number;
   verifyStatus?: VerifyStatus;
   verifySubmittedAt?: number;
+  subPlan?: SubPlan;
+  subActive?: boolean;
+  subSince?: number;
 }
 
 interface AuthCtx {

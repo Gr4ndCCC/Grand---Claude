@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Check, Crown, Shield, ChevronRight } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -26,38 +26,26 @@ const INCLUDED = [
   'Priority event discovery',
 ];
 
-const PREMIUM_EXTRAS = [
-  'Dedicated host concierge',
-  'Private event hosting tools',
-  'Legend-track fast lane',
-  'Early summit seat allocation',
-  'Featured on Brotherhood Network',
-];
-
 function VaultPricing() {
-  const { openAuth, user } = useAuth();
+  const { user, openAuth } = useAuth();
   const navigate = useNavigate();
 
   const handleJoin = () => {
     if (!user) return openAuth('Create your Ember account to join the Vault.');
-    if (user.verifyStatus !== 'verified') {
-      navigate('/verify');
-      return;
-    }
-    alert('Checkout flow — coming soon. Phase 3 will add Lemon Squeezy payment.');
+    navigate('/vault/checkout');
   };
 
   return (
-    <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-      {/* monthly */}
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', maxWidth: '680px', margin: '0 auto' }}>
+      {/* Monthly */}
       <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '36px' }}>
         <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>Monthly</p>
         <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff', marginBottom: '4px' }}>€15</p>
-        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per month, cancel anytime</p>
+        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per month · cancel anytime</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.slice(0, 6).map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
-              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
+            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0, marginTop: '2px' }} />{f}
             </li>
           ))}
         </ul>
@@ -68,7 +56,7 @@ function VaultPricing() {
         >Start monthly</button>
       </div>
 
-      {/* annual */}
+      {/* Annual */}
       <div style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.35)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
         <span className="mono" style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--maroon)', background: 'rgba(128,0,0,0.15)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
           Best value
@@ -81,8 +69,8 @@ function VaultPricing() {
         <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per year · save 45%</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
-              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0 }} />{f}
+            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0, marginTop: '2px' }} />{f}
             </li>
           ))}
         </ul>
@@ -92,86 +80,30 @@ function VaultPricing() {
           onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
         >Start annual</button>
       </div>
-
-      {/* premium */}
-      <div style={{ background: 'linear-gradient(135deg, #0D0800, #120A00)', border: '1px solid rgba(218,165,32,0.3)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
-        <div style={{ position: 'absolute', top: '16px', right: '16px', display: 'flex', alignItems: 'center', gap: '4px', color: '#DAA520', background: 'rgba(218,165,32,0.1)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
-          <Crown size={10} />
-          <span className="mono">Legend tier</span>
-        </div>
-        <p className="mono" style={{ color: '#B8860B', marginBottom: '12px' }}>Premium</p>
-        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff', marginBottom: '4px' }}>€249</p>
-        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per year · for serious hosts</p>
-        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-          {INCLUDED.map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
-              <Check size={12} style={{ color: '#B8860B', flexShrink: 0 }} />{f}
-            </li>
-          ))}
-        </ul>
-        <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-          {PREMIUM_EXTRAS.map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#DAA520', fontSize: '13px' }}>
-              <Crown size={11} style={{ flexShrink: 0 }} />{f}
-            </li>
-          ))}
-        </ul>
-        <button onClick={handleJoin}
-          style={{ width: '100%', background: 'linear-gradient(135deg, #B8860B, #DAA520)', color: '#000', border: 'none', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
-          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-        >Unlock Premium</button>
-      </div>
-    </div>
-  );
-}
-
-function VerifyBanner() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  if (!user) return null;
-  const status = user.verifyStatus ?? 'unverified';
-  if (status === 'verified') return null;
-
-  const isPending = status === 'pending';
-  return (
-    <div style={{
-      background: isPending ? 'rgba(218,165,32,0.10)' : 'rgba(128,0,0,0.10)',
-      borderBottom: isPending ? '1px solid rgba(218,165,32,0.25)' : '1px solid rgba(128,0,0,0.25)',
-      padding: '14px 0', marginTop: '64px',
-    }}>
-      <div className="page-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <Shield size={16} style={{ color: isPending ? '#DAA520' : 'var(--maroon)', flexShrink: 0 }} />
-          <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.5 }}>
-            {isPending
-              ? 'Your verification is under review. You\'ll get full access as soon as it\'s approved.'
-              : 'The Vault requires ID verification. It takes 2 minutes.'}
-          </p>
-        </div>
-        {!isPending && (
-          <button onClick={() => navigate('/verify')}
-            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}
-          >Verify now <ChevronRight size={14} /></button>
-        )}
-      </div>
     </div>
   );
 }
 
 export function Vault() {
+  const { user, openAuth } = useAuth();
+  const navigate = useNavigate();
+
+  const handleJoin = () => {
+    if (!user) return openAuth('Create your Ember account to join the Vault.');
+    navigate('/vault/checkout');
+  };
+
   return (
     <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
       <Nav />
-      <VerifyBanner />
 
       {/* hero */}
       <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '700px', height: '500px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.22) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* gradient bleed into next section */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, transparent, #0D0D0D)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <motion.p className="mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--maroon)', marginBottom: '8px' }}>
-            The Vault
-          </motion.p>
+          <motion.p className="mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Vault</motion.p>
           <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -180,8 +112,7 @@ export function Vault() {
             The inner circle.<br />
             <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Everything the grill deserves.</span>
           </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             style={{ color: '#A0A0A0', fontSize: '18px', maxWidth: '540px', margin: '0 auto 48px', lineHeight: '1.7' }}
           >
             Exclusive recipes. Live masterclasses. The Board. Brotherhood Network.
@@ -195,14 +126,22 @@ export function Vault() {
             ))}
           </motion.div>
           <br />
-          <FireButton variant="primary" size="lg">Join the Vault</FireButton>
+          <button onClick={handleJoin}
+            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 32px', cursor: 'pointer', fontSize: '16px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'none'; }}
+          >Join the Vault</button>
           <p className="mono" style={{ color: '#5A5A5A', marginTop: '16px' }}>Cancel anytime · No contracts · Instant access</p>
         </div>
       </section>
 
       {/* features grid */}
-      <section style={{ padding: '80px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="page-container">
+      <section style={{ padding: '80px 0 100px', background: '#0D0D0D', position: 'relative' }}>
+        {/* top fade from hero */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to bottom, #0A0A0A, transparent)', pointerEvents: 'none' }} />
+        {/* bottom fade into pricing */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, transparent, #0A0A0A)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>What's inside</p>
           <span className="maroon-rule" />
           <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', marginBottom: '20px', lineHeight: 1.06 }}>
@@ -216,12 +155,9 @@ export function Vault() {
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {VAULT_FEATURES.map(({ title, body }, i) => (
-              <motion.div
-                key={title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }}
-                transition={{ delay: i * 0.08 }}
+              <motion.div key={title}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-60px' }} transition={{ delay: i * 0.08 }}
                 className="card-glow"
                 style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}
               >
@@ -230,23 +166,17 @@ export function Vault() {
               </motion.div>
             ))}
           </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             style={{ textAlign: 'center', marginTop: '48px' }}
           >
-            <FireButton variant="primary" size="lg">
-              Join the Vault for more
-            </FireButton>
+            <FireButton variant="primary" size="lg">Join the Vault for more</FireButton>
             <p className="mono" style={{ color: '#5A5A5A', marginTop: '12px' }}>Cancel anytime · Instant access</p>
           </motion.div>
         </div>
       </section>
 
       {/* pricing */}
-      <section style={{ padding: '100px 0' }}>
+      <section style={{ padding: '100px 0', position: 'relative' }}>
         <div className="page-container">
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Membership</p>

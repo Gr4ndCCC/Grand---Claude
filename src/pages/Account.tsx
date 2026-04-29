@@ -1,40 +1,45 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Settings, Palette, Bell, Mic, Eye, Shield,
-  LogOut, ChevronRight, User, Globe, Moon,
-  Volume2, Trash2, Download, ToggleLeft, ToggleRight,
-  CheckCircle2, Clock, AlertTriangle,
+  User, CreditCard, Calendar, Settings,
+  LogOut, Check, Crown, ChevronRight,
+  Shield, Flame, Clock, Plus,
 } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
+import { getAllEvents } from '../data/events';
 
-type Section =
-  | 'general'
-  | 'personalization'
-  | 'notifications'
-  | 'speech'
-  | 'appearance'
-  | 'privacy';
+type Tab = 'profile' | 'billing' | 'events' | 'settings';
 
-const SECTIONS: { id: Section; label: string; icon: React.ElementType }[] = [
-  { id: 'general',         label: 'General',         icon: Settings  },
-  { id: 'personalization', label: 'Personalization', icon: Palette   },
-  { id: 'notifications',   label: 'Notifications',   icon: Bell      },
-  { id: 'speech',          label: 'Speech',          icon: Mic       },
-  { id: 'appearance',      label: 'Appearance',      icon: Eye       },
-  { id: 'privacy',         label: 'Privacy & Data',  icon: Shield    },
+const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: 'profile',  label: 'Profile',  icon: User       },
+  { id: 'billing',  label: 'Billing',  icon: CreditCard },
+  { id: 'events',   label: 'Events',   icon: Calendar   },
+  { id: 'settings', label: 'Settings', icon: Settings   },
 ];
+
+function initials(name: string) {
+  return name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
+}
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button
       onClick={() => onChange(!checked)}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: checked ? 'var(--maroon)' : '#444' }}
+      style={{
+        width: '44px', height: '24px', borderRadius: '12px', padding: '2px',
+        background: checked ? 'var(--maroon)' : 'rgba(255,255,255,0.12)',
+        border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+        display: 'inline-flex', alignItems: 'center',
+      }}
     >
-      {checked ? <ToggleRight size={28} /> : <ToggleLeft size={28} />}
+      <div style={{
+        width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
+        transform: checked ? 'translateX(20px)' : 'translateX(0)',
+        transition: 'transform 0.2s',
+      }} />
     </button>
   );
 }
@@ -44,352 +49,282 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', gap: '24px' }}>
       <div>
         <p style={{ color: '#fff', fontSize: '14px', marginBottom: desc ? '3px' : 0 }}>{label}</p>
-        {desc && <p style={{ color: '#666', fontSize: '12px' }}>{desc}</p>}
+        {desc && <p style={{ color: '#666', fontSize: '12px', lineHeight: 1.5 }}>{desc}</p>}
       </div>
       <div style={{ flexShrink: 0 }}>{children}</div>
     </div>
   );
 }
 
-function Select({ value, options, onChange }: { value: string; options: string[]; onChange: (v: string) => void }) {
+function SCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
-      style={{
-        background: '#1A1A1A', color: '#fff', border: '1px solid rgba(255,255,255,0.12)',
-        borderRadius: '8px', padding: '8px 12px', fontSize: '13px',
-        fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
-      }}
-    >
-      {options.map(o => <option key={o} value={o}>{o}</option>)}
-    </select>
-  );
-}
-
-function DangerBtn({ label, icon: Icon, onClick }: { label: string; icon: React.ElementType; onClick?: () => void }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'flex', alignItems: 'center', gap: '8px',
-        background: 'rgba(180,30,30,0.1)', color: '#cc4444',
-        border: '1px solid rgba(180,30,30,0.25)', borderRadius: '8px',
-        padding: '10px 16px', cursor: 'pointer', fontSize: '13px',
-        fontFamily: 'inherit', transition: 'all 0.2s',
-      }}
-      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,30,30,0.2)'; }}
-      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(180,30,30,0.1)'; }}
-    >
-      <Icon size={14} />{label}
-    </button>
-  );
-}
-
-function VerificationCard({ status, onAction }: { status: string; onAction: () => void }) {
-  const isVerified = status === 'verified';
-  const isPending  = status === 'pending';
-  const tone =
-    isVerified ? { bg: 'rgba(60,140,80,0.10)', border: 'rgba(60,140,80,0.30)', icon: CheckCircle2, color: '#5cb85c' } :
-    isPending  ? { bg: 'rgba(218,165,32,0.10)', border: 'rgba(218,165,32,0.30)', icon: Clock,         color: '#DAA520' } :
-                 { bg: 'rgba(128,0,0,0.10)',    border: 'rgba(128,0,0,0.30)',    icon: AlertTriangle, color: 'var(--maroon)' };
-  const Icon = tone.icon;
-  return (
-    <div style={{ background: tone.bg, border: `1px solid ${tone.border}`, borderRadius: '12px', padding: '18px 20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-      <Icon size={20} style={{ color: tone.color, flexShrink: 0 }} />
-      <div style={{ flex: 1, minWidth: '160px' }}>
-        <p style={{ color: '#fff', fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>
-          {isVerified ? 'Identity verified' : isPending ? 'Verification pending' : 'Verify your identity'}
-        </p>
-        <p style={{ color: '#888', fontSize: '12px' }}>
-          {isVerified ? 'You have full access to the Vault and Brotherhood Network.'
-           : isPending ? 'We\'re reviewing your documents. Usually takes 24 hours.'
-           : 'Required for Vault access and Brotherhood Network features.'}
-        </p>
-      </div>
-      {!isVerified && !isPending && (
-        <button onClick={onAction}
-          style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, fontFamily: 'inherit', flexShrink: 0 }}
-        >Start →</button>
-      )}
+    <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '16px' }}>
+      <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff', marginBottom: subtitle ? '6px' : '20px' }}>{title}</h3>
+      {subtitle && <p style={{ color: '#666', fontSize: '13px', marginBottom: '20px' }}>{subtitle}</p>}
+      {children}
     </div>
   );
 }
 
-function GeneralSection({ user }: { user: NonNullable<ReturnType<typeof useAuth>['user']> }) {
+function ProfileTab() {
+  const { user, updateUser } = useAuth();
   const navigate = useNavigate();
+  const [name, setName] = useState(user?.name ?? '');
+  const [saved, setSaved] = useState(false);
+  if (!user) return null;
   const status = user.verifyStatus ?? 'unverified';
-
+  const save = () => {
+    updateUser({ name: name.trim() || user.name });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
   return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>General</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Account information and preferences</p>
+    <>
+      <SCard title="Your identity" subtitle="How the brotherhood sees you">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', marginBottom: '20px' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '18px', color: '#fff', flexShrink: 0 }}>
+            {initials(user.name)}
+          </div>
+          <div>
+            <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff' }}>{user.name}</p>
+            <p style={{ color: '#666', fontSize: '13px' }}>{user.email}</p>
+          </div>
+        </div>
+        <Row label="Display name" desc="Shown to other members on the platform">
+          <input value={name} onChange={e => setName(e.target.value)}
+            style={{ background: '#1A1A1A', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit', width: '200px' }}
+          />
+        </Row>
+        <Row label="Email address">
+          <span style={{ color: '#666', fontSize: '13px' }}>{user.email}</span>
+        </Row>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button onClick={save}
+            style={{ background: saved ? 'rgba(34,197,94,0.15)' : 'var(--maroon)', color: saved ? '#4ade80' : '#fff', border: saved ? '1px solid rgba(34,197,94,0.3)' : 'none', borderRadius: '8px', padding: '9px 20px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }}
+          >{saved ? <><Check size={13} /> Saved</> : 'Save changes'}</button>
+        </div>
+      </SCard>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '20px', background: '#111', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.07)', marginBottom: '24px' }}>
-        <div style={{ width: '52px', height: '52px', borderRadius: '50%', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <User size={22} style={{ color: '#fff' }} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <p style={{ color: '#fff', fontWeight: 500 }}>{user.name}</p>
-          <p style={{ color: '#666', fontSize: '13px' }}>{user.email}</p>
-        </div>
-        {status === 'verified' && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(60,140,80,0.12)', border: '1px solid rgba(60,140,80,0.3)', borderRadius: '999px', padding: '4px 10px' }}>
-            <CheckCircle2 size={12} style={{ color: '#5cb85c' }} />
-            <span className="mono" style={{ color: '#5cb85c', fontSize: '10px' }}>VERIFIED</span>
+      <SCard title="Identity verification">
+        {status === 'unverified' && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.25)', borderRadius: '10px', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Shield size={18} style={{ color: 'var(--maroon)', flexShrink: 0 }} />
+              <div>
+                <p style={{ color: '#fff', fontSize: '14px', marginBottom: '3px' }}>Verify your identity</p>
+                <p style={{ color: '#666', fontSize: '12px' }}>Required for Vault access and Brotherhood Network features.</p>
+              </div>
+            </div>
+            <button onClick={() => navigate('/verify')}
+              style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}
+            >Start <ChevronRight size={13} /></button>
           </div>
         )}
-      </div>
-
-      <VerificationCard status={status} onAction={() => navigate('/verify')} />
-
-      <Row label="Display name" desc="Shown to other members on the platform">
-        <input
-          defaultValue={user.name}
-          style={{ background: '#1A1A1A', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', fontFamily: 'inherit', outline: 'none', width: '180px' }}
-        />
-      </Row>
-      <Row label="Email address">
-        <span style={{ color: '#666', fontSize: '13px' }}>{user.email}</span>
-      </Row>
-      <Row label="Language" desc="Platform language">
-        <Select value="English" options={['English', 'Español', 'Français', 'Deutsch', 'Italiano', 'Português']} onChange={() => {}} />
-      </Row>
-      <Row label="Timezone">
-        <Select value="UTC+1 Amsterdam" options={['UTC-5 New York', 'UTC+1 Amsterdam', 'UTC+2 Warsaw', 'UTC+9 Tokyo', 'UTC+11 Sydney']} onChange={() => {}} />
-      </Row>
-      <Row label="Locale" desc="Date, time, and number format">
-        <Select value="EU (dd/mm/yyyy)" options={['EU (dd/mm/yyyy)', 'US (mm/dd/yyyy)', 'ISO (yyyy-mm-dd)']} onChange={() => {}} />
-      </Row>
-    </div>
+        {status === 'pending' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(218,165,32,0.08)', border: '1px solid rgba(218,165,32,0.25)', borderRadius: '10px' }}>
+            <Clock size={18} style={{ color: '#DAA520', flexShrink: 0 }} />
+            <div>
+              <p style={{ color: '#DAA520', fontSize: '14px', marginBottom: '3px' }}>Verification under review</p>
+              <p style={{ color: '#666', fontSize: '12px' }}>Usually approved within 24 hours.</p>
+            </div>
+          </div>
+        )}
+        {status === 'verified' && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px', background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: '10px' }}>
+            <Check size={18} style={{ color: '#4ade80', flexShrink: 0 }} />
+            <p style={{ color: '#4ade80', fontSize: '14px' }}>Identity verified — full access enabled.</p>
+          </div>
+        )}
+      </SCard>
+    </>
   );
 }
 
-function PersonalizationSection() {
-  const [memHistory, setMemHistory] = useState(true);
-  const [customInstructions, setCustomInstructions] = useState(false);
-  const [showRank, setShowRank] = useState(true);
-  const [publicProfile, setPublicProfile] = useState(true);
+function BillingTab() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  if (!user) return null;
+  const active = user.subActive;
+  const plan = user.subPlan;
+  const since = user.subSince ? new Date(user.subSince).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : null;
+  return (
+    <>
+      <SCard title="Current plan" subtitle="Your active Ember membership">
+        {active && plan ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.25)', borderRadius: '10px', flexWrap: 'wrap', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Flame size={18} style={{ color: '#fff' }} />
+              </div>
+              <div>
+                <p style={{ color: '#fff', fontWeight: 600, fontSize: '15px' }}>
+                  Vault {plan === 'annual' ? 'Annual' : 'Monthly'} · {plan === 'annual' ? '€99/yr' : '€15/mo'}
+                </p>
+                {since && <p style={{ color: '#666', fontSize: '12px' }}>Member since {since}</p>}
+              </div>
+            </div>
+            <span style={{ color: '#4ade80', background: 'rgba(34,197,94,0.10)', border: '1px solid rgba(34,197,94,0.20)', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>Active</span>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '32px 16px' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+              <Crown size={20} style={{ color: '#5A5A5A' }} />
+            </div>
+            <p style={{ color: '#A0A0A0', fontSize: '14px', marginBottom: '16px' }}>No active membership</p>
+            <button onClick={() => navigate('/vault')}
+              style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 24px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }}
+            >Join the Vault</button>
+          </div>
+        )}
+      </SCard>
+
+      <SCard title="Invoices" subtitle="Your payment history">
+        {active ? (
+          <div>
+            {[
+              { date: 'Apr 1, 2026', amount: plan === 'annual' ? '€99.00' : '€15.00' },
+              { date: 'Mar 1, 2026', amount: '€15.00' },
+            ].map((inv, i, arr) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 0', borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div>
+                  <p style={{ color: '#fff', fontSize: '13px' }}>Vault membership</p>
+                  <p style={{ color: '#666', fontSize: '11px', marginTop: '2px' }}>{inv.date}</p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ color: '#A0A0A0', fontSize: '13px' }}>{inv.amount}</span>
+                  <span style={{ color: '#4ade80', fontSize: '10px', background: 'rgba(34,197,94,0.08)', borderRadius: '4px', padding: '2px 7px', fontFamily: 'JetBrains Mono, monospace' }}>Paid</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p style={{ color: '#5A5A5A', fontSize: '13px', textAlign: 'center', padding: '24px' }}>No invoices yet.</p>
+        )}
+      </SCard>
+    </>
+  );
+}
+
+function EventsTab() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const allEvents = getAllEvents();
+  if (!user) return null;
+  const attended = allEvents.filter(e => e.attendees.some(a => a.name === user.name));
+  const hosted   = allEvents.filter(e => e.host === user.name);
+
+  const ERow = ({ ev, badge }: { ev: typeof allEvents[0]; badge: string }) => (
+    <div onClick={() => navigate(`/events/${ev.id}`)}
+      style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', cursor: 'pointer', transition: 'background 0.15s' }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+    >
+      <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: ev.coverColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', flexShrink: 0 }}>{ev.flag}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ color: '#fff', fontSize: '13px', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.title}</p>
+        <p style={{ color: '#666', fontSize: '11px', marginTop: '2px' }}>{ev.date} · {ev.city}</p>
+      </div>
+      <span style={{ fontSize: '10px', color: '#A0A0A0', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', padding: '3px 7px', fontFamily: 'JetBrains Mono, monospace', flexShrink: 0 }}>{badge}</span>
+    </div>
+  );
 
   return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>Personalization</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Control how Ember remembers and displays your activity</p>
+    <>
+      <SCard title="Attending" subtitle={`${attended.length} event${attended.length !== 1 ? 's' : ''}`}>
+        {attended.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px' }}>
+            <p style={{ color: '#5A5A5A', fontSize: '13px', marginBottom: '12px' }}>No events joined yet.</p>
+            <button onClick={() => navigate('/events')} style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit' }}>Browse events</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {attended.map(ev => <ERow key={ev.id} ev={ev} badge="Attending" />)}
+          </div>
+        )}
+      </SCard>
 
-      <Row label="Activity history" desc="Ember uses your event history to surface relevant events and hosts">
-        <Toggle checked={memHistory} onChange={setMemHistory} />
-      </Row>
-      <Row label="Custom preferences" desc="Let Ember tailor event recommendations based on your grilling style">
-        <Toggle checked={customInstructions} onChange={setCustomInstructions} />
-      </Row>
-      <Row label="Show Board rank publicly" desc="Display your tier badge on your profile">
-        <Toggle checked={showRank} onChange={setShowRank} />
-      </Row>
-      <Row label="Public profile" desc="Other members can find and view your profile">
-        <Toggle checked={publicProfile} onChange={setPublicProfile} />
-      </Row>
-
-      <div style={{ marginTop: '32px', padding: '20px', background: '#111', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.07)' }}>
-        <p style={{ color: '#A0A0A0', fontSize: '14px', marginBottom: '12px' }}>Grilling style</p>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {['Charcoal', 'Wood fire', 'Offset smoker', 'Kettle grill', 'Kamado', 'Gas', 'Yakitori', 'Argentine'].map(tag => (
-            <button key={tag}
-              style={{ background: 'rgba(128,0,0,0.15)', color: 'var(--beige)', border: '1px solid rgba(128,0,0,0.3)', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
-            >{tag}</button>
-          ))}
-        </div>
-      </div>
-    </div>
+      <SCard title="Hosting" subtitle={`${hosted.length} event${hosted.length !== 1 ? 's' : ''}`}>
+        {hosted.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px' }}>
+            <p style={{ color: '#5A5A5A', fontSize: '13px', marginBottom: '12px' }}>You haven't hosted any events yet.</p>
+            <button onClick={() => navigate('/hosts/new')} style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <Plus size={13} /> Create event
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {hosted.map(ev => <ERow key={ev.id} ev={ev} badge="Host" />)}
+          </div>
+        )}
+      </SCard>
+    </>
   );
 }
 
-function NotificationsSection() {
-  const [eventsNearby, setEventsNearby] = useState(true);
-  const [hostUpdates, setHostUpdates] = useState(true);
-  const [vaultReleases, setVaultReleases] = useState(true);
-  const [weeklyDigest, setWeeklyDigest] = useState(false);
-  const [boardUpdates, setBoardUpdates] = useState(true);
+function SettingsTab() {
+  const [emailEvents,    setEmailEvents]    = useState(true);
+  const [emailWeekly,    setEmailWeekly]    = useState(true);
   const [emailMarketing, setEmailMarketing] = useState(false);
-  const [pushEnabled, setPushEnabled] = useState(true);
-
+  const [pushEvents,     setPushEvents]     = useState(true);
+  const { signOut } = useAuth();
+  const navigate = useNavigate();
   return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>Notifications</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Choose what Ember sends you and how</p>
+    <>
+      <SCard title="Notifications" subtitle="How we reach you">
+        <Row label="Event reminders" desc="Day-before and day-of reminders for events you're attending">
+          <Toggle checked={emailEvents} onChange={setEmailEvents} />
+        </Row>
+        <Row label="Weekly digest" desc="What's happening in your cities this week">
+          <Toggle checked={emailWeekly} onChange={setEmailWeekly} />
+        </Row>
+        <Row label="Offers & news" desc="Occasional emails about new features and partner deals">
+          <Toggle checked={emailMarketing} onChange={setEmailMarketing} />
+        </Row>
+        <Row label="Push notifications" desc="Browser push for chat messages and RSVPs">
+          <Toggle checked={pushEvents} onChange={setPushEvents} />
+        </Row>
+      </SCard>
 
-      <p className="mono" style={{ color: 'var(--maroon)', fontSize: '10px', letterSpacing: '0.1em', marginBottom: '12px' }}>EMAIL</p>
-      <Row label="Events near you" desc="New events in your city or region">
-        <Toggle checked={eventsNearby} onChange={setEventsNearby} />
-      </Row>
-      <Row label="Host updates" desc="Changes to events you've RSVP'd to">
-        <Toggle checked={hostUpdates} onChange={setHostUpdates} />
-      </Row>
-      <Row label="Vault releases" desc="New recipes, masterclasses, and content">
-        <Toggle checked={vaultReleases} onChange={setVaultReleases} />
-      </Row>
-      <Row label="Weekly digest" desc="Summary of activity and upcoming events">
-        <Toggle checked={weeklyDigest} onChange={setWeeklyDigest} />
-      </Row>
-      <Row label="Board & rank updates" desc="When you earn or lose a rank tier">
-        <Toggle checked={boardUpdates} onChange={setBoardUpdates} />
-      </Row>
-      <Row label="Promotional emails" desc="Offers from Ember partners">
-        <Toggle checked={emailMarketing} onChange={setEmailMarketing} />
-      </Row>
-
-      <p className="mono" style={{ color: 'var(--maroon)', fontSize: '10px', letterSpacing: '0.1em', marginBottom: '12px', marginTop: '24px' }}>PUSH</p>
-      <Row label="Push notifications" desc="Browser or mobile push alerts">
-        <Toggle checked={pushEnabled} onChange={setPushEnabled} />
-      </Row>
-    </div>
-  );
-}
-
-function SpeechSection() {
-  const [voiceInput, setVoiceInput] = useState(false);
-  const [readAloud, setReadAloud] = useState(false);
-  const [autoSend, setAutoSend] = useState(false);
-
-  return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>Speech</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Voice input and text-to-speech settings</p>
-
-      <Row label="Voice input" desc="Use microphone to search events and navigate">
-        <Toggle checked={voiceInput} onChange={setVoiceInput} />
-      </Row>
-      <Row label="Read descriptions aloud" desc="Text-to-speech for event details and recipes">
-        <Toggle checked={readAloud} onChange={setReadAloud} />
-      </Row>
-      <Row label="Auto-send voice messages" desc="Send voice queries without pressing confirm">
-        <Toggle checked={autoSend} onChange={setAutoSend} />
-      </Row>
-      <Row label="Voice speed">
-        <Select value="Normal" options={['Slow', 'Normal', 'Fast']} onChange={() => {}} />
-      </Row>
-      <Row label="Voice">
-        <Select value="Default" options={['Default', 'Natural', 'Ember (custom)']} onChange={() => {}} />
-      </Row>
-
-      <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(128,0,0,0.08)', borderRadius: '10px', border: '1px solid rgba(128,0,0,0.2)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-          <Volume2 size={14} style={{ color: 'var(--maroon)' }} />
-          <p style={{ color: 'var(--beige)', fontSize: '13px', fontWeight: 500 }}>Ember Voice — coming soon</p>
-        </div>
-        <p style={{ color: '#666', fontSize: '12px' }}>A custom voice trained on real pitmaster voices. Available to Legend-tier members.</p>
-      </div>
-    </div>
-  );
-}
-
-function AppearanceSection() {
-  const [theme, setTheme] = useState<'dark' | 'auto'>('dark');
-  const [compactMode, setCompactMode] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [fontSize, setFontSize] = useState('Default');
-
-  return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>Appearance</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Customize how Ember looks for you</p>
-
-      <p className="mono" style={{ color: 'var(--maroon)', fontSize: '10px', letterSpacing: '0.1em', marginBottom: '12px' }}>THEME</p>
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-        {(['dark', 'auto'] as const).map(t => (
-          <button key={t} onClick={() => setTheme(t)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '8px',
-              background: theme === t ? 'rgba(128,0,0,0.15)' : '#111',
-              border: theme === t ? '1px solid rgba(128,0,0,0.4)' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '10px', padding: '14px 20px', cursor: 'pointer',
-              color: theme === t ? 'var(--beige)' : '#666',
-              fontSize: '13px', fontFamily: 'inherit', transition: 'all 0.2s',
-            }}
-          >
-            {t === 'dark' ? <Moon size={14} /> : <Globe size={14} />}
-            {t === 'dark' ? 'Dark (default)' : 'System'}
+      <SCard title="Security">
+        <Row label="Change password" desc="You'll receive a reset link by email">
+          <button style={{ background: 'rgba(255,255,255,0.06)', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}>
+            Send reset link
           </button>
-        ))}
-      </div>
+        </Row>
+      </SCard>
 
-      <Row label="Compact mode" desc="Reduce spacing for denser content">
-        <Toggle checked={compactMode} onChange={setCompactMode} />
-      </Row>
-      <Row label="Reduce motion" desc="Minimize animations across the platform">
-        <Toggle checked={reducedMotion} onChange={setReducedMotion} />
-      </Row>
-      <Row label="Font size">
-        <Select value={fontSize} options={['Small', 'Default', 'Large']} onChange={setFontSize} />
-      </Row>
-    </div>
-  );
-}
-
-function PrivacySection({ onSignOut }: { onSignOut: () => void }) {
-  const [locationSharing, setLocationSharing] = useState(true);
-  const [analytics, setAnalytics] = useState(true);
-  const [profileIndexing, setProfileIndexing] = useState(false);
-
-  return (
-    <div>
-      <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '4px' }}>Privacy & Data</h2>
-      <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>Control what Ember knows and stores about you</p>
-
-      <Row label="Location sharing" desc="Used to show nearby events and Nearby Now feature">
-        <Toggle checked={locationSharing} onChange={setLocationSharing} />
-      </Row>
-      <Row label="Usage analytics" desc="Help improve Ember by sharing anonymous usage data">
-        <Toggle checked={analytics} onChange={setAnalytics} />
-      </Row>
-      <Row label="Profile search indexing" desc="Let search engines find your public profile">
-        <Toggle checked={profileIndexing} onChange={setProfileIndexing} />
-      </Row>
-
-      <div style={{ marginTop: '32px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <p className="mono" style={{ color: '#5A5A5A', fontSize: '10px', letterSpacing: '0.1em' }}>DATA</p>
-        <DangerBtn label="Download my data" icon={Download} />
-        <DangerBtn label="Clear activity history" icon={Trash2} />
-        <DangerBtn label="Delete account" icon={Trash2} />
-      </div>
-
-      <div style={{ marginTop: '32px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <button
-          onClick={onSignOut}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            background: 'transparent', color: '#888',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
-            padding: '10px 16px', cursor: 'pointer', fontSize: '13px',
-            fontFamily: 'inherit', transition: 'color 0.2s',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#888')}
-        >
-          <LogOut size={14} />Sign out of all devices
-        </button>
-      </div>
-    </div>
+      <SCard title="Danger zone">
+        <Row label="Sign out">
+          <button onClick={() => { signOut(); navigate('/'); }}
+            style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          ><LogOut size={12} /> Sign out</button>
+        </Row>
+        <Row label="Delete account" desc="Permanently remove all your data. This cannot be undone.">
+          <button style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}>
+            Delete
+          </button>
+        </Row>
+      </SCard>
+    </>
   );
 }
 
 export function Account() {
-  const { user, openAuth, signOut } = useAuth();
-  const navigate = useNavigate();
-  const [section, setSection] = useState<Section>('general');
+  const { user, openAuth } = useAuth();
+  const [tab, setTab] = useState<Tab>('profile');
 
   if (!user) {
     return (
       <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
         <Nav />
-        <div style={{ paddingTop: '160px', textAlign: 'center' }}>
-          <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>Account</p>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '16px' }}>
-            You're not signed in.
-          </h1>
-          <p style={{ color: '#A0A0A0', marginBottom: '32px' }}>Sign in to manage your Ember account.</p>
-          <button
-            onClick={() => openAuth('Sign in to access your account settings.')}
-            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px 32px', cursor: 'pointer', fontSize: '15px', fontWeight: 600, fontFamily: 'inherit' }}
+        <div style={{ padding: '160px 24px', textAlign: 'center' }}>
+          <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(128,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <User size={24} style={{ color: 'var(--maroon)' }} />
+          </div>
+          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '40px', marginBottom: '12px' }}>Sign in to your account</h1>
+          <p style={{ color: '#A0A0A0', marginBottom: '24px' }}>Access your profile, billing and event history.</p>
+          <button onClick={() => openAuth()}
+            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px 28px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '15px', fontWeight: 600 }}
           >Sign in</button>
         </div>
         <Footer />
@@ -397,80 +332,57 @@ export function Account() {
     );
   }
 
-  const handleSignOut = () => {
-    signOut();
-    navigate('/');
-  };
-
-  const renderSection = () => {
-    switch (section) {
-      case 'general':         return <GeneralSection user={user} />;
-      case 'personalization': return <PersonalizationSection />;
-      case 'notifications':   return <NotificationsSection />;
-      case 'speech':          return <SpeechSection />;
-      case 'appearance':      return <AppearanceSection />;
-      case 'privacy':         return <PrivacySection onSignOut={handleSignOut} />;
-    }
+  const CONTENT: Record<Tab, React.ReactNode> = {
+    profile:  <ProfileTab />,
+    billing:  <BillingTab />,
+    events:   <EventsTab />,
+    settings: <SettingsTab />,
   };
 
   return (
     <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
       <Nav />
-
-      <div className="page-container" style={{ paddingTop: '100px', paddingBottom: '80px' }}>
-        <motion.p
-          className="mono"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          style={{ color: 'var(--maroon)', marginBottom: '6px' }}
-        >Settings</motion.p>
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(28px, 4vw, 48px)', color: '#fff', marginBottom: '40px' }}
-        >Account</motion.h1>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '32px', alignItems: 'start' }}>
-          {/* sidebar */}
-          <div style={{ position: 'sticky', top: '96px' }}>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              {SECTIONS.map(({ id, label, icon: Icon }) => (
-                <button
-                  key={id}
-                  onClick={() => setSection(id)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: '10px',
-                    background: section === id ? 'rgba(128,0,0,0.15)' : 'transparent',
-                    color: section === id ? '#fff' : '#888',
-                    border: 'none', borderRadius: '8px',
-                    padding: '11px 14px', cursor: 'pointer',
-                    fontSize: '14px', fontFamily: 'inherit',
-                    textAlign: 'left', transition: 'all 0.15s',
-                    borderLeft: section === id ? '2px solid var(--maroon)' : '2px solid transparent',
-                  }}
-                  onMouseEnter={e => { if (section !== id) e.currentTarget.style.color = '#ccc'; }}
-                  onMouseLeave={e => { if (section !== id) e.currentTarget.style.color = '#888'; }}
-                >
-                  <Icon size={15} />
-                  {label}
-                  {section === id && <ChevronRight size={13} style={{ marginLeft: 'auto', color: 'var(--maroon)' }} />}
-                </button>
-              ))}
-            </nav>
+      <section style={{ paddingTop: '100px', paddingBottom: '80px' }}>
+        <div className="page-container">
+          <div style={{ marginBottom: '32px' }}>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px' }}>Settings</p>
+            <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', lineHeight: 1.06 }}>Account</h1>
           </div>
 
-          {/* content */}
-          <motion.div
-            key={section}
-            initial={{ opacity: 0, x: 12 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.25 }}
-            style={{ background: '#0D0D0D', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '32px' }}
-          >
-            {renderSection()}
-          </motion.div>
-        </div>
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '220px minmax(0,1fr)', gap: '24px', alignItems: 'start' }} className="account-grid">
+            {/* Sidebar */}
+            <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', overflow: 'hidden', position: 'sticky', top: '90px' }}>
+              {TABS.map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => setTab(id)}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+                    padding: '14px 18px',
+                    background: tab === id ? 'rgba(128,0,0,0.12)' : 'transparent',
+                    borderLeft: tab === id ? '3px solid var(--maroon)' : '3px solid transparent',
+                    border: 'none', cursor: 'pointer',
+                    color: tab === id ? '#fff' : '#A0A0A0',
+                    fontSize: '14px', fontFamily: 'inherit',
+                    transition: 'all 0.15s', textAlign: 'left',
+                  }}
+                >
+                  <Icon size={15} style={{ flexShrink: 0 }} />
+                  {label}
+                  {tab === id && <ChevronRight size={12} style={{ marginLeft: 'auto', color: 'var(--maroon)' }} />}
+                </button>
+              ))}
+            </div>
 
+            {/* Content */}
+            <AnimatePresence mode="wait">
+              <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+                {CONTENT[tab]}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </section>
       <Footer />
+      <style>{`@media(max-width:700px){.account-grid{grid-template-columns:1fr!important;}}`}</style>
     </div>
   );
 }

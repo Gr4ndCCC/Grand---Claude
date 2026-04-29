@@ -98,6 +98,15 @@ export function Nav() {
       {open && (
         <div className="fixed inset-0 z-40 flex flex-col pt-16" style={{ background: 'rgba(10,10,10,0.98)', backdropFilter: 'blur(20px)' }}>
           <nav className="flex flex-col gap-1 p-6">
+            {/* Account — first in mobile nav */}
+            {user && (
+              <NavLink to="/account" onClick={() => setOpen(false)}
+                className="px-4 py-4 rounded-lg text-lg ember-focus"
+                style={({ isActive }) => ({ color: isActive ? '#fff' : 'var(--beige)', background: isActive ? 'rgba(128,0,0,0.12)' : 'rgba(128,0,0,0.06)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 500, borderLeft: '2px solid var(--maroon)', paddingLeft: '18px' })}
+              >
+                <Settings size={16} /> Account
+              </NavLink>
+            )}
             {NAV_LINKS.map(({ to, label }) => (
               <NavLink key={to} to={to} onClick={() => setOpen(false)}
                 className="px-4 py-4 rounded-lg text-lg ember-focus"
@@ -108,7 +117,7 @@ export function Nav() {
           <div className="px-6 mt-4 flex flex-col gap-3">
             {user ? (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px' }}>
-                <span style={{ color: '#A0A0A0' }}>{user.name}</span>
+                <span style={{ color: '#A0A0A0', fontSize: '14px' }}>{user.name} · {user.email}</span>
                 <button onClick={() => { signOut(); setOpen(false); }} style={{ color: '#666', background: 'none', border: 'none', cursor: 'pointer' }}>
                   <LogOut size={16} />
                 </button>
