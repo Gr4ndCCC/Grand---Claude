@@ -21,9 +21,10 @@ const STEPS = [
 export function Hosts() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
+
   const handleCreate = () => {
-    if (!user) return openAuth('Sign in to create your first event.');
-    alert('Event creation flow — coming soon. Phase 4 will add the full host studio.');
+    if (!user) return openAuth('Sign in to host an event.');
+    navigate('/hosts/new');
   };
 
   return (
