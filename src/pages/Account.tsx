@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User, CreditCard, Calendar, Settings,
@@ -310,8 +310,29 @@ function SettingsTab() {
 }
 
 export function Account() {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, updateUser } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('profile');
+
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('checkout') !== 'success') return;
+
+    const planParam = params.get('plan');
+    const pendingPlan = sessionStorage.getItem('ember_pending_plan');
+    const plan = planParam === 'monthly' || planParam === 'annual'
+      ? planParam
+      : pendingPlan === 'monthly' || pendingPlan === 'annual'
+        ? pendingPlan
+        : 'annual';
+
+    updateUser({ subPlan: plan, subActive: true, subSince: Date.now() });
+    sessionStorage.removeItem('ember_pending_plan');
+    setTab('billing');
+    navigate('/account', { replace: true });
+  }, [location.search, navigate, updateUser, user]);
 
   if (!user) {
     return (
