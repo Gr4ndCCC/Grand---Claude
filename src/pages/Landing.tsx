@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, lazy, Suspense, Component } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -6,59 +6,27 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { FireButton } from '../components/FireButton';
 import { useAuth } from '../lib/auth';
+import { FireGraph } from '../components/ui/FireGraph';
 
-const GlobeCanvas = lazy(() =>
-  import('../components/GlobeCanvas').then(m => ({ default: m.GlobeCanvas }))
-);
-
-class GlobeErrorBoundary extends Component<
-  { children: React.ReactNode; fallback: React.ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  render() {
-    return this.state.hasError ? this.props.fallback : this.props.children;
-  }
-}
-
-/* ── fallback SVG map (shown while globe loads / on error) ─── */
-function WorldMap() {
-  const pins = [
-    { cx: 320, cy: 155, city: 'New York'    },
-    { cx: 480, cy: 130, city: 'London'      },
-    { cx: 510, cy: 125, city: 'Amsterdam'   },
-    { cx: 520, cy: 135, city: 'Berlin'      },
-    { cx: 690, cy: 155, city: 'Tokyo'       },
-    { cx: 380, cy: 230, city: 'São Paulo'   },
-    { cx: 535, cy: 200, city: 'Johannesburg'},
-    { cx: 710, cy: 215, city: 'Sydney'      },
-    { cx: 600, cy: 135, city: 'Istanbul'    },
-  ];
+function HintText() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(false), 4000);
+    return () => clearTimeout(t);
+  }, []);
   return (
-    <div style={{ background: 'rgba(128,0,0,0.04)', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(228,207,179,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '300px' }}>
-      <svg viewBox="0 50 900 360" style={{ width: '100%', opacity: 0.85 }}>
-        <g fill="none" stroke="rgba(228,207,179,0.15)" strokeWidth="0.8">
-          <path d="M180,100 L320,80 L370,90 L380,130 L340,160 L310,180 L280,200 L240,220 L210,200 L180,170 L160,140 Z" />
-          <path d="M280,210 L340,200 L370,230 L360,280 L330,310 L300,300 L270,260 Z" />
-          <path d="M440,80 L540,75 L560,90 L550,120 L510,135 L480,125 L450,115 L440,100 Z" />
-          <path d="M470,140 L560,140 L580,170 L570,220 L540,250 L510,245 L490,220 L475,190 Z" />
-          <path d="M560,75 L720,70 L760,90 L750,140 L700,160 L640,165 L600,150 L570,130 L555,105 Z" />
-          <path d="M670,210 L750,205 L760,235 L730,260 L690,255 L670,235 Z" />
-        </g>
-        {pins.map(({ cx, cy, city }) => (
-          <g key={city}>
-            <circle cx={cx} cy={cy} r="10" fill="rgba(128,0,0,0.15)" />
-            <circle cx={cx} cy={cy} r="4" fill="var(--maroon)" opacity="0.9" />
-          </g>
-        ))}
-      </svg>
+    <div style={{
+      position: 'absolute', bottom: '16px', left: '50%',
+      transform: 'translateX(-50%)', pointerEvents: 'none', zIndex: 2,
+      opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease',
+      fontFamily: 'JetBrains Mono, monospace', fontSize: '11px',
+      color: 'rgba(200,184,162,0.55)', whiteSpace: 'nowrap',
+    }}>
+      drag nodes · double-click to ignite
     </div>
   );
 }
+
 
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
@@ -439,17 +407,33 @@ export function Landing() {
               </motion.div>
             </div>
 
-            {/* 3D globe */}
+            {/* Fire Graph */}
             <motion.div
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.9 }}
+              style={{ position: 'relative', width: '100%', minHeight: '420px' }}
+              className="lg:min-h-[520px]"
             >
-              <GlobeErrorBoundary fallback={<WorldMap />}>
-                <Suspense fallback={<WorldMap />}>
-                  <GlobeCanvas />
-                </Suspense>
-              </GlobeErrorBoundary>
+              <FireGraph className="absolute inset-0 w-full h-full" style={{ borderRadius: '16px', overflow: 'hidden' }} />
+              {/* HUD pill */}
+              <div style={{
+                position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', alignItems: 'center', gap: '12px',
+                padding: '10px 20px', borderRadius: '999px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
+                pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 2,
+              }}>
+                <span
+                  className="animate-ember-pulse"
+                  style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', display: 'inline-block', flexShrink: 0 }}
+                />
+                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C8B8A2' }}>
+                  Ember · The global BBQ brotherhood
+                </span>
+              </div>
+              <HintText />
             </motion.div>
           </div>
         </div>
