@@ -31,3 +31,4 @@ backend/coverage/
 
 # misc
 *.local
+.vercel

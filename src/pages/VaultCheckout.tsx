@@ -6,11 +6,6 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 
-// Replace these with your actual Lemon Squeezy checkout URLs
-// Go to: app.lemonsqueezy.com → Products → your product → Share a checkout link
-const LS_MONTHLY_URL = 'https://emberbbq.lemonsqueezy.com/checkout/buy/monthly';
-const LS_ANNUAL_URL  = 'https://emberbbq.lemonsqueezy.com/checkout/buy/annual';
-
 const INCLUDED = [
   'Unlimited recipe access',
   'Live & recorded masterclasses',
@@ -26,6 +21,8 @@ export function VaultCheckout() {
   const { user, openAuth, updateUser } = useAuth();
   const navigate = useNavigate();
   const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState('');
 
   if (!user) {
     return (
@@ -45,19 +42,34 @@ export function VaultCheckout() {
     );
   }
 
-  const handleCheckout = () => {
-    const url = selected === 'annual' ? LS_ANNUAL_URL : LS_MONTHLY_URL;
+  const handleCheckout = async () => {
+    setIsCreating(true);
+    setError('');
 
-    // Append prefill params for Lemon Squeezy hosted checkout
-    const checkoutUrl = new URL(url);
-    checkoutUrl.searchParams.set('checkout[email]', user.email);
-    checkoutUrl.searchParams.set('checkout[name]', user.name);
+    try {
+      const response = await fetch('/api/lemonsqueezy/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selected,
+          email: user.email,
+          name: user.name,
+        }),
+      });
 
-    // Optimistically mark subscription — Lemon Squeezy webhook will confirm
-    updateUser({ subPlan: selected, subActive: true, subSince: Date.now() });
+      const data = await response.json();
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Checkout could not be created.');
+      }
+      sessionStorage.setItem('ember_pending_plan', selected);
+      window.location.href = data.url;
 
-    // Open Lemon Squeezy hosted checkout in new tab
-    window.open(checkoutUrl.toString(), '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Checkout could not be created.');
+      updateUser({ subPlan: null, subActive: false });
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -178,12 +190,18 @@ export function VaultCheckout() {
                 </div>
               </div>
 
-              <button onClick={handleCheckout}
-                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', cursor: 'pointer', fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
+              {error && (
+                <div style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '8px', padding: '10px 12px', marginBottom: '14px' }}>
+                  <p style={{ color: '#fca5a5', fontSize: '12px', lineHeight: 1.5 }}>{error}</p>
+                </div>
+              )}
+
+              <button onClick={handleCheckout} disabled={isCreating}
+                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', cursor: isCreating ? 'wait' : 'pointer', opacity: isCreating ? 0.8 : 1, fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
               >
-                <CreditCard size={16} /> Proceed to Payment
+                <CreditCard size={16} /> {isCreating ? 'Creating checkout...' : 'Proceed to Payment'}
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px' }}>
