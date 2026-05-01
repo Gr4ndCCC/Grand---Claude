@@ -16,41 +16,30 @@ const CENTER_K   = 0.004;
 const EDGE_PROB  = 0.22;
 
 const CITIES = [
-  'Istanbul','Sydney','Chicago','Mumbai','Warsaw','Amsterdam',
-  'Tokyo','New York','Rome','Lisbon','Johannesburg','São Paulo',
-  'Berlin','Seoul','Mexico City','Lagos','Bangkok','Toronto',
-  'Dubai','Buenos Aires','Cairo','Melbourne','London','Austin',
-  'Nashville','Oakland','Athens','Madrid','Cape Town','Nairobi',
-  'Osaka','Paris','Houston','Karachi','Bogotá','Jakarta',
-  'Kinshasa','Lima','Santiago','Riyadh','Casablanca','Accra',
-  'Taipei','Kuala Lumpur','Stockholm','Barcelona','Vienna','Zürich',
-  'Helsinki','Prague','Budapest','Beirut','Tel Aviv','Abidjan',
-  'Montréal','Vancouver','Denver','Miami','Phoenix','Seattle',
-  'Addis Ababa','Dar es Salaam','Kampala','Dakar','Tunis','Algiers',
-  'Tashkent','Baku','Tbilisi','Yerevan','Almaty','Bishkek',
-  'Yangon','Hanoi','Ho Chi Minh City','Colombo','Dhaka','Kathmandu',
-  'Ulaanbaatar','Vladivostok','Novosibirsk','Minsk','Kyiv','Bucharest',
-  'Sofia','Zagreb','Sarajevo','Tirana','Skopje','Nicosia',
-  'Reykjavik','Dublin','Porto','Seville','Valencia',
-  'Marseille','Lyon','Brussels','Rotterdam','Copenhagen','Oslo',
-  'Riga','Tallinn','Vilnius','Gdańsk','Kraków','Wrocław',
-  'Guadalajara','Monterrey','San José','Havana','San Juan','Quito',
-  'La Paz','Asunción','Montevideo','Recife','Fortaleza','Manaus',
-  'Kumasi','Luanda','Maputo','Harare','Lusaka',
-  'Kigali','Lomé','Cotonou','Niamey','Bamako','Ouagadougou',
-  'Antananarivo','Port Louis','Djibouti','Mogadishu',
+  'New York', 'London', 'Tokyo', 'Paris', 'Dubai', 'Singapore',
+  'Mumbai', 'Sydney', 'Lagos', 'Istanbul', 'São Paulo', 'Los Angeles',
+  'Beijing', 'Shanghai', 'Hong Kong', 'Seoul', 'Mexico City', 'Cairo',
+  'Jakarta', 'Bangkok', 'Nairobi', 'Toronto', 'Amsterdam', 'Berlin',
+  'Madrid', 'Rome', 'Johannesburg', 'Buenos Aires', 'Moscow', 'Karachi',
+  'Chicago', 'Miami', 'Barcelona', 'Athens', 'Casablanca',
 ];
 
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
+const DOT_COLORS = ['#bf4a14', '#f69742', '#951902', '#fba24b'];
+const LINE_COLOR = { r: 67, g: 34, b: 16 }; // #432210
 
-function heatColor(t: number, alpha: number) {
-  const r = Math.round(lerp(85,  255, t));
-  const g = Math.round(lerp(0,   140, Math.pow(t, 1.6)));
-  const b = Math.round(lerp(0,    60, Math.pow(t, 3)));
-  return `rgba(${r},${g},${b},${alpha})`;
-}
+const DOT_RGB = DOT_COLORS.map(hex => ({
+  r: parseInt(hex.slice(1, 3), 16),
+  g: parseInt(hex.slice(3, 5), 16),
+  b: parseInt(hex.slice(5, 7), 16),
+}));
+
+// Flame variant per color: glowMult controls halo size, particleMult controls spark density
+const FLAME_VARIANTS = [
+  { glowMult: 3.8, glowAlpha: 0.42, particleMult: 1.0 }, // #bf4a14 orange-red, medium
+  { glowMult: 4.5, glowAlpha: 0.36, particleMult: 1.3 }, // #f69742 bright orange, wide
+  { glowMult: 2.8, glowAlpha: 0.54, particleMult: 0.7 }, // #951902 deep crimson, tight
+  { glowMult: 5.0, glowAlpha: 0.30, particleMult: 1.6 }, // #fba24b warm gold, softest
+];
 
 interface Node {
   id: number;
@@ -61,6 +50,7 @@ interface Node {
   label: string;
   ignited: boolean;
   igniteTimer: number;
+  colorIdx: number;
 }
 
 interface Edge {
@@ -72,6 +62,7 @@ interface Particle {
   x: number; y: number;
   vx: number; vy: number;
   life: number; size: number; heat: number;
+  colorIdx: number;
 }
 
 export function FireGraph({ width, height, className, style }: FireGraphProps) {
@@ -99,14 +90,15 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       const shuffled = [...CITIES].sort(() => Math.random() - 0.5);
       nodes = Array.from({ length: NODE_COUNT }, (_, i) => ({
         id: i,
-        x: w * 0.15 + Math.random() * w * 0.7,
-        y: h * 0.15 + Math.random() * h * 0.7,
+        x: w * 0.35 + Math.random() * w * 0.60,
+        y: h * 0.15 + Math.random() * h * 0.70,
         vx: 0, vy: 0,
         heat: Math.random() * 0.3 + 0.05,
         radius: 6 + Math.random() * 12,
         label: shuffled[i % shuffled.length],
         ignited: false,
         igniteTimer: 0,
+        colorIdx: Math.floor(Math.random() * 4),
       }));
       edges = [];
       for (let i = 0; i < NODE_COUNT; i++) {
@@ -160,7 +152,6 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       });
     }
 
-    /* mouse */
     function onMouseDown(e: MouseEvent) {
       const { x, y } = canvasXY(e);
       const i = nodeAt(x, y);
@@ -205,7 +196,6 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       });
     }
 
-    /* touch */
     function onTouchStart(e: TouchEvent) {
       e.preventDefault();
       const { x, y } = canvasXY(e.touches[0]);
@@ -243,16 +233,15 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
     canvas.addEventListener('touchmove',  onTouchMove,  { passive: false });
     canvas.addEventListener('touchend',   onTouchEnd);
 
-    /* edge passive cooldown every 100ms */
     cooldownId = setInterval(() => {
       edges.forEach(e => { e.heat = e.heat * 0.98 + 0.002; });
     }, 100);
 
-    /* draw loop */
     function draw(ts: number) {
       const time = ts - startTime;
       const { w: W, h: H } = getDims();
-      const cx = W / 2, cy = H / 2;
+      // Center of gravity shifted right so the network clusters on the right side
+      const cx = W * 0.65, cy = H / 2;
 
       /* ── physics ── */
       for (let i = 0; i < nodes.length; i++) {
@@ -297,7 +286,8 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
 
       /* ── spawn particles ── */
       nodes.forEach(n => {
-        const count = n.ignited ? 6 : Math.floor(n.heat * 2.5);
+        const variant = FLAME_VARIANTS[n.colorIdx];
+        const count = n.ignited ? 6 : Math.floor(n.heat * 2.5 * variant.particleMult);
         for (let k = 0; k < count; k++) {
           particles.push({
             x: n.x + (Math.random() - 0.5) * n.radius,
@@ -305,6 +295,7 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
             vx: (Math.random() - 0.5) * 1.2,
             vy: -(Math.random() * 1.5 + 0.5),
             life: 1.0, size: Math.random() * 2 + 1, heat: n.heat,
+            colorIdx: n.colorIdx,
           });
         }
       });
@@ -323,17 +314,16 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       /* ── 1. clear ── */
       ctx.clearRect(0, 0, W, H);
 
-      /* ── 2. soft warm hearth glow (transparent at edges, no rectangle) ── */
-      const bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.6);
+      /* ── 2. soft warm hearth glow centered on right cluster ── */
+      const bg = ctx.createRadialGradient(W * 0.65, H / 2, 0, W * 0.65, H / 2, Math.max(W, H) * 0.6);
       bg.addColorStop(0,    'rgba(40,22,14,0.28)');
       bg.addColorStop(0.55, 'rgba(20,10,6,0.10)');
       bg.addColorStop(1,    'rgba(9,5,4,0)');
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
-      /* ── 3. edges ── */
+      /* ── 3. edges — source-over so #432210 renders visibly on dark bg ── */
       ctx.save();
-      ctx.globalCompositeOperation = 'screen';
       edges.forEach(ed => {
         const na = nodes[ed.a], nb = nodes[ed.b];
         if (!na || !nb) return;
@@ -346,18 +336,9 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
         ctx.beginPath();
         ctx.moveTo(na.x, na.y);
         ctx.quadraticCurveTo(mx, my, nb.x, nb.y);
-        ctx.strokeStyle = heatColor(t, 0.55);
+        ctx.strokeStyle = `rgba(${LINE_COLOR.r},${LINE_COLOR.g},${LINE_COLOR.b},${0.55 + t * 0.35})`;
         ctx.lineWidth = 0.8 + t * 1.6;
         ctx.stroke();
-
-        if (t > 0.5) {
-          ctx.beginPath();
-          ctx.moveTo(na.x, na.y);
-          ctx.quadraticCurveTo(mx, my, nb.x, nb.y);
-          ctx.strokeStyle = heatColor(t, (t - 0.5) * 0.18);
-          ctx.lineWidth = 4 + t * 8;
-          ctx.stroke();
-        }
       });
       ctx.restore();
 
@@ -365,9 +346,10 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
       particles.forEach(p => {
+        const col = DOT_RGB[p.colorIdx];
         ctx.beginPath();
         ctx.arc(p.x, p.y, Math.max(0.1, p.size), 0, Math.PI * 2);
-        ctx.fillStyle = heatColor(p.heat, p.life * 0.7);
+        ctx.fillStyle = `rgba(${col.r},${col.g},${col.b},${p.life * 0.7})`;
         ctx.fill();
       });
       ctx.restore();
@@ -378,11 +360,13 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       nodes.forEach(n => {
         const t = n.heat;
         const r = n.radius;
-        const glowR = n.ignited ? r * 7 : r * 3.5;
+        const col = DOT_RGB[n.colorIdx];
+        const variant = FLAME_VARIANTS[n.colorIdx];
+        const glowR = n.ignited ? r * 7 : r * variant.glowMult;
 
         const outerG = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
-        outerG.addColorStop(0, heatColor(t, 0.35));
-        outerG.addColorStop(1, heatColor(t, 0));
+        outerG.addColorStop(0, `rgba(${col.r},${col.g},${col.b},${variant.glowAlpha * t + 0.05})`);
+        outerG.addColorStop(1, `rgba(${col.r},${col.g},${col.b},0)`);
         ctx.beginPath();
         ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
         ctx.fillStyle = outerG;
@@ -392,9 +376,9 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
         const coreG = ctx.createRadialGradient(hotX, hotY, 0, n.x, n.y, r);
         coreG.addColorStop(0,    'rgba(255,250,235,1.0)');
         coreG.addColorStop(0.18, 'rgba(255,225,170,0.98)');
-        coreG.addColorStop(0.45, heatColor(1.0, 0.92));
-        coreG.addColorStop(0.75, heatColor(t,   0.78));
-        coreG.addColorStop(1,    heatColor(t * 0.6, 0.5));
+        coreG.addColorStop(0.45, `rgba(${col.r},${col.g},${col.b},0.95)`);
+        coreG.addColorStop(0.75, `rgba(${col.r},${col.g},${col.b},0.80)`);
+        coreG.addColorStop(1,    `rgba(${Math.round(col.r * 0.6)},${Math.round(col.g * 0.6)},${Math.round(col.b * 0.6)},0.5)`);
         ctx.beginPath();
         ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
         ctx.fillStyle = coreG;
@@ -408,6 +392,7 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       nodes.forEach(n => {
         const t = n.heat;
         const r = n.radius;
+        const col = DOT_RGB[n.colorIdx];
         let fontSize: number, opacity: number, weight = '400';
         if (n.ignited) {
           fontSize = 18; opacity = 1.0; weight = '600';
@@ -420,7 +405,9 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
           ctx.font = `${weight} ${fontSize}px Newsreader, Georgia, serif`;
         }
         ctx.globalAlpha = Math.min(1, opacity);
-        ctx.fillStyle = t > 0.6 ? 'rgba(255,240,220,1)' : heatColor(t * 0.85 + 0.15, 1.0);
+        ctx.fillStyle = t > 0.6
+          ? 'rgba(255,240,220,1)'
+          : `rgba(${col.r},${col.g},${col.b},1)`;
         ctx.fillText(n.label, n.x, n.y - r - 6);
       });
       ctx.restore();

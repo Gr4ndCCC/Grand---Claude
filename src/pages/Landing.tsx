@@ -343,7 +343,7 @@ export function Landing() {
         {/* Soft gradient fade so headline copy reads cleanly over the fire */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-          background: 'linear-gradient(90deg, rgba(9,5,4,0.78) 0%, rgba(9,5,4,0.55) 30%, rgba(9,5,4,0.15) 55%, rgba(9,5,4,0) 75%)',
+          background: 'linear-gradient(90deg, rgba(9,5,4,0.92) 0%, rgba(9,5,4,0.82) 32%, rgba(9,5,4,0.45) 52%, rgba(9,5,4,0.10) 68%, rgba(9,5,4,0) 80%)',
         }} />
 
         {/* HUD pill at top center of hero */}
