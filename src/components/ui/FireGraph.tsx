@@ -323,10 +323,11 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       /* ── 1. clear ── */
       ctx.clearRect(0, 0, W, H);
 
-      /* ── 2. background vignette ── */
-      const bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.75);
-      bg.addColorStop(0, 'rgba(22,14,10,0.94)');
-      bg.addColorStop(1, 'rgba(5,3,3,0.99)');
+      /* ── 2. soft warm hearth glow (transparent at edges, no rectangle) ── */
+      const bg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, Math.max(W, H) * 0.6);
+      bg.addColorStop(0,    'rgba(40,22,14,0.28)');
+      bg.addColorStop(0.55, 'rgba(20,10,6,0.10)');
+      bg.addColorStop(1,    'rgba(9,5,4,0)');
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 

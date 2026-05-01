@@ -330,7 +330,7 @@ export function Landing() {
   };
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ background: '#090504', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
       <Nav />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
@@ -415,7 +415,7 @@ export function Landing() {
               style={{ position: 'relative', width: '100%', minHeight: '420px' }}
               className="lg:min-h-[520px]"
             >
-              <FireGraph className="absolute inset-0 w-full h-full" style={{ borderRadius: '16px', overflow: 'hidden' }} />
+              <FireGraph className="absolute inset-0 w-full h-full" />
               {/* HUD pill */}
               <div style={{
                 position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
