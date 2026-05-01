@@ -103,7 +103,7 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
         y: h * 0.15 + Math.random() * h * 0.7,
         vx: 0, vy: 0,
         heat: Math.random() * 0.3 + 0.05,
-        radius: 4 + Math.random() * 5,
+        radius: 6 + Math.random() * 12,
         label: shuffled[i % shuffled.length],
         ignited: false,
         igniteTimer: 0,
@@ -390,9 +390,11 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
 
         const hotX = n.x - r * 0.25, hotY = n.y - r * 0.25;
         const coreG = ctx.createRadialGradient(hotX, hotY, 0, n.x, n.y, r);
-        coreG.addColorStop(0,   heatColor(1.0,       0.95));
-        coreG.addColorStop(0.5, heatColor(t,         0.85));
-        coreG.addColorStop(1,   heatColor(t * 0.6,   0.6));
+        coreG.addColorStop(0,    'rgba(255,250,235,1.0)');
+        coreG.addColorStop(0.18, 'rgba(255,225,170,0.98)');
+        coreG.addColorStop(0.45, heatColor(1.0, 0.92));
+        coreG.addColorStop(0.75, heatColor(t,   0.78));
+        coreG.addColorStop(1,    heatColor(t * 0.6, 0.5));
         ctx.beginPath();
         ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
         ctx.fillStyle = coreG;
@@ -406,20 +408,20 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       nodes.forEach(n => {
         const t = n.heat;
         const r = n.radius;
-        let fontSize: number, opacity: number;
+        let fontSize: number, opacity: number, weight = '400';
         if (n.ignited) {
-          fontSize = 13; opacity = 1.0;
-          ctx.font = `italic ${fontSize}px Newsreader, Georgia, serif`;
-        } else if (r <= 7) {
-          fontSize = 10; opacity = 0.38 + t * 0.3;
-          ctx.font = `${fontSize}px Newsreader, Georgia, serif`;
+          fontSize = 18; opacity = 1.0; weight = '600';
+          ctx.font = `italic ${weight} ${fontSize}px Newsreader, Georgia, serif`;
+        } else if (r <= 10) {
+          fontSize = 13; opacity = 0.5 + t * 0.35;
+          ctx.font = `${weight} ${fontSize}px Newsreader, Georgia, serif`;
         } else {
-          fontSize = 12; opacity = 0.55 + t * 0.4;
-          ctx.font = `${fontSize}px Newsreader, Georgia, serif`;
+          fontSize = 16; weight = '500'; opacity = 0.7 + t * 0.3;
+          ctx.font = `${weight} ${fontSize}px Newsreader, Georgia, serif`;
         }
         ctx.globalAlpha = Math.min(1, opacity);
-        ctx.fillStyle = heatColor(t, 1.0);
-        ctx.fillText(n.label, n.x, n.y - r - 5);
+        ctx.fillStyle = t > 0.6 ? 'rgba(255,240,220,1)' : heatColor(t * 0.85 + 0.15, 1.0);
+        ctx.fillText(n.label, n.x, n.y - r - 6);
       });
       ctx.restore();
 

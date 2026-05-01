@@ -334,106 +334,105 @@ export function Landing() {
       <Nav />
 
       {/* ── HERO ──────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', paddingTop: '120px', paddingBottom: '80px', overflow: 'hidden' }}>
-        <div className="maroon-glow smoke-pulse" />
+      <section style={{ position: 'relative', paddingTop: '120px', paddingBottom: '80px', minHeight: '760px', overflow: 'hidden' }}>
+        {/* FireGraph fills the entire hero as the dominant visual */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+          <FireGraph className="w-full h-full" />
+        </div>
 
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div>
-              <motion.p
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="mono"
-                style={{ color: 'var(--maroon)', marginBottom: '16px' }}
-              >
-                The global BBQ brotherhood
-              </motion.p>
+        {/* Soft gradient fade so headline copy reads cleanly over the fire */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+          background: 'linear-gradient(90deg, rgba(9,5,4,0.78) 0%, rgba(9,5,4,0.55) 30%, rgba(9,5,4,0.15) 55%, rgba(9,5,4,0) 75%)',
+        }} />
 
-              <motion.h1
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-                style={{
-                  fontFamily: 'Playfair Display, Georgia, serif',
-                  fontSize: 'clamp(42px, 6vw, 80px)',
-                  fontWeight: '400', lineHeight: '1.06',
-                  color: '#fff', marginBottom: '24px',
-                }}
-              >
-                The world grills.
-                <br />
-                <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>
-                  Join the brotherhood.
-                </span>
-              </motion.h1>
+        {/* HUD pill at top center of hero */}
+        <div style={{
+          position: 'absolute', top: '92px', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: '12px',
+          padding: '10px 20px', borderRadius: '999px',
+          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
+          pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 4,
+        }}>
+          <span className="animate-ember-pulse"
+            style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', display: 'inline-block', flexShrink: 0 }}
+          />
+          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C8B8A2' }}>
+            Ember · The global BBQ brotherhood
+          </span>
+        </div>
 
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                style={{ color: '#A0A0A0', fontSize: '17px', lineHeight: '1.7', maxWidth: '480px', marginBottom: '40px' }}
-              >
-                Discover BBQ events in 40+ countries. Host your own gathering.
-                Build your rank. Connect with pitmasters worldwide.
-              </motion.p>
+        {/* Hint */}
+        <HintText />
 
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.35 }}
-                style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px' }}
-              >
-                <FireButton variant="primary" onClick={handleJoinEvent}>
-                  Find events near you
-                </FireButton>
-                <FireButton variant="outline" onClick={handleHostEvent}>
-                  Host an event
-                </FireButton>
-              </motion.div>
-
-              {/* stats bar */}
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
-                style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}
-              >
-                {STATS.map(({ value, suffix, label }) => (
-                  <div key={label}>
-                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', fontWeight: '400', color: '#fff', lineHeight: 1 }}>
-                      <Counter to={value} suffix={suffix} />
-                    </p>
-                    <p className="mono" style={{ color: '#5A5A5A', marginTop: '4px' }}>{label}</p>
-                  </div>
-                ))}
-              </motion.div>
-            </div>
-
-            {/* Fire Graph */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.3, duration: 0.9 }}
-              style={{ position: 'relative', width: '100%', minHeight: '420px' }}
-              className="lg:min-h-[520px]"
+        {/* Text content layered above the fire (passes pointer events for the canvas) */}
+        <div className="page-container" style={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
+          <div style={{ maxWidth: '560px' }}>
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="mono"
+              style={{ color: 'var(--maroon)', marginBottom: '16px' }}
             >
-              <FireGraph className="absolute inset-0 w-full h-full" />
-              {/* HUD pill */}
-              <div style={{
-                position: 'absolute', top: '16px', left: '50%', transform: 'translateX(-50%)',
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '10px 20px', borderRadius: '999px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
-                pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 2,
-              }}>
-                <span
-                  className="animate-ember-pulse"
-                  style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', display: 'inline-block', flexShrink: 0 }}
-                />
-                <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C8B8A2' }}>
-                  Ember · The global BBQ brotherhood
-                </span>
-              </div>
-              <HintText />
+              The global BBQ brotherhood
+            </motion.p>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              style={{
+                fontFamily: 'Playfair Display, Georgia, serif',
+                fontSize: 'clamp(42px, 6vw, 80px)',
+                fontWeight: '400', lineHeight: '1.06',
+                color: '#fff', marginBottom: '24px',
+              }}
+            >
+              The world grills.
+              <br />
+              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>
+                Join the brotherhood.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              style={{ color: '#C8B8A2', fontSize: '17px', lineHeight: '1.7', maxWidth: '460px', marginBottom: '40px' }}
+            >
+              Discover BBQ events in 40+ countries. Host your own gathering.
+              Build your rank. Connect with pitmasters worldwide.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.35 }}
+              style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px', pointerEvents: 'auto' }}
+            >
+              <FireButton variant="primary" onClick={handleJoinEvent}>
+                Find events near you
+              </FireButton>
+              <FireButton variant="outline" onClick={handleHostEvent}>
+                Host an event
+              </FireButton>
+            </motion.div>
+
+            {/* stats bar */}
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ delay: 0.55 }}
+              style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}
+            >
+              {STATS.map(({ value, suffix, label }) => (
+                <div key={label}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', fontWeight: '400', color: '#fff', lineHeight: 1 }}>
+                    <Counter to={value} suffix={suffix} />
+                  </p>
+                  <p className="mono" style={{ color: '#5A5A5A', marginTop: '4px' }}>{label}</p>
+                </div>
+              ))}
             </motion.div>
           </div>
         </div>
