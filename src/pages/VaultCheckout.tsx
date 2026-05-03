@@ -18,13 +18,30 @@ const INCLUDED = [
   'Priority event discovery',
 ];
 
+declare global {
+  interface Window {
+    LemonSqueezy?: { Url: { Open: (url: string) => void } };
+    createLemonSqueezy?: () => void;
+  }
+}
+
 function buildCheckoutUrl(base: string, name: string, email: string) {
   const url = new URL(base);
+  url.searchParams.set('embed', '1');
   url.searchParams.set('checkout[email]', email);
   url.searchParams.set('checkout[name]',  name);
   const successUrl = `${window.location.origin}${window.location.pathname}#/account?vault=success`;
   url.searchParams.set('checkout[success_url]', successUrl);
   return url.toString();
+}
+
+function openOverlay(url: string) {
+  if (window.LemonSqueezy?.Url?.Open) {
+    window.LemonSqueezy.Url.Open(url);
+  } else {
+    // Script not yet loaded — fall back to new tab
+    window.open(url, '_blank', 'noopener');
+  }
 }
 
 export function VaultCheckout() {
@@ -71,7 +88,8 @@ export function VaultCheckout() {
     setIsCreating(true);
     sessionStorage.setItem('ember_pending_plan', selected);
     const url = buildCheckoutUrl(checkoutBase as string, user.name, user.email);
-    window.location.href = url;
+    openOverlay(url);
+    setIsCreating(false);
   };
 
   return (
