@@ -1,0 +1,11 @@
+name = "ember-webhook"
+main = "index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+STORE_EMAIL = "emberworldwide@gmail.com"
+FROM_EMAIL = "Ember <hello@emberworld.co>"
+
+# Set secrets via CLI (never put real values here):
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put LS_WEBHOOK_SECRET
