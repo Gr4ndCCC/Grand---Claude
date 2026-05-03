@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 
 const LEGAL = [
   { label: 'Privacy', to: '/privacy' },
@@ -6,7 +7,7 @@ const LEGAL = [
   { label: 'Contact', to: '/contact' },
 ];
 
-const PLATFORM = [
+const PLATFORM_BASE = [
   { label: 'Events',  to: '/events' },
   { label: 'Vault',   to: '/vault'  },
   { label: 'Hosts',   to: '/hosts'  },
@@ -24,6 +25,10 @@ const BROTHERHOOD = [
 
 export function Footer() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const PLATFORM = user
+    ? [{ label: 'Account', to: '/account' }, ...PLATFORM_BASE]
+    : PLATFORM_BASE;
 
   return (
     <footer style={{ background: '#0A0A0A', borderTop: '1px solid rgba(255,255,255,0.06)' }}>

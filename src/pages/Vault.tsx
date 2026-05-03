@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -87,10 +88,11 @@ function VaultPricing() {
 export function Vault() {
   const { user, openAuth } = useAuth();
   const navigate = useNavigate();
+  const [plan, setPlan] = useState<'monthly' | 'annual'>('annual');
 
   const handleJoin = () => {
     if (!user) return openAuth('Create your Ember account to join the Vault.');
-    navigate('/vault/checkout');
+    navigate(`/vault/checkout?plan=${plan}`);
   };
 
   return (
@@ -119,11 +121,43 @@ export function Vault() {
             The Council. Annual Summit. One membership. Everything.
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}
-            style={{ display: 'inline-flex', gap: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '12px', padding: '6px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '48px' }}
+            role="tablist" aria-label="Choose billing plan"
+            style={{ display: 'inline-flex', gap: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '14px', padding: '8px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '48px', flexWrap: 'wrap' }}
           >
-            {['Monthly · €15', 'Annual · €99 · Save 45%'].map((l, i) => (
-              <div key={l} style={{ padding: '10px 20px', borderRadius: '8px', background: i === 1 ? 'var(--maroon)' : 'transparent', color: i === 1 ? '#fff' : '#A0A0A0', fontSize: '14px', fontWeight: i === 1 ? 600 : 400 }}>{l}</div>
-            ))}
+            <button
+              type="button"
+              role="tab"
+              aria-selected={plan === 'monthly'}
+              onClick={() => setPlan('monthly')}
+              style={{
+                padding: '14px 28px', borderRadius: '10px',
+                background: plan === 'monthly' ? 'var(--maroon)' : 'transparent',
+                color: plan === 'monthly' ? '#fff' : '#C8B8A2',
+                fontSize: '16px',
+                fontWeight: plan === 'monthly' ? 700 : 500,
+                fontFamily: 'inherit',
+                border: 'none', cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: plan === 'monthly' ? '0 4px 16px rgba(128,0,0,0.4)' : 'none',
+              }}
+            >Monthly · €15</button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={plan === 'annual'}
+              onClick={() => setPlan('annual')}
+              style={{
+                padding: '14px 28px', borderRadius: '10px',
+                background: plan === 'annual' ? 'var(--maroon)' : 'transparent',
+                color: plan === 'annual' ? '#fff' : '#C8B8A2',
+                fontSize: '16px',
+                fontWeight: plan === 'annual' ? 700 : 500,
+                fontFamily: 'inherit',
+                border: 'none', cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: plan === 'annual' ? '0 4px 16px rgba(128,0,0,0.4)' : 'none',
+              }}
+            >Annual · €99 · Save 45%</button>
           </motion.div>
           <br />
           <button onClick={handleJoin}

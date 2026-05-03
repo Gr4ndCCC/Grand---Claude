@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Check, Flame, Shield, CreditCard } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
@@ -17,12 +17,34 @@ const INCLUDED = [
   'Priority event discovery',
 ];
 
+const LS_URLS = {
+  monthly: import.meta.env.VITE_LS_MONTHLY_URL as string | undefined,
+  annual:  import.meta.env.VITE_LS_ANNUAL_URL  as string | undefined,
+};
+
+function buildCheckoutUrl(base: string, name: string, email: string) {
+  const url = new URL(base);
+  url.searchParams.set('checkout[email]', email);
+  url.searchParams.set('checkout[name]',  name);
+  // Carry the user back to the account page after success
+  const successUrl = `${window.location.origin}${window.location.pathname}#/account?vault=success`;
+  url.searchParams.set('checkout[success_url]', successUrl);
+  return url.toString();
+}
+
 export function VaultCheckout() {
-  const { user, openAuth, updateUser } = useAuth();
+  const { user, openAuth } = useAuth();
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<'monthly' | 'annual'>('annual');
+  const [params] = useSearchParams();
+  const initialPlan = (params.get('plan') === 'monthly' ? 'monthly' : 'annual') as 'monthly' | 'annual';
+  const [selected, setSelected] = useState<'monthly' | 'annual'>(initialPlan);
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const p = params.get('plan');
+    if (p === 'monthly' || p === 'annual') setSelected(p);
+  }, [params]);
 
   if (!user) {
     return (
@@ -42,34 +64,19 @@ export function VaultCheckout() {
     );
   }
 
-  const handleCheckout = async () => {
-    setIsCreating(true);
+  const checkoutBase = LS_URLS[selected];
+  const isConfigured = !!checkoutBase && /^https?:\/\//.test(checkoutBase);
+
+  const handleCheckout = () => {
     setError('');
-
-    try {
-      const response = await fetch('/api/lemonsqueezy/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          plan: selected,
-          email: user.email,
-          name: user.name,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok || !data.url) {
-        throw new Error(data.error || 'Checkout could not be created.');
-      }
-      sessionStorage.setItem('ember_pending_plan', selected);
-      window.location.href = data.url;
-
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout could not be created.');
-      updateUser({ subPlan: null, subActive: false });
-    } finally {
-      setIsCreating(false);
+    if (!isConfigured) {
+      setError('Lemon Squeezy checkout URL is not configured yet. Set VITE_LS_MONTHLY_URL and VITE_LS_ANNUAL_URL in your environment.');
+      return;
     }
+    setIsCreating(true);
+    sessionStorage.setItem('ember_pending_plan', selected);
+    const url = buildCheckoutUrl(checkoutBase as string, user.name, user.email);
+    window.location.href = url;
   };
 
   return (
@@ -190,18 +197,26 @@ export function VaultCheckout() {
                 </div>
               </div>
 
+              {!isConfigured && (
+                <div style={{ background: 'rgba(234,179,8,0.10)', border: '1px solid rgba(234,179,8,0.30)', borderRadius: '8px', padding: '10px 12px', marginBottom: '14px' }}>
+                  <p style={{ color: '#facc15', fontSize: '12px', lineHeight: 1.5 }}>
+                    Lemon Squeezy is not yet configured. Add <code>VITE_LS_MONTHLY_URL</code> and <code>VITE_LS_ANNUAL_URL</code> to your environment with the checkout URLs from your Lemon Squeezy dashboard.
+                  </p>
+                </div>
+              )}
+
               {error && (
                 <div style={{ background: 'rgba(239,68,68,0.10)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: '8px', padding: '10px 12px', marginBottom: '14px' }}>
                   <p style={{ color: '#fca5a5', fontSize: '12px', lineHeight: 1.5 }}>{error}</p>
                 </div>
               )}
 
-              <button onClick={handleCheckout} disabled={isCreating}
-                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', cursor: isCreating ? 'wait' : 'pointer', opacity: isCreating ? 0.8 : 1, fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
+              <button onClick={handleCheckout} disabled={isCreating || !isConfigured}
+                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', cursor: isCreating ? 'wait' : (isConfigured ? 'pointer' : 'not-allowed'), opacity: isCreating ? 0.8 : (isConfigured ? 1 : 0.5), fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
+                onMouseEnter={e => { if (isConfigured) e.currentTarget.style.background = 'var(--maroon-light)'; }}
                 onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
               >
-                <CreditCard size={16} /> {isCreating ? 'Creating checkout...' : 'Proceed to Payment'}
+                <CreditCard size={16} /> {isCreating ? 'Redirecting…' : 'Proceed to Payment'}
               </button>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '12px' }}>
