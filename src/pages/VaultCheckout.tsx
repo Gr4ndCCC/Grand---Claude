@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Flame, Shield, CreditCard } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
+import { getCheckoutUrl } from '../config/checkout';
 
 const INCLUDED = [
   'Unlimited recipe access',
@@ -17,16 +18,10 @@ const INCLUDED = [
   'Priority event discovery',
 ];
 
-const LS_URLS = {
-  monthly: import.meta.env.VITE_LS_MONTHLY_URL as string | undefined,
-  annual:  import.meta.env.VITE_LS_ANNUAL_URL  as string | undefined,
-};
-
 function buildCheckoutUrl(base: string, name: string, email: string) {
   const url = new URL(base);
   url.searchParams.set('checkout[email]', email);
   url.searchParams.set('checkout[name]',  name);
-  // Carry the user back to the account page after success
   const successUrl = `${window.location.origin}${window.location.pathname}#/account?vault=success`;
   url.searchParams.set('checkout[success_url]', successUrl);
   return url.toString();
@@ -64,13 +59,13 @@ export function VaultCheckout() {
     );
   }
 
-  const checkoutBase = LS_URLS[selected];
+  const checkoutBase = getCheckoutUrl(selected);
   const isConfigured = !!checkoutBase && /^https?:\/\//.test(checkoutBase);
 
   const handleCheckout = () => {
     setError('');
     if (!isConfigured) {
-      setError('Lemon Squeezy checkout URL is not configured yet. Set VITE_LS_MONTHLY_URL and VITE_LS_ANNUAL_URL in your environment.');
+      setError('Lemon Squeezy checkout URL is not set. Open src/config/checkout.ts and paste your URL into the `default` field.');
       return;
     }
     setIsCreating(true);
@@ -200,7 +195,7 @@ export function VaultCheckout() {
               {!isConfigured && (
                 <div style={{ background: 'rgba(234,179,8,0.10)', border: '1px solid rgba(234,179,8,0.30)', borderRadius: '8px', padding: '10px 12px', marginBottom: '14px' }}>
                   <p style={{ color: '#facc15', fontSize: '12px', lineHeight: 1.5 }}>
-                    Lemon Squeezy is not yet configured. Add <code>VITE_LS_MONTHLY_URL</code> and <code>VITE_LS_ANNUAL_URL</code> to your environment with the checkout URLs from your Lemon Squeezy dashboard.
+                    Paste your Lemon Squeezy checkout URL into <code>src/config/checkout.ts</code> (the <code>default</code> field) and redeploy.
                   </p>
                 </div>
               )}
