@@ -14,7 +14,7 @@
  * URLs look like: https://YOURSTORE.lemonsqueezy.com/buy/abc-123-def-456
  */
 export const LEMONSQUEEZY_CHECKOUT = {
-  default: '',  // ← single URL for both plans (easiest)
+  default: 'https://checkout.emberworld.co/checkout/buy/d93985c6-4550-4d51-80de-35d6fce07aa2',
   monthly: '',  // ← optional: separate URL for the monthly variant
   annual:  '',  // ← optional: separate URL for the annual variant
 };
