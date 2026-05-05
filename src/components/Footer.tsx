@@ -31,52 +31,67 @@ export function Footer() {
     : PLATFORM_BASE;
 
   return (
-    <footer style={{ background: '#0A0A0A', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-      <div className="page-container py-16">
-        <div className="grid md:grid-cols-3 gap-12 mb-12">
+    <footer style={{ background: '#090504', position: 'relative', overflow: 'hidden' }}>
+      {/* Maroon-to-transparent top hairline */}
+      <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent 0%, rgba(128,0,0,0.6) 30%, rgba(228,207,179,0.15) 50%, rgba(128,0,0,0.6) 70%, transparent 100%)' }} />
+
+      {/* Subtle maroon smoke behind wordmark */}
+      <div style={{ position: 'absolute', top: 0, left: 0, width: '500px', height: '300px', background: 'radial-gradient(ellipse at 20% 20%, rgba(128,0,0,0.07) 0%, transparent 60%)', pointerEvents: 'none' }} />
+
+      <div className="page-container py-16" style={{ position: 'relative', zIndex: 1 }}>
+        <div className="grid md:grid-cols-3 gap-12 mb-14">
+
+          {/* Brand column */}
           <div>
             <button
               onClick={() => navigate('/')}
-              className="ember-focus mb-4"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block' }}
+              className="ember-focus"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', marginBottom: '12px' }}
             >
-              <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: 'var(--beige)' }}>
+              <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: 'var(--beige)', letterSpacing: '-0.01em', lineHeight: 1 }}>
                 Ember
               </span>
             </button>
-            <p style={{ color: '#5A5A5A', fontSize: '14px', lineHeight: '1.7', maxWidth: '280px' }}>
-              The world's first global social BBQ brotherhood. 40+ countries. One fire.
+            <p style={{ color: 'var(--beige)', fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '15px', marginBottom: '12px', opacity: 0.6 }}>
+              The world grills.
+            </p>
+            <p style={{ color: '#4A4A4A', fontSize: '13px', lineHeight: '1.7', maxWidth: '260px' }}>
+              The global social BBQ brotherhood. 40+ countries. One fire.
             </p>
           </div>
 
+          {/* Platform column */}
           <div>
-            <p className="mono mb-4" style={{ color: '#5A5A5A' }}>Platform</p>
-            <ul className="flex flex-col gap-3">
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '10px', letterSpacing: '0.15em' }}>Platform</p>
+            <div style={{ width: '16px', height: '1px', background: 'linear-gradient(90deg, var(--maroon), transparent)', marginBottom: '16px' }} />
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {PLATFORM.map(({ label, to }) => (
                 <li key={label}>
                   <button
                     onClick={() => navigate(to)}
-                    className="ember-focus"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#A0A0A0', fontSize: '14px', transition: 'color 0.2s' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                    className="ember-focus footer-link"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', color: '#6A6A6A', fontSize: '14px', transition: 'color 0.2s, padding-left 0.2s', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '0px', textAlign: 'left' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#E4CFB3'; e.currentTarget.style.paddingLeft = '6px'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#6A6A6A'; e.currentTarget.style.paddingLeft = '0'; }}
                   >{label}</button>
                 </li>
               ))}
             </ul>
           </div>
 
+          {/* Brotherhood column */}
           <div>
-            <p className="mono mb-4" style={{ color: '#5A5A5A' }}>The Brotherhood</p>
-            <ul className="flex flex-col gap-3">
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '10px', letterSpacing: '0.15em' }}>The Brotherhood</p>
+            <div style={{ width: '16px', height: '1px', background: 'linear-gradient(90deg, var(--maroon), transparent)', marginBottom: '16px' }} />
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {BROTHERHOOD.map(({ label, to }) => (
                 <li key={label}>
                   <button
                     onClick={() => navigate(to)}
                     className="ember-focus"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: '#A0A0A0', fontSize: '14px', transition: 'color 0.2s', textAlign: 'left' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0', color: '#6A6A6A', fontSize: '14px', transition: 'color 0.2s, padding-left 0.2s', fontFamily: 'inherit', textAlign: 'left' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#E4CFB3'; e.currentTarget.style.paddingLeft = '6px'; }}
+                    onMouseLeave={e => { e.currentTarget.style.color = '#6A6A6A'; e.currentTarget.style.paddingLeft = '0'; }}
                   >{label}</button>
                 </li>
               ))}
@@ -84,15 +99,21 @@ export function Footer() {
           </div>
         </div>
 
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <p className="mono" style={{ color: '#5A5A5A' }}>© {new Date().getFullYear()} Ember · The world grills.</p>
-          <div className="flex gap-6">
+        {/* Bottom bar */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="animate-ember-pulse" style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#c96e47', display: 'inline-block', flexShrink: 0 }} />
+            <p className="mono" style={{ color: '#333', fontSize: '10px' }}>
+              © {new Date().getFullYear()} Ember · The world grills.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '24px' }}>
             {LEGAL.map(({ label, to }) => (
               <button key={label} className="ember-focus mono"
                 onClick={() => navigate(to)}
-                style={{ color: '#5A5A5A', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#A0A0A0')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#5A5A5A')}
+                style={{ color: '#333', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 0.2s', fontSize: '10px' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#6A6A6A')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#333')}
               >{label}</button>
             ))}
           </div>

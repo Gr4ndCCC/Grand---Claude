@@ -37,11 +37,11 @@ function VaultPricing() {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px', maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', maxWidth: '720px', margin: '0 auto', alignItems: 'stretch' }}>
       {/* Monthly */}
-      <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '36px' }}>
+      <div style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '36px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
         <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>Monthly</p>
-        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff', marginBottom: '4px' }}>€15</p>
+        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', color: '#fff', marginBottom: '4px', lineHeight: 1 }}>€15</p>
         <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per month · cancel anytime</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.slice(0, 6).map(f => (
@@ -57,29 +57,37 @@ function VaultPricing() {
         >Start monthly</button>
       </div>
 
-      {/* Annual */}
-      <div style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.35)', borderRadius: '16px', padding: '36px', position: 'relative' }}>
-        <span className="mono" style={{ position: 'absolute', top: '16px', right: '16px', color: 'var(--maroon)', background: 'rgba(128,0,0,0.15)', borderRadius: '6px', padding: '4px 10px', fontSize: '10px' }}>
-          Best value
+      {/* Annual — the prize */}
+      <div style={{
+        background: 'linear-gradient(160deg, rgba(128,0,0,0.18) 0%, rgba(85,0,0,0.10) 100%)',
+        border: '1px solid rgba(228,207,179,0.18)',
+        borderRadius: '18px', padding: '40px 36px', position: 'relative',
+        transform: 'scale(1.02)',
+        boxShadow: '0 24px 60px rgba(128,0,0,0.28), 0 0 0 1px rgba(228,207,179,0.06), inset 0 1px 0 rgba(228,207,179,0.08)',
+      }}>
+        <span className="mono" style={{ position: 'absolute', top: '-1px', right: '20px', transform: 'translateY(-50%)', color: '#fff', background: 'var(--maroon)', borderRadius: '999px', padding: '5px 12px', fontSize: '10px', boxShadow: '0 4px 16px rgba(128,0,0,0.5)' }}>
+          ★ Best value
         </span>
-        <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>Annual</p>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '4px' }}>
-          <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '44px', color: '#fff' }}>€99</p>
-          <p style={{ color: '#5A5A5A', textDecoration: 'line-through', fontSize: '14px' }}>€180</p>
+        {/* Ember dot above price */}
+        <span className="animate-ember-pulse" style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#c96e47', boxShadow: '0 0 10px #c96e47', marginBottom: '14px' }} />
+        <p className="mono" style={{ color: 'var(--beige)', marginBottom: '12px' }}>Annual · Inner Circle</p>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
+          <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '56px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€99</p>
+          <p style={{ color: '#5A5A5A', textDecoration: 'line-through', fontSize: '15px' }}>€180</p>
         </div>
-        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per year · save 45%</p>
+        <p style={{ color: 'var(--beige)', marginBottom: '28px', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>SAVE 45% · €8.25/month</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
-              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0, marginTop: '2px' }} />{f}
+            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#C8B8A2', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--beige)', flexShrink: 0, marginTop: '2px' }} />{f}
             </li>
           ))}
         </ul>
         <button onClick={handleJoin}
-          style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', transition: 'all 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
-        >Start annual</button>
+          style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '15px', cursor: 'pointer', fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: '0 4px 18px rgba(128,0,0,0.35)', letterSpacing: '0.01em' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(128,0,0,0.55)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(128,0,0,0.35)'; }}
+        >Claim your seat →</button>
       </div>
     </div>
   );

@@ -98,19 +98,22 @@ export function FireButton({
           borderRadius: '10px',
           cursor: 'pointer',
           fontFamily: 'inherit',
-          transition: 'all 0.2s',
+          transition: 'all 0.25s var(--ease-spark)',
           width: fullWidth ? '100%' : undefined,
           position: 'relative',
           zIndex: 1,
+          // Idle ember halo for primary — always faintly glowing like a coal
+          boxShadow: variant === 'primary' ? '0 0 0 1px rgba(228,207,179,0.04), 0 4px 18px rgba(128,0,0,0.18)' : undefined,
         }}
         onMouseEnter={e => {
           if (variant === 'primary') {
             e.currentTarget.style.background = 'var(--maroon-light)';
             e.currentTarget.style.transform = 'translateY(-2px)';
-            e.currentTarget.style.boxShadow = 'var(--shadow-maroon)';
+            e.currentTarget.style.boxShadow = '0 0 0 1px rgba(228,207,179,0.10), 0 8px 32px rgba(128,0,0,0.55)';
           } else if (variant === 'outline') {
             e.currentTarget.style.background = 'rgba(228,207,179,0.07)';
             e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.borderColor = 'rgba(228,207,179,0.45)';
           } else {
             e.currentTarget.style.background = 'rgba(255,255,255,0.10)';
           }
@@ -119,10 +122,11 @@ export function FireButton({
           if (variant === 'primary') {
             e.currentTarget.style.background = 'var(--maroon)';
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = 'none';
+            e.currentTarget.style.boxShadow = '0 0 0 1px rgba(228,207,179,0.04), 0 4px 18px rgba(128,0,0,0.18)';
           } else if (variant === 'outline') {
             e.currentTarget.style.background = 'transparent';
             e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.borderColor = 'rgba(228,207,179,0.25)';
           } else {
             e.currentTarget.style.background = 'rgba(255,255,255,0.06)';
           }

@@ -40,15 +40,15 @@ export default {
         display: 'var(--t-display)',
       },
       animation: {
-      'ember-pulse': 'ember-pulse 1.6s ease-in-out infinite',
-    },
-    keyframes: {
-      'ember-pulse': {
-        '0%,100%': { opacity: '1', boxShadow: '0 0 8px #c96e47'  },
-        '50%':     { opacity: '.7', boxShadow: '0 0 18px #e8b196' },
+        'ember-pulse': 'ember-pulse 1.6s ease-in-out infinite',
       },
-    },
-    boxShadow: {
+      keyframes: {
+        'ember-pulse': {
+          '0%,100%': { opacity: '1', boxShadow: '0 0 8px #c96e47'  },
+          '50%':     { opacity: '.7', boxShadow: '0 0 18px #e8b196' },
+        },
+      },
+      boxShadow: {
         '1':      'var(--shadow-1)',
         '2':      'var(--shadow-2)',
         '3':      'var(--shadow-3)',

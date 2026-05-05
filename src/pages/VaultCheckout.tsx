@@ -14,15 +14,15 @@ declare global {
   }
 }
 
-const PERKS = [
-  'Unlimited recipe access',
-  'Live & recorded masterclasses',
-  'Brotherhood Network badge',
-  'Board certification eligibility',
-  'Partner discounts & early access',
-  'Council voting rights',
-  'Annual Summit access',
-  'Priority event discovery',
+const PERKS: { title: string; desc: string }[] = [
+  { title: 'The full recipe vault',          desc: 'Every pitmaster recipe. Unlocked. Forever.' },
+  { title: 'Live masterclasses, on demand',  desc: 'Train with world-class pitmasters in real time.' },
+  { title: 'The Brotherhood Network',        desc: 'Verified badge. Direct line to 40+ countries of grillers.' },
+  { title: 'Board certification path',       desc: 'Earn the title. Become a certified Ember pitmaster.' },
+  { title: 'Partner discounts & early drops',desc: 'Exclusive gear, rubs, and tools — before anyone else.' },
+  { title: 'Council voting rights',          desc: 'Shape the future of Ember. Your voice. Your fire.' },
+  { title: 'Annual Summit access',           desc: 'The yearly gathering. Smoke, steel, brotherhood.' },
+  { title: 'Priority event discovery',       desc: 'See the best gatherings first. Lock your seat.' },
 ];
 
 function buildCheckoutUrl(base: string, name: string, email: string) {
@@ -93,7 +93,7 @@ export function VaultCheckout() {
   const initialPlan = (params.get('plan') === 'monthly' ? 'monthly' : 'annual') as 'monthly' | 'annual';
 
   const [selected, setSelected]     = useState<'monthly' | 'annual'>(initialPlan);
-  const [paymentTab, setPaymentTab] = useState<'card' | 'paypal'>('card');
+  const [paymentTab, setPaymentTab] = useState<'card' | 'apple' | 'paypal'>('card');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc]       = useState('');
@@ -266,18 +266,59 @@ export function VaultCheckout() {
                 </button>
               </motion.div>
 
-              {/* What's included */}
+              {/* What you're actually buying */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.16 }}
-                style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '22px 24px' }}
+                style={{
+                  background: 'linear-gradient(180deg, rgba(128,0,0,0.06) 0%, rgba(255,255,255,0.02) 100%)',
+                  border: '1px solid rgba(228,207,179,0.10)',
+                  borderRadius: '20px',
+                  padding: '28px 28px 30px',
+                  boxShadow: '0 4px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}
               >
-                <p className="mono" style={{ color: '#333', marginBottom: '16px', fontSize: '10px' }}>Everything included in both plans</p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 16px' }}>
-                  {PERKS.map(label => (
-                    <div key={label} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
-                      <Check size={10} style={{ color: 'var(--maroon)', marginTop: '3px', flexShrink: 0 }} />
-                      <span style={{ color: '#5A5A5A', fontSize: '12px', lineHeight: 1.45 }}>{label}</span>
+                <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '11px', letterSpacing: '0.18em' }}>
+                  WHAT YOU GET
+                </p>
+                <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '26px', fontWeight: 400, lineHeight: 1.15, color: '#fff', marginBottom: '6px' }}>
+                  Everything Ember has to offer.<br />
+                  <span style={{ color: '#E4CFB3', fontStyle: 'italic' }}>One membership. No gates.</span>
+                </h2>
+                <p style={{ color: '#8A8A8A', fontSize: '14px', lineHeight: 1.55, marginBottom: '24px' }}>
+                  Both plans unlock the full Vault. Cancel anytime — but nobody does.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 20px' }} className="vault-perks-grid">
+                  {PERKS.map(({ title, desc }) => (
+                    <div key={title} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                      <div style={{
+                        width: '22px', height: '22px', borderRadius: '50%',
+                        background: 'rgba(128,0,0,0.18)',
+                        border: '1px solid rgba(128,0,0,0.40)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0, marginTop: '1px',
+                      }}>
+                        <Check size={12} style={{ color: '#E4CFB3' }} strokeWidth={2.5} />
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 600, marginBottom: '2px', lineHeight: 1.3 }}>
+                          {title}
+                        </p>
+                        <p style={{ color: '#9A9A9A', fontSize: '12.5px', lineHeight: 1.45 }}>
+                          {desc}
+                        </p>
+                      </div>
                     </div>
                   ))}
+                </div>
+
+                {/* Closing line */}
+                <div style={{ marginTop: '26px', paddingTop: '20px', borderTop: '1px solid rgba(228,207,179,0.10)', textAlign: 'center' }}>
+                  <p style={{
+                    color: '#E4CFB3', fontFamily: 'Playfair Display, Georgia, serif',
+                    fontStyle: 'italic', fontSize: '17px', lineHeight: 1.4,
+                  }}>
+                    "The world grills. The Vault is where the brotherhood keeps the fire."
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -368,14 +409,24 @@ export function VaultCheckout() {
                     <button
                       type="button"
                       onClick={() => setPaymentTab('card')}
-                      style={{ flex: 1, padding: '8px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', fontWeight: 500, transition: 'all 0.2s', background: paymentTab === 'card' ? '#1C1C1C' : 'transparent', color: paymentTab === 'card' ? '#fff' : '#4A4A4A', boxShadow: paymentTab === 'card' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
+                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'inherit', fontWeight: 500, transition: 'all 0.2s', background: paymentTab === 'card' ? '#1C1C1C' : 'transparent', color: paymentTab === 'card' ? '#fff' : '#4A4A4A', boxShadow: paymentTab === 'card' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
                     >
                       <CreditCard size={12} /> Card
                     </button>
                     <button
                       type="button"
+                      onClick={() => setPaymentTab('apple')}
+                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'inherit', fontWeight: 600, transition: 'all 0.2s', background: paymentTab === 'apple' ? '#1C1C1C' : 'transparent', color: paymentTab === 'apple' ? '#fff' : '#4A4A4A', boxShadow: paymentTab === 'apple' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+                    >
+                      <svg width="11" height="13" viewBox="0 0 13 16" fill="currentColor" aria-hidden="true">
+                        <path d="M10.83 8.5c-.02-2.04 1.66-3.02 1.74-3.07-.95-1.39-2.43-1.58-2.95-1.6-1.25-.13-2.45.74-3.08.74-.65 0-1.62-.72-2.67-.7-1.37.02-2.65.8-3.36 2.03-1.43 2.49-.36 6.16 1.03 8.18.68.99 1.49 2.1 2.55 2.06 1.03-.04 1.42-.66 2.66-.66 1.24 0 1.59.66 2.67.64 1.1-.02 1.8-1.01 2.47-2 .78-1.15 1.1-2.27 1.12-2.32-.02-.01-2.16-.83-2.18-3.3zM8.83 2.55C9.4 1.86 9.78.91 9.68 0c-.78.03-1.74.52-2.32 1.2-.52.6-.97 1.57-.85 2.46.87.07 1.76-.44 2.32-1.11z"/>
+                      </svg>
+                      Pay
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setPaymentTab('paypal')}
-                      style={{ flex: 1, padding: '8px 10px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.04em', transition: 'all 0.2s', background: paymentTab === 'paypal' ? '#1C1C1C' : 'transparent', color: paymentTab === 'paypal' ? '#009cde' : '#4A4A4A', boxShadow: paymentTab === 'paypal' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none' }}
+                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.04em', transition: 'all 0.2s', background: paymentTab === 'paypal' ? '#1C1C1C' : 'transparent', color: paymentTab === 'paypal' ? '#009cde' : '#4A4A4A', boxShadow: paymentTab === 'paypal' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none' }}
                     >
                       PayPal
                     </button>
@@ -480,6 +531,20 @@ export function VaultCheckout() {
                             </select>
                           </div>
                         </motion.div>
+                      ) : paymentTab === 'apple' ? (
+                        <motion.div key="apple" initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }}
+                          style={{ padding: '24px 20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', marginBottom: '16px', textAlign: 'center' }}
+                        >
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                            <svg width="22" height="26" viewBox="0 0 13 16" fill="#fff" aria-hidden="true">
+                              <path d="M10.83 8.5c-.02-2.04 1.66-3.02 1.74-3.07-.95-1.39-2.43-1.58-2.95-1.6-1.25-.13-2.45.74-3.08.74-.65 0-1.62-.72-2.67-.7-1.37.02-2.65.8-3.36 2.03-1.43 2.49-.36 6.16 1.03 8.18.68.99 1.49 2.1 2.55 2.06 1.03-.04 1.42-.66 2.66-.66 1.24 0 1.59.66 2.67.64 1.1-.02 1.8-1.01 2.47-2 .78-1.15 1.1-2.27 1.12-2.32-.02-.01-2.16-.83-2.18-3.3zM8.83 2.55C9.4 1.86 9.78.91 9.68 0c-.78.03-1.74.52-2.32 1.2-.52.6-.97 1.57-.85 2.46.87.07 1.76-.44 2.32-1.11z"/>
+                            </svg>
+                            <span style={{ color: '#fff', fontSize: '17px', fontWeight: 600, letterSpacing: '-0.01em' }}>Pay</span>
+                          </div>
+                          <p style={{ color: '#7A7A7A', fontSize: '12px', lineHeight: 1.6 }}>
+                            Confirm with Face ID or Touch ID at checkout. No card details to enter.
+                          </p>
+                        </motion.div>
                       ) : (
                         <motion.div key="paypal" initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }}
                           style={{ padding: '20px', background: 'rgba(0,156,222,0.04)', border: '1px solid rgba(0,156,222,0.14)', borderRadius: '12px', marginBottom: '16px', textAlign: 'center' }}
@@ -528,7 +593,11 @@ export function VaultCheckout() {
                         <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'vault-shimmer 1s linear infinite', borderRadius: '12px' }} />
                       )}
                       {!isSubmitting && <Lock size={13} />}
-                      {isSubmitting ? 'Opening checkout…' : paymentTab === 'card' ? 'Complete Secure Checkout' : 'Continue with PayPal'}
+                      {isSubmitting
+                        ? 'Opening checkout…'
+                        : paymentTab === 'card'   ? 'Complete Secure Checkout'
+                        : paymentTab === 'apple'  ? 'Pay with  Pay'
+                        : 'Continue with PayPal'}
                     </button>
                   </form>
 
@@ -582,6 +651,11 @@ export function VaultCheckout() {
           }
           .vault-co-grid > div:last-child {
             position: static !important;
+          }
+        }
+        @media (max-width: 540px) {
+          .vault-perks-grid {
+            grid-template-columns: 1fr !important;
           }
         }
         @keyframes vault-shimmer {

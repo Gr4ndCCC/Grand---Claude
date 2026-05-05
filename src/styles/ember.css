@@ -129,6 +129,11 @@ p { margin: 0; }
 }
 .city-scroll:hover { animation-play-state: paused; }
 
+.city-scroll-mask {
+  -webkit-mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, black 8%, black 92%, transparent 100%);
+}
+
 /* smoke pulse — very subtle atmospheric */
 @keyframes smoke-pulse {
   0%, 100% { opacity: 0.08; transform: scale(1); }
@@ -228,6 +233,15 @@ p { margin: 0; }
   }
   .about-split > * {
     order: unset !important;
+  }
+}
+
+/* hero stats — 2-col on small phones */
+@media (max-width: 480px) {
+  .hero-stats {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px 20px !important;
   }
 }
 

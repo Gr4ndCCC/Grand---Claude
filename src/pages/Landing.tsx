@@ -8,26 +8,6 @@ import { FireButton } from '../components/FireButton';
 import { useAuth } from '../lib/auth';
 import { FireGraph } from '../components/ui/FireGraph';
 
-function HintText() {
-  const [visible, setVisible] = useState(true);
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(false), 4000);
-    return () => clearTimeout(t);
-  }, []);
-  return (
-    <div style={{
-      position: 'absolute', bottom: '16px', left: '50%',
-      transform: 'translateX(-50%)', pointerEvents: 'none', zIndex: 2,
-      opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease',
-      fontFamily: 'JetBrains Mono, monospace', fontSize: '11px',
-      color: 'rgba(200,184,162,0.55)', whiteSpace: 'nowrap',
-    }}>
-      drag nodes · double-click to ignite
-    </div>
-  );
-}
-
-
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
@@ -346,26 +326,6 @@ export function Landing() {
           background: 'linear-gradient(90deg, rgba(9,5,4,0.92) 0%, rgba(9,5,4,0.82) 32%, rgba(9,5,4,0.45) 52%, rgba(9,5,4,0.10) 68%, rgba(9,5,4,0) 80%)',
         }} />
 
-        {/* HUD pill at top center of hero */}
-        <div style={{
-          position: 'absolute', top: '92px', left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', alignItems: 'center', gap: '12px',
-          padding: '10px 20px', borderRadius: '999px',
-          border: '1px solid rgba(255,255,255,0.1)',
-          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)',
-          pointerEvents: 'none', whiteSpace: 'nowrap', zIndex: 4,
-        }}>
-          <span className="animate-ember-pulse"
-            style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', display: 'inline-block', flexShrink: 0 }}
-          />
-          <span style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C8B8A2' }}>
-            Ember · The global BBQ brotherhood
-          </span>
-        </div>
-
-        {/* Hint */}
-        <HintText />
-
         {/* Text content layered above the fire (passes pointer events for the canvas) */}
         <div className="page-container" style={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
           <div style={{ maxWidth: '560px' }}>
@@ -382,15 +342,23 @@ export function Landing() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
               style={{
+                position: 'relative',
                 fontFamily: 'Playfair Display, Georgia, serif',
-                fontSize: 'clamp(42px, 6vw, 80px)',
-                fontWeight: '400', lineHeight: '1.06',
-                color: '#fff', marginBottom: '24px',
+                fontSize: 'clamp(56px, 8.5vw, 128px)',
+                fontWeight: '400', lineHeight: '0.94',
+                letterSpacing: '-0.02em',
+                color: '#fff', marginBottom: '28px',
+                textShadow: '0 2px 40px rgba(128,0,0,0.35)',
               }}
             >
+              <span style={{
+                position: 'absolute', inset: '-40px -120px auto auto', width: '600px', height: '300px',
+                background: 'radial-gradient(ellipse at 30% 40%, rgba(128,0,0,0.18) 0%, transparent 60%)',
+                pointerEvents: 'none', zIndex: -1,
+              }} aria-hidden />
               The world grills.
               <br />
-              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>
+              <span style={{ color: 'var(--beige)', fontStyle: 'italic', fontSize: '0.92em' }}>
                 Join the brotherhood.
               </span>
             </motion.h1>
@@ -423,14 +391,15 @@ export function Landing() {
             <motion.div
               initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               transition={{ delay: 0.55 }}
-              style={{ display: 'flex', gap: '32px', flexWrap: 'wrap' }}
+              className="hero-stats"
+              style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}
             >
               {STATS.map(({ value, suffix, label }) => (
                 <div key={label}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', fontWeight: '400', color: '#fff', lineHeight: 1 }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 4.5vw, 56px)', fontWeight: '400', color: 'var(--beige)', lineHeight: 1, letterSpacing: '-0.02em' }}>
                     <Counter to={value} suffix={suffix} />
                   </p>
-                  <p className="mono" style={{ color: '#5A5A5A', marginTop: '4px' }}>{label}</p>
+                  <p className="mono" style={{ color: '#6A6A6A', marginTop: '8px' }}>{label}</p>
                 </div>
               ))}
             </motion.div>
@@ -439,12 +408,12 @@ export function Landing() {
       </section>
 
       {/* ── CITIES SCROLL ─────────────────────────────────────── */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '16px 0' }}>
+      <div className="city-scroll-mask" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '18px 0' }}>
         <div className="city-scroll">
           {[...CITIES, ...CITIES].map((city, i) => (
-            <span key={i} className="mono" style={{ color: '#5A5A5A', padding: '0 24px', whiteSpace: 'nowrap' }}>
+            <span key={i} className="mono" style={{ color: '#6A6A6A', padding: '0 28px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '28px' }}>
               {city}
-              <span style={{ color: 'var(--maroon)', marginLeft: '24px' }}>·</span>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--maroon)', display: 'inline-block', boxShadow: '0 0 8px rgba(128,0,0,0.5)' }} />
             </span>
           ))}
         </div>
@@ -464,10 +433,25 @@ export function Landing() {
           <div className="grid md:grid-cols-3 gap-8">
             {HOW_STEPS.map(({ n, title, body }, i) => (
               <FadeUp key={n} delay={i * 0.12}>
-                <div style={{ borderLeft: '2px solid var(--maroon)', paddingLeft: '24px' }}>
-                  <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>{n}</p>
-                  <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '12px' }}>{title}</h3>
-                  <p style={{ color: '#A0A0A0', lineHeight: '1.7' }}>{body}</p>
+                <div style={{ position: 'relative', paddingLeft: '28px', minHeight: '160px' }}>
+                  {/* vertical maroon-to-transparent rule */}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '2px', background: 'linear-gradient(180deg, var(--maroon) 0%, rgba(128,0,0,0.10) 100%)' }} />
+                  {/* ember dot at top of rule */}
+                  <span className="animate-ember-pulse" style={{ position: 'absolute', left: '-3px', top: '-2px', width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', boxShadow: '0 0 10px #c96e47' }} />
+                  {/* oversized ghost numeral behind */}
+                  <span style={{
+                    position: 'absolute', left: '20px', top: '-22px', zIndex: 0,
+                    fontFamily: 'Playfair Display, Georgia, serif', fontSize: '110px', fontWeight: 400,
+                    color: 'rgba(228,207,179,0.05)', lineHeight: 1, letterSpacing: '-0.04em',
+                    pointerEvents: 'none', userSelect: 'none',
+                  }}>
+                    {n}
+                  </span>
+                  <div style={{ position: 'relative', zIndex: 1 }}>
+                    <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '14px' }}>STEP {n}</p>
+                    <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', marginBottom: '14px', lineHeight: 1.15 }}>{title}</h3>
+                    <p style={{ color: '#A0A0A0', lineHeight: '1.7', fontSize: '15px' }}>{body}</p>
+                  </div>
                 </div>
               </FadeUp>
             ))}
@@ -476,8 +460,12 @@ export function Landing() {
       </section>
 
       {/* ── THE BOARD ─────────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="page-container">
+      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
+        {/* smoke top fade */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, rgba(128,0,0,0.03), transparent)', pointerEvents: 'none' }} />
+        {/* smoke bottom fade */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, rgba(128,0,0,0.03), transparent)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <FadeUp>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Board</p>
             <span className="maroon-rule" />
@@ -494,15 +482,16 @@ export function Landing() {
             {BOARD_RANKS.map(({ tier, color, req }, i) => (
               <FadeUp key={tier} delay={i * 0.1}>
                 <div className="card-glow" style={{
-                  background: '#111',
+                  background: `linear-gradient(160deg, #141414 0%, #0E0E0E 100%)`,
                   border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: '14px',
+                  borderRadius: '16px',
                   padding: '28px 24px',
+                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
                 }}>
-                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: `${color}22`, border: `1px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
-                    <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: color }} />
+                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${color}18`, border: `1px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px', boxShadow: `0 4px 16px ${color}28` }}>
+                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}80` }} />
                   </div>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff', marginBottom: '10px' }}>{tier}</p>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '10px' }}>{tier}</p>
                   <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{req}</p>
                 </div>
               </FadeUp>
@@ -512,7 +501,7 @@ export function Landing() {
       </section>
 
       {/* ── LIVE EVENTS ───────────────────────────────────────── */}
-      <section style={{ padding: '100px 0' }}>
+      <section style={{ padding: '100px 0', background: '#090504' }}>
         <div className="page-container">
           <FadeUp>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Live this week</p>
@@ -531,7 +520,7 @@ export function Landing() {
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             {EVENTS.map(({ city, flag, title, host, rank, date, time, guests, max }, i) => (
               <FadeUp key={title} delay={i * 0.1}>
-                <div className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <p className="mono" style={{ color: '#5A5A5A', marginBottom: '6px' }}>{flag} {city}</p>
@@ -569,8 +558,10 @@ export function Landing() {
       </section>
 
       {/* ── THE INTERACTION (RSVP + MENU) ─────────────────────── */}
-      <section style={{ padding: '100px 0', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="page-container">
+      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, transparent)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, transparent)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <FadeUp>
             <RSVPMenu />
           </FadeUp>
@@ -578,8 +569,10 @@ export function Landing() {
       </section>
 
       {/* ── THE VAULT ─────────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="page-container">
+      <section style={{ padding: '100px 0', background: '#090504', position: 'relative', overflow: 'hidden' }}>
+        {/* Maroon glow behind the section */}
+        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '800px', height: '600px', background: 'radial-gradient(ellipse at 50% 50%, rgba(128,0,0,0.10) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <FadeUp>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Vault</p>
@@ -593,20 +586,20 @@ export function Landing() {
                 Annual Summit access. Everything the grill deserves.
               </p>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '40px' }}>
-                <div style={{ textAlign: 'center', background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px 28px' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€15</p>
-                  <p className="mono" style={{ color: '#5A5A5A' }}>per month</p>
+                <div style={{ textAlign: 'center', background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '20px 28px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€15</p>
+                  <p className="mono" style={{ color: '#5A5A5A', marginTop: '6px' }}>per month</p>
                 </div>
-                <div style={{ textAlign: 'center', background: 'rgba(128,0,0,0.15)', border: '1px solid rgba(128,0,0,0.3)', borderRadius: '12px', padding: '20px 28px' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff' }}>€99</p>
-                  <p className="mono" style={{ color: 'var(--maroon)' }}>annual · best value</p>
+                <div style={{ textAlign: 'center', background: 'linear-gradient(160deg, rgba(128,0,0,0.22) 0%, rgba(85,0,0,0.12) 100%)', border: '1px solid rgba(228,207,179,0.18)', borderRadius: '14px', padding: '20px 28px', boxShadow: '0 8px 28px rgba(128,0,0,0.20), inset 0 1px 0 rgba(228,207,179,0.08)' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€99</p>
+                  <p className="mono" style={{ color: 'var(--beige)', marginTop: '6px' }}>annual · best value</p>
                 </div>
               </div>
               <button
                 style={btn.primary}
                 onClick={() => navigate('/vault')}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(128,0,0,0.55)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = ''; }}
               >Join the Vault →</button>
             </FadeUp>
 
@@ -620,7 +613,7 @@ export function Landing() {
                   { title: 'Partners',            body: 'Premium suppliers, exclusive deals.' },
                   { title: 'The Council',         body: 'Vote on platform direction.' },
                 ].map(({ title, body }) => (
-                  <div key={title} className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '20px' }}>
+                  <div key={title} className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '22px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
                     <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '15px', color: 'var(--beige)', marginBottom: '6px' }}>{title}</p>
                     <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{body}</p>
                   </div>
@@ -632,8 +625,10 @@ export function Landing() {
       </section>
 
       {/* ── TESTIMONIALS ──────────────────────────────────────── */}
-      <section style={{ padding: '100px 0' }}>
-        <div className="page-container">
+      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, transparent)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, transparent)', pointerEvents: 'none' }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <FadeUp>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>From the brotherhood</p>
             <span className="maroon-rule" />
@@ -646,7 +641,7 @@ export function Landing() {
           <div className="grid md:grid-cols-3 gap-5">
             {TESTIMONIALS.map(({ quote, name, city, rank }, i) => (
               <FadeUp key={name} delay={i * 0.1}>
-                <div className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%' }}>
+                <div className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
                   <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '18px', color: 'var(--beige)', lineHeight: '1.6', flex: 1 }}>
                     "{quote}"
                   </p>
