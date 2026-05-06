@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { sendNewsletterEmail } from '../lib/email';
 
 const LEGAL = [
   { label: 'Privacy', to: '/privacy' },
@@ -26,6 +28,14 @@ const BROTHERHOOD = [
 export function Footer() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [nlEmail, setNlEmail] = useState('');
+  const [nlDone, setNlDone] = useState(false);
+
+  const subscribeNewsletter = () => {
+    if (!nlEmail.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) return;
+    sendNewsletterEmail(nlEmail, user?.name);
+    setNlDone(true);
+  };
   const PLATFORM = user
     ? [{ label: 'Account', to: '/account' }, ...PLATFORM_BASE]
     : PLATFORM_BASE;
@@ -55,9 +65,49 @@ export function Footer() {
             <p style={{ color: 'var(--beige)', fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '15px', marginBottom: '12px', opacity: 0.6 }}>
               The world grills.
             </p>
-            <p style={{ color: '#4A4A4A', fontSize: '13px', lineHeight: '1.7', maxWidth: '260px' }}>
+            <p style={{ color: '#4A4A4A', fontSize: '13px', lineHeight: '1.7', maxWidth: '260px', marginBottom: '20px' }}>
               The global social BBQ brotherhood. 40+ countries. One fire.
             </p>
+
+            {/* Newsletter */}
+            {nlDone ? (
+              <p style={{ color: 'var(--beige)', fontSize: '13px', fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic' }}>
+                You're in the fire circle.
+              </p>
+            ) : (
+              <div>
+                <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '10px', letterSpacing: '0.12em' }}>Stay close to the fire</p>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="email"
+                    value={nlEmail}
+                    onChange={e => setNlEmail(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && subscribeNewsletter()}
+                    placeholder="your@email.com"
+                    style={{
+                      flex: 1, background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.10)',
+                      borderRadius: '8px', padding: '9px 12px',
+                      color: '#fff', fontSize: '13px', outline: 'none',
+                      fontFamily: 'inherit', minWidth: 0,
+                    }}
+                  />
+                  <button
+                    onClick={subscribeNewsletter}
+                    style={{
+                      background: 'var(--maroon)', color: '#fff',
+                      border: 'none', borderRadius: '8px',
+                      padding: '9px 14px', cursor: 'pointer',
+                      fontSize: '12px', fontFamily: 'inherit',
+                      fontWeight: 600, flexShrink: 0,
+                      transition: 'background 0.2s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
+                  >Join</button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Platform column */}

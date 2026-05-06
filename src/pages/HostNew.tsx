@@ -9,6 +9,7 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import { createEvent, COVER_PALETTE, THEME_OPTIONS } from '../data/events';
+import { sendEventHostEmail } from '../lib/email';
 
 const FLAG_BY_COUNTRY: Record<string, string> = {
   netherlands: '🇳🇱', amsterdam: '🇳🇱',
@@ -103,6 +104,16 @@ export function HostNew() {
       theme,
       coverColor,
       needed,
+    });
+    sendEventHostEmail({
+      name: user.name,
+      email: user.email,
+      eventTitle: name.trim(),
+      eventDate: formattedDate,
+      eventTime: time,
+      eventLocation: location.trim(),
+      eventId: newEvent.id,
+      maxGuests,
     });
     setTimeout(() => navigate(`/events/${newEvent.id}`), 300);
   };

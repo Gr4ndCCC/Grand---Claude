@@ -34,6 +34,7 @@ jobs:
           VITE_SITE_URL: https://emberworld.co
           VITE_LS_MONTHLY_URL: ${{ secrets.VITE_LS_MONTHLY_URL }}
           VITE_LS_ANNUAL_URL: ${{ secrets.VITE_LS_ANNUAL_URL }}
+          VITE_EMAIL_API_URL: ${{ secrets.VITE_EMAIL_API_URL }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

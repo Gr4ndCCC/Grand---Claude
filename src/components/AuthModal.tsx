@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { FireButton } from './FireButton';
+import { sendWelcomeEmail } from '../lib/email';
 
 function isOver18(dob: string) {
   const d = new Date(dob);
@@ -42,7 +43,9 @@ export function AuthModal() {
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
     await new Promise(r => setTimeout(r, 800));
-    signIn({ email: form.email, name: form.name || form.email.split('@')[0], dob: form.dob, joinedAt: Date.now() });
+    const name = form.name || form.email.split('@')[0];
+    signIn({ email: form.email, name, dob: form.dob, joinedAt: Date.now() });
+    if (mode === 'join') sendWelcomeEmail(name, form.email);
     setLoading(false);
   };
 

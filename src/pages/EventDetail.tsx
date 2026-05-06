@@ -12,6 +12,7 @@ import {
   EmberEvent, getEvent, joinEvent, addContribution, postChat,
   summarizeContributions, Rank,
 } from '../data/events';
+import { sendEventRsvpEmail } from '../lib/email';
 
 const RANK_COLORS: Record<Rank, string> = {
   Legend: '#DAA520', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
@@ -112,6 +113,15 @@ export function EventDetail() {
     if (updated) setEvent({ ...updated });
     setShowJoinModal(false);
     setShowAddModal(true);
+    sendEventRsvpEmail({
+      name: user.name,
+      email: user.email,
+      eventTitle: event.title,
+      eventDate: event.date,
+      eventTime: event.time,
+      eventLocation: event.location,
+      eventId: event.id,
+    });
   };
 
   const submitContribution = () => {
