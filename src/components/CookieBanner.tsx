@@ -38,7 +38,7 @@ export function CookieBanner() {
           <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.6', flex: 1, minWidth: '200px' }}>
             Ember uses cookies to keep you signed in and improve your experience.
             See our{' '}
-            <a href="#/privacy" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Privacy Policy</a>.
+            <a href="/privacy" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Privacy Policy</a>.
           </p>
           <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
             <button

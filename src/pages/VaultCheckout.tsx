@@ -30,7 +30,7 @@ function buildCheckoutUrl(base: string, name: string, email: string) {
   url.searchParams.set('embed', '1');
   url.searchParams.set('checkout[email]', email);
   url.searchParams.set('checkout[name]', name);
-  const successUrl = `${window.location.origin}${window.location.pathname}#/account?vault=success`;
+  const successUrl = `${window.location.origin}/account?vault=success`;
   url.searchParams.set('checkout[success_url]', successUrl);
   return url.toString();
 }

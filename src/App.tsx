@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Landing }        from './pages/Landing';
 import { Events }         from './pages/Events';
 import { Vault }          from './pages/Vault';
@@ -36,7 +36,7 @@ function ScrollToTop() {
 export default function App() {
   return (
     <AuthProvider>
-      <HashRouter>
+      <BrowserRouter>
         <RouteTracker />
         <ScrollToTop />
         <AuthModal />
@@ -61,7 +61,7 @@ export default function App() {
           <Route path="/contact"          element={<Contact />}       />
           <Route path="*"                 element={<Navigate to="/" replace />} />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </AuthProvider>
   );
 }

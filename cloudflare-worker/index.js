@@ -152,7 +152,7 @@ function customerEmailHtml(name, plan, total) {
     </table>
     <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:32px;">
       <tr><td align="center">
-        <a href="https://emberworld.co/#/account"
+        <a href="https://emberworld.co/account"
           style="display:inline-block;background:#800000;color:#fff;text-decoration:none;border-radius:10px;padding:16px 40px;font-family:Georgia,serif;font-size:15px;font-weight:700;">
           Enter the Vault →
         </a>

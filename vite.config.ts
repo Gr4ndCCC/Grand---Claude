@@ -1,13 +1,12 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Use /Grand---Claude/ base path when deploying to GitHub Pages,
-// otherwise root for local dev and other hosts.
-const isGhPages = process.env.DEPLOY_TARGET === 'gh-pages'
+// Site is served from emberworld.co (custom apex domain on GitHub Pages),
+// so absolute root paths are correct. BrowserRouter requires this.
 
 // Replace __SITE_URL__ placeholders in index.html so canonical/OG tags
-// point at the real origin (set in Vercel env vars). Falls back to '' so
-// the build never crashes when the var is unset.
+// point at the real origin. Falls back to '' so the build never crashes
+// when the var is unset.
 function htmlEnvSubstitute(siteUrl: string): Plugin {
   return {
     name: 'html-env-substitute',
@@ -19,9 +18,9 @@ function htmlEnvSubstitute(siteUrl: string): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const siteUrl = env.VITE_SITE_URL || ''
+  const siteUrl = env.VITE_SITE_URL || 'https://emberworld.co'
   return {
     plugins: [react(), htmlEnvSubstitute(siteUrl)],
-    base: isGhPages ? './' : '/',
+    base: '/',
   }
 })
