@@ -6,6 +6,7 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import { FireGraph } from '../components/ui/FireGraph';
+import { CityNetwork } from '../components/CityNetwork';
 
 /* ── tiny utilities ────────────────────────────────────────── */
 
@@ -488,6 +489,43 @@ export function Landing() {
 
       {/* ── BIBLE VERSE BAR ───────────────────────────────────── */}
       <VerseBar />
+
+      {/* ── CITY NETWORK MAP ──────────────────────────────────── */}
+      <section style={{ padding: '80px 0 40px', overflow: 'visible', position: 'relative' }}>
+        <div className="page-container" style={{ overflow: 'visible' }}>
+          <FadeUp>
+            <div className="section-label" style={{ marginBottom: '20px' }}>§ Where the fire burns</div>
+          </FadeUp>
+        </div>
+        {/* Full-width map — no box, bleeds edge to edge */}
+        <FadeUp delay={0.1}>
+          <div style={{ position: 'relative', overflow: 'visible' }}>
+            <div aria-hidden style={{
+              position: 'absolute', top: '40%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '700px', height: '280px',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(128,0,0,0.07) 0%, transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <CityNetwork />
+          </div>
+        </FadeUp>
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+          <div style={{
+            background: 'rgba(128,0,0,0.16)',
+            border: '1px solid rgba(128,0,0,0.38)',
+            borderRadius: '999px',
+            padding: '6px 18px',
+            backdropFilter: 'blur(4px)',
+            display: 'inline-flex', alignItems: 'center', gap: '8px',
+          }}>
+            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--maroon)', boxShadow: '0 0 6px rgba(180,0,0,0.8)' }} />
+            <span className="mono" style={{ color: 'var(--maroon)', fontSize: '11px', letterSpacing: '0.14em' }}>
+              LIVE FIRES ACROSS 40+ COUNTRIES
+            </span>
+          </div>
+        </div>
+      </section>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
       <section className="v3-section" style={{ position: 'relative', padding: '140px 0' }}>
