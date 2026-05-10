@@ -28,66 +28,113 @@ export function Nav() {
       <header
         className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
-          background: scrolled ? 'rgba(10,10,10,0.94)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
+          background: scrolled
+            ? 'linear-gradient(180deg, rgba(8,6,10,0.92) 0%, rgba(8,6,10,0.78) 100%)'
+            : 'linear-gradient(180deg, rgba(8,6,10,0.55) 0%, rgba(8,6,10,0) 100%)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
+          borderBottom: scrolled ? '1px solid rgba(245,237,224,0.06)' : 'none',
         }}
       >
-        <div className="page-container flex items-center justify-between h-16">
-          <button onClick={() => navigate('/')} className="ember-focus"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+        <div className="page-container flex items-center justify-between" style={{ height: '72px' }}>
+          {/* Logo: ember sphere mark + italic-feeling wordmark */}
+          <button
+            onClick={() => navigate('/')}
+            className="ember-focus"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: '10px' }}
           >
-            <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', fontWeight: '400', color: 'var(--beige)', letterSpacing: '-0.3px' }}>Ember</span>
+            <span className="logo-mark-v3" aria-hidden />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 400, color: 'var(--bone-100)', letterSpacing: '-0.01em' }}>
+              ember
+            </span>
           </button>
 
-          <nav className="hidden md:flex items-center gap-1">
+          {/* Desktop nav — italic bone-300 */}
+          <nav className="hidden md:flex items-center" style={{ gap: '32px' }}>
             {NAV_LINKS.map(({ to, label }) => (
-              <NavLink key={to} to={to}
-                className="ember-focus px-4 py-2 rounded-lg text-sm transition-all duration-200"
+              <NavLink
+                key={to}
+                to={to}
+                className="ember-focus"
                 style={({ isActive }) => ({
-                  color: isActive ? '#fff' : '#A0A0A0',
-                  background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+                  color: isActive ? 'var(--bone-100)' : 'var(--bone-300)',
+                  fontFamily: 'var(--font-display)',
+                  fontStyle: 'italic',
+                  fontSize: '15px',
                   textDecoration: 'none',
+                  transition: 'color 0.25s var(--ease-coal)',
                 })}
-              >{label}</NavLink>
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
+                onMouseLeave={e => {
+                  if (!e.currentTarget.classList.contains('active')) {
+                    e.currentTarget.style.color = 'var(--bone-300)';
+                  }
+                }}
+              >
+                {label}
+              </NavLink>
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          {/* Right side actions */}
+          <div className="hidden md:flex items-center" style={{ gap: '12px' }}>
             {user ? (
               <>
-                <button onClick={() => navigate('/account')} className="ember-focus"
-                  style={{ color: '#A0A0A0', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 10px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px', borderRadius: '8px', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                <button
+                  onClick={() => navigate('/account')}
+                  className="ember-focus"
+                  style={{
+                    color: 'var(--bone-300)',
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '6px 10px', fontSize: '13px',
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    borderRadius: '8px', transition: 'color 0.2s',
+                    fontStyle: 'italic',
+                    fontFamily: 'var(--font-display)',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--bone-300)')}
                 >
                   <Settings size={14} />
-                  <span className="mono">{user.name}</span>
+                  <span>{user.name}</span>
                 </button>
                 <button onClick={signOut} className="ember-focus"
-                  style={{ color: '#555', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
+                  style={{ color: 'var(--bone-500)', background: 'none', border: 'none', cursor: 'pointer', padding: '6px' }}
                   title="Sign out"
                 ><LogOut size={16} /></button>
               </>
             ) : (
               <>
-                <button onClick={() => openAuth('Sign in to your Ember account.')} className="text-sm ember-focus"
-                  style={{ color: '#A0A0A0', background: 'none', border: 'none', cursor: 'pointer', padding: '8px 12px', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#fff')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#A0A0A0')}
+                <button
+                  onClick={() => openAuth('Sign in to your Ember account.')}
+                  className="ember-focus"
+                  style={{
+                    color: 'var(--bone-300)', background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '8px 12px', fontSize: '15px',
+                    fontFamily: 'var(--font-display)', fontStyle: 'italic',
+                    transition: 'color 0.2s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--bone-300)')}
                 >Sign in</button>
-                <button onClick={() => { openAuth('Join Ember to access the Vault and all features.'); }}
-                  className="ember-focus text-sm font-medium"
-                  style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 20px', cursor: 'pointer', transition: 'background 0.2s, transform 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; }}
-                >Join the Vault</button>
+                <button
+                  onClick={() => { openAuth('Join Ember to access the Vault and all features.'); }}
+                  className="ember-focus btn-v3 primary"
+                  style={{ height: '40px', padding: '0 20px', fontSize: '14px' }}
+                >
+                  Join the Vault
+                </button>
               </>
             )}
           </div>
 
-          <button className="md:hidden ember-focus p-2"
-            style={{ color: '#fff', background: 'none', border: 'none', cursor: 'pointer' }}
+          {/* Mobile menu trigger */}
+          <button
+            className="md:hidden ember-focus"
+            style={{
+              color: 'var(--bone-100)', background: 'none', border: 'none',
+              cursor: 'pointer', padding: '8px',
+            }}
             onClick={() => setOpen(!open)} aria-label="Toggle menu"
           >
             {open ? <X size={20} /> : <Menu size={20} />}
@@ -95,40 +142,69 @@ export function Nav() {
         </div>
       </header>
 
+      {/* Mobile menu */}
       {open && (
-        <div className="fixed inset-0 z-40 flex flex-col pt-16" style={{ background: 'rgba(10,10,10,0.98)', backdropFilter: 'blur(20px)' }}>
-          <nav className="flex flex-col gap-1 p-6">
-            {/* Account — first in mobile nav */}
+        <div
+          className="fixed inset-0 z-40 flex flex-col"
+          style={{
+            paddingTop: '72px',
+            background: 'rgba(8,6,10,0.98)',
+            backdropFilter: 'blur(20px)',
+          }}
+        >
+          <nav className="flex flex-col" style={{ gap: '4px', padding: '28px 24px' }}>
             {user && (
               <NavLink to="/account" onClick={() => setOpen(false)}
-                className="px-4 py-4 rounded-lg text-lg ember-focus"
-                style={({ isActive }) => ({ color: isActive ? '#fff' : 'var(--beige)', background: isActive ? 'rgba(128,0,0,0.12)' : 'rgba(128,0,0,0.06)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', fontWeight: 500, borderLeft: '2px solid var(--maroon)', paddingLeft: '18px' })}
+                className="ember-focus"
+                style={({ isActive }) => ({
+                  padding: '14px 18px',
+                  borderRadius: '10px',
+                  fontSize: '18px',
+                  fontFamily: 'var(--font-display)',
+                  color: isActive ? 'var(--bone-100)' : 'var(--beige)',
+                  background: isActive ? 'rgba(128,0,0,0.16)' : 'rgba(128,0,0,0.06)',
+                  textDecoration: 'none',
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  fontWeight: 500,
+                  borderLeft: '2px solid var(--burgundy)',
+                })}
               >
                 <Settings size={16} /> Account
               </NavLink>
             )}
             {NAV_LINKS.map(({ to, label }) => (
               <NavLink key={to} to={to} onClick={() => setOpen(false)}
-                className="px-4 py-4 rounded-lg text-lg ember-focus"
-                style={({ isActive }) => ({ color: isActive ? '#fff' : '#A0A0A0', background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent', textDecoration: 'none' })}
+                className="ember-focus"
+                style={({ isActive }) => ({
+                  padding: '14px 18px',
+                  borderRadius: '10px',
+                  fontSize: '18px',
+                  fontFamily: 'var(--font-display)',
+                  fontStyle: 'italic',
+                  color: isActive ? 'var(--bone-100)' : 'var(--bone-300)',
+                  background: isActive ? 'rgba(245,237,224,0.06)' : 'transparent',
+                  textDecoration: 'none',
+                })}
               >{label}</NavLink>
             ))}
           </nav>
-          <div className="px-6 mt-4 flex flex-col gap-3">
+          <div style={{ padding: '0 24px', marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {user ? (
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: 'rgba(255,255,255,0.04)', borderRadius: '10px' }}>
-                <span style={{ color: '#A0A0A0', fontSize: '14px' }}>{user.name} · {user.email}</span>
-                <button onClick={() => { signOut(); setOpen(false); }} style={{ color: '#666', background: 'none', border: 'none', cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px', background: 'rgba(245,237,224,0.04)', borderRadius: '10px' }}>
+                <span style={{ color: 'var(--bone-300)', fontSize: '14px' }}>{user.name} · {user.email}</span>
+                <button onClick={() => { signOut(); setOpen(false); }} style={{ color: 'var(--bone-500)', background: 'none', border: 'none', cursor: 'pointer' }}>
                   <LogOut size={16} />
                 </button>
               </div>
             ) : (
               <>
                 <button onClick={() => { openAuth(); setOpen(false); }}
-                  style={{ background: 'transparent', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px', cursor: 'pointer', fontSize: '16px' }}
+                  className="btn-v3 ghost"
+                  style={{ width: '100%', height: '52px' }}
                 >Sign in</button>
                 <button onClick={() => { openAuth('Join the Vault.'); setOpen(false); }}
-                  style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', cursor: 'pointer', fontSize: '16px', fontWeight: '600' }}
+                  className="btn-v3 primary"
+                  style={{ width: '100%', height: '52px' }}
                 >Join the Vault</button>
               </>
             )}
