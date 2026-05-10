@@ -11,6 +11,14 @@ const NAV_LINKS = [
   { to: '/faq',    label: 'FAQ'    },
 ];
 
+/* Liquid-glass transition timing — matches iOS spring easing */
+const GLASS_TRANSITION =
+  'background 0.55s cubic-bezier(0.4,0,0.2,1), ' +
+  'backdrop-filter 0.55s cubic-bezier(0.4,0,0.2,1), ' +
+  '-webkit-backdrop-filter 0.55s cubic-bezier(0.4,0,0.2,1), ' +
+  'border-color 0.55s cubic-bezier(0.4,0,0.2,1), ' +
+  'box-shadow 0.55s cubic-bezier(0.4,0,0.2,1)';
+
 export function Nav() {
   const navigate = useNavigate();
   const { user, openAuth, signOut } = useAuth();
@@ -19,6 +27,7 @@ export function Nav() {
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 24);
+    handler();
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, []);
@@ -26,18 +35,36 @@ export function Nav() {
   return (
     <>
       <header
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
         style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0,
+          zIndex: 50,
+          height: '72px',
+          /* ── Liquid glass core ──────────────────────────────
+             When scrolled: frosted glass panel with soft edge highlight.
+             When at top: fully transparent — content shows through cleanly. */
           background: scrolled
-            ? 'linear-gradient(180deg, rgba(8,6,10,0.92) 0%, rgba(8,6,10,0.78) 100%)'
-            : 'linear-gradient(180deg, rgba(8,6,10,0.55) 0%, rgba(8,6,10,0) 100%)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
-          borderBottom: scrolled ? '1px solid rgba(245,237,224,0.06)' : 'none',
+            ? 'rgba(8, 6, 10, 0.38)'
+            : 'transparent',
+          backdropFilter: scrolled
+            ? 'blur(24px) saturate(1.7) brightness(0.92)'
+            : 'blur(0px) saturate(1)',
+          WebkitBackdropFilter: scrolled
+            ? 'blur(24px) saturate(1.7) brightness(0.92)'
+            : 'blur(0px) saturate(1)',
+          /* Top edge: subtle light-refraction highlight (glass edge glow)
+             Bottom: soft depth shadow for nav/content separation */
+          boxShadow: scrolled
+            ? 'inset 0 1px 0 rgba(245,237,224,0.07), 0 8px 40px rgba(0,0,0,0.22)'
+            : 'none',
+          borderBottom: scrolled
+            ? '1px solid rgba(245,237,224,0.06)'
+            : '1px solid transparent',
+          transition: GLASS_TRANSITION,
         }}
       >
         <div className="page-container flex items-center justify-between" style={{ height: '72px' }}>
-          {/* Logo: ember sphere mark + italic-feeling wordmark */}
+          {/* Logo */}
           <button
             onClick={() => navigate('/')}
             className="ember-focus"
@@ -49,26 +76,31 @@ export function Nav() {
             </span>
           </button>
 
-          {/* Desktop nav — italic bone-300 */}
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center" style={{ gap: '32px' }}>
             {NAV_LINKS.map(({ to, label }) => (
               <NavLink
                 key={to}
                 to={to}
-                className="ember-focus"
+                className="ember-focus nav-link-glass"
                 style={({ isActive }) => ({
                   color: isActive ? 'var(--bone-100)' : 'var(--bone-300)',
                   fontFamily: 'var(--font-display)',
                   fontStyle: 'italic',
                   fontSize: '15px',
                   textDecoration: 'none',
-                  transition: 'color 0.25s var(--ease-coal)',
+                  letterSpacing: '-0.005em',
+                  transition: 'color 0.3s cubic-bezier(0.4,0,0.2,1), text-shadow 0.3s cubic-bezier(0.4,0,0.2,1)',
                 })}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color = 'var(--bone-100)';
+                  e.currentTarget.style.textShadow = '0 0 22px rgba(245,237,224,0.25)';
+                }}
                 onMouseLeave={e => {
                   if (!e.currentTarget.classList.contains('active')) {
                     e.currentTarget.style.color = 'var(--bone-300)';
                   }
+                  e.currentTarget.style.textShadow = 'none';
                 }}
               >
                 {label}
@@ -112,14 +144,20 @@ export function Nav() {
                     color: 'var(--bone-300)', background: 'none', border: 'none', cursor: 'pointer',
                     padding: '8px 12px', fontSize: '15px',
                     fontFamily: 'var(--font-display)', fontStyle: 'italic',
-                    transition: 'color 0.2s',
+                    transition: 'color 0.25s, text-shadow 0.25s',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--bone-300)')}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = 'var(--bone-100)';
+                    e.currentTarget.style.textShadow = '0 0 22px rgba(245,237,224,0.2)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = 'var(--bone-300)';
+                    e.currentTarget.style.textShadow = 'none';
+                  }}
                 >Sign in</button>
                 <button
-                  onClick={() => { openAuth('Join Ember to access the Vault and all features.'); }}
-                  className="ember-focus btn-v3 primary"
+                  onClick={() => openAuth('Join Ember to access the Vault and all features.')}
+                  className="ember-focus btn-v3 primary nav-vault-btn"
                   style={{ height: '40px', padding: '0 20px', fontSize: '14px' }}
                 >
                   Join the Vault
@@ -142,14 +180,16 @@ export function Nav() {
         </div>
       </header>
 
-      {/* Mobile menu */}
+      {/* Mobile menu — glass panel */}
       {open && (
         <div
           className="fixed inset-0 z-40 flex flex-col"
           style={{
             paddingTop: '72px',
-            background: 'rgba(8,6,10,0.98)',
-            backdropFilter: 'blur(20px)',
+            background: 'rgba(8, 6, 10, 0.82)',
+            backdropFilter: 'blur(28px) saturate(1.5)',
+            WebkitBackdropFilter: 'blur(28px) saturate(1.5)',
+            borderTop: '1px solid rgba(245,237,224,0.06)',
           }}
         >
           <nav className="flex flex-col" style={{ gap: '4px', padding: '28px 24px' }}>
