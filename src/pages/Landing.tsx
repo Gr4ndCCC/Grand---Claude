@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
-import { FireButton } from '../components/FireButton';
 import { useAuth } from '../lib/auth';
 import { FireGraph } from '../components/ui/FireGraph';
+
+/* ── tiny utilities ────────────────────────────────────────── */
 
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   const [val, setVal] = useState(0);
@@ -26,21 +27,22 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
   return <span ref={ref}>{val}{suffix}</span>;
 }
 
-/* ── fade-up wrapper ───────────────────────────────────────── */
-function FadeUp({ children, delay = 0, className = '' }: {
-  children: React.ReactNode; delay?: number; className?: string;
+function FadeUp({ children, delay = 0, className = '', style }: {
+  children: React.ReactNode; delay?: number; className?: string; style?: React.CSSProperties;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 28 }}
+      initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1, delay, ease: [0.4, 0, 0.2, 1] }}
       className={className}
+      style={style}
     >{children}</motion.div>
   );
 }
 
+/* ── content (kept verbatim) ───────────────────────────────── */
 
 const STATS = [
   { value: 15,  suffix: '',  label: 'Live events'   },
@@ -50,53 +52,82 @@ const STATS = [
 ];
 
 const HOW_STEPS = [
-  { n: '01', title: 'Discover', body: 'Find BBQ gatherings near you on the live map. Every pin is a real event, a real host, a real fire.' },
-  { n: '02', title: 'Join & Contribute', body: "RSVP, tell the host what you're bringing — meat, charcoal, drinks. No doubling up. No gaps." },
-  { n: '03', title: 'Level up', body: "Host. Get rated. Earn your rank on The Board. Build a reputation that follows you everywhere fire burns." },
+  { n: '01', title: 'Discover',           body: 'Find BBQ gatherings near you on the live map. Every pin is a real event, a real host, a real fire.' },
+  { n: '02', title: 'Join & Contribute',  body: "RSVP, tell the host what you're bringing — meat, charcoal, drinks. No doubling up. No gaps." },
+  { n: '03', title: 'Level up',           body: "Host. Get rated. Earn your rank on The Board. Build a reputation that follows you everywhere fire burns." },
 ];
 
-const BOARD_RANKS = [
-  { tier: 'Ember',  color: '#800000', req: 'Join the Vault · Host your first event' },
-  { tier: 'Iron',   color: '#6B7280', req: '5+ events · 4.5★ average rating' },
-  { tier: 'Gold',   color: '#B8860B', req: '20+ events · 4.8★ · Vault contributor' },
-  { tier: 'Legend', color: '#DAA520', req: 'Top 1% globally · Invitation only' },
+type RankTier = 'ember' | 'iron' | 'gold' | 'legend';
+const BOARD_RANKS: { tier: RankTier; name: string; req: string }[] = [
+  { tier: 'ember',  name: 'Ember',  req: 'Join the Vault · Host your first event' },
+  { tier: 'iron',   name: 'Iron',   req: '5+ events · 4.5★ average rating' },
+  { tier: 'gold',   name: 'Gold',   req: '20+ events · 4.8★ · Vault contributor' },
+  { tier: 'legend', name: 'Legend', req: 'Top 1% globally · Invitation only' },
 ];
 
 const EVENTS = [
-  { city: 'Amsterdam', flag: '🇳🇱', title: 'Amsterdam Sunset BBQ',     host: 'Lars V.',    rank: 'Gold',   date: 'Sat, Apr 19', time: '18:00', guests: 8,  max: 12 },
-  { city: 'Tokyo',     flag: '🇯🇵', title: 'Tokyo Garden Grill',        host: 'Hiro M.',    rank: 'Iron',   date: 'Sun, Apr 20', time: '17:00', guests: 6,  max: 10 },
-  { city: 'New York',  flag: '🇺🇸', title: 'Brooklyn Smokehouse Night', host: 'Marcus B.',  rank: 'Legend', date: 'Fri, Apr 25', time: '19:00', guests: 14, max: 20 },
+  { city: 'Amsterdam', cc: 'NL', title: 'Amsterdam Sunset BBQ',     host: 'Lars V.',    rank: 'Gold'   as const, date: 'Sat, Apr 19', time: '18:00', guests: 8,  max: 12 },
+  { city: 'Tokyo',     cc: 'JP', title: 'Tokyo Garden Grill',        host: 'Hiro M.',    rank: 'Iron'   as const, date: 'Sun, Apr 20', time: '17:00', guests: 6,  max: 10 },
+  { city: 'New York',  cc: 'US', title: 'Brooklyn Smokehouse Night', host: 'Marcus B.',  rank: 'Legend' as const, date: 'Fri, Apr 25', time: '19:00', guests: 14, max: 20 },
 ];
 
 const TESTIMONIALS = [
-  { quote: "I flew to Amsterdam for an Ember gathering. Left with four guys I'll grill with for life. That doesn't happen on Eventbrite.", name: 'Kofi A.',  city: 'Accra → Amsterdam', rank: 'Iron'   },
-  { quote: "The Board made me take hosting seriously. I went from a backyard weekend thing to something people actually talk about.",         name: 'Marco T.', city: 'Rome',              rank: 'Gold'   },
-  { quote: "I've used every events app. None of them care about the food. Ember understands that the grill is the whole point.",             name: 'Yuto K.',  city: 'Tokyo',             rank: 'Ember'  },
+  { quote: "I flew to Amsterdam for an Ember gathering. Left with four guys I'll grill with for life. That doesn't happen on Eventbrite.", name: 'Kofi A.',  city: 'Accra → Amsterdam', rank: 'Iron'  as const },
+  { quote: "The Board made me take hosting seriously. I went from a backyard weekend thing to something people actually talk about.",         name: 'Marco T.', city: 'Rome',              rank: 'Gold'  as const },
+  { quote: "I've used every events app. None of them care about the food. Ember understands that the grill is the whole point.",             name: 'Yuto K.',  city: 'Tokyo',             rank: 'Ember' as const },
 ];
 
-const RANK_COLOR: Record<string, string> = { Ember: '#800000', Iron: '#6B7280', Gold: '#B8860B', Legend: '#DAA520' };
+const VAULT_FEATURES = [
+  { title: 'Recipes',             body: 'Member-only. Not on any food blog.' },
+  { title: 'Knowledge',            body: 'Live masterclasses from real gatherings.' },
+  { title: 'Brotherhood Network',  body: 'Verified members worldwide.' },
+  { title: 'The Board',            body: 'Four tiers. Earned through craft.' },
+  { title: 'Partners',             body: 'Premium suppliers, exclusive deals.' },
+  { title: 'The Council',          body: 'Vote on platform direction.' },
+];
 
 const CITIES = ['Amsterdam', 'Tokyo', 'New York', 'Rome', 'Lisbon', 'Johannesburg', 'São Paulo', 'Singapore', 'Barcelona', 'Berlin', 'Istanbul', 'Sydney', 'Chicago', 'Mumbai', 'Warsaw'];
 
-function RankBadge({ rank }: { rank: string }) {
-  const c = RANK_COLOR[rank] ?? '#555';
-  return (
-    <span className="rank-badge" style={{ color: c, background: `${c}18`, border: `1px solid ${c}44` }}>
-      {rank}
-    </span>
-  );
+/* ── tier styling helpers ──────────────────────────────────── */
+
+function tierBadgeStyle(rank: 'Ember' | 'Iron' | 'Gold' | 'Legend'): React.CSSProperties {
+  switch (rank) {
+    case 'Gold':
+      return { color: 'var(--gold-v3)', border: '1px solid rgba(184,146,74,0.4)', background: 'rgba(184,146,74,0.06)' };
+    case 'Iron':
+      return { color: 'var(--bone-300)', border: '1px solid rgba(245,237,224,0.15)', background: 'rgba(245,237,224,0.03)' };
+    case 'Legend':
+      return { color: 'var(--gold-hi)', border: '1px solid rgba(212,168,95,0.5)', background: 'rgba(212,168,95,0.08)', boxShadow: '0 0 20px rgba(212,168,95,0.15)' };
+    case 'Ember':
+    default:
+      return { color: 'var(--burgundy)', border: '1px solid rgba(128,0,0,0.5)', background: 'rgba(85,0,0,0.2)' };
+  }
 }
 
-/* ── RSVP pill + Menu claim — dark/maroon edition ─────────── */
+function rankCardAccents(tier: RankTier) {
+  switch (tier) {
+    case 'ember':
+      return { iconBg: 'rgba(85,0,0,0.35)', iconBorder: '1px solid rgba(128,0,0,0.4)', dot: 'var(--burgundy)', dotShadow: '0 0 12px var(--burgundy)', hoverShadow: '0 24px 60px rgba(85,0,0,0.3), 0 0 0 1px rgba(128,0,0,0.45)' };
+    case 'iron':
+      return { iconBg: 'rgba(245,237,224,0.04)', iconBorder: '1px solid rgba(245,237,224,0.1)', dot: 'var(--bone-300)', dotShadow: '0 0 8px rgba(217,201,171,0.4)', hoverShadow: '0 24px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(245,237,224,0.18)' };
+    case 'gold':
+      return { iconBg: 'rgba(184,146,74,0.12)', iconBorder: '1px solid rgba(184,146,74,0.4)', dot: 'var(--gold-v3)', dotShadow: '0 0 12px var(--gold-v3)', hoverShadow: '0 24px 60px rgba(184,146,74,0.18), 0 0 0 1px var(--gold-v3)' };
+    case 'legend':
+      return { iconBg: 'rgba(212,168,95,0.18)', iconBorder: '1px solid rgba(212,168,95,0.5)', dot: 'var(--gold-hi)', dotShadow: '0 0 16px var(--gold-hi)', hoverShadow: '0 24px 60px rgba(212,168,95,0.25), 0 0 0 1px var(--gold-hi), 0 0 100px rgba(212,168,95,0.15)' };
+  }
+}
+
+/* ── RSVP / Menu interaction (kept from existing site, restyled) ── */
+
 function RSVPMenu() {
   const { user, openAuth } = useAuth();
   const [rsvp, setRsvp] = useState<'in' | 'maybe' | 'cant'>();
   const [score] = useState(84);
 
   const initialMenu = [
-    { id: 'm1', name: 'Brisket, hot and fast',  cat: 'MAIN',  claimed: false, by: '' },
-    { id: 'm2', name: 'Charred shishitos',      cat: 'VEG',   claimed: true,  by: 'Marin K.' },
-    { id: 'm3', name: 'Sumac slaw',             cat: 'SIDE',  claimed: false, by: '' },
+    { id: 'm1', name: 'Brisket, hot and fast',     cat: 'MAIN',  claimed: false, by: '' },
+    { id: 'm2', name: 'Charred shishitos',         cat: 'VEG',   claimed: true,  by: 'Marin K.' },
+    { id: 'm3', name: 'Sumac slaw',                cat: 'SIDE',  claimed: false, by: '' },
     { id: 'm4', name: 'Smoked stone fruit cobbler', cat: 'SWEET', claimed: false, by: '' },
   ];
   const [menu, setMenu] = useState(initialMenu);
@@ -117,89 +148,87 @@ function RSVPMenu() {
     { id: 'cant',  label: "Can't"    },
   ] as const;
 
-  /* circular score svg */
   const radius = 22, circ = 2 * Math.PI * radius;
   const offset = circ - (score / 100) * circ;
 
   return (
     <div className="grid lg:grid-cols-2 gap-12 items-center">
-      {/* left — copy */}
       <div>
-        <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The interaction</p>
-        <span className="maroon-rule" />
-        <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}>
+        <div className="section-label">§ The interaction</div>
+        <h2 style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', color: 'var(--bone-100)', marginBottom: '20px' }}>
           Tap once.<br />
-          <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>You're in.</span>
+          <span className="accent-italic">You're in.</span>
         </h2>
-        <p style={{ color: '#A0A0A0', fontSize: '17px', lineHeight: '1.7', marginBottom: '40px', maxWidth: '440px' }}>
+        <p style={{ color: 'var(--bone-400)', fontSize: '17px', lineHeight: 1.7, marginBottom: '40px', maxWidth: '440px' }}>
           No accounts. No profiles. No notifications. Three buttons and a list.
           The whole product fits in a text message.
         </p>
 
         {/* RSVP row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '28px' }}>
-          <span className="mono" style={{ color: '#5A5A5A', width: '60px' }}>RSVP</span>
+          <span className="mono" style={{ color: 'var(--bone-500)', width: '60px' }}>RSVP</span>
           <div style={{
             display: 'inline-flex', gap: '4px',
-            background: '#111', border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.08)',
             borderRadius: '999px', padding: '4px',
           }}>
             {RSVPS.map(r => (
               <button key={r.id} onClick={() => handleRsvp(r.id)}
                 className="ember-focus"
                 style={{
-                  background: rsvp === r.id ? 'var(--maroon)' : 'transparent',
-                  color: rsvp === r.id ? '#fff' : '#A0A0A0',
+                  background: rsvp === r.id ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'transparent',
+                  color: rsvp === r.id ? 'var(--bone-100)' : 'var(--bone-300)',
                   border: 'none', borderRadius: '999px',
                   padding: '8px 18px', fontSize: '14px',
-                  cursor: 'pointer', fontFamily: 'Playfair Display, Georgia, serif',
-                  transition: 'all 0.2s',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-display)',
+                  fontStyle: rsvp === r.id ? 'normal' : 'italic',
+                  transition: 'all 0.25s var(--ease-coal)',
                 }}
               >{r.label}</button>
             ))}
           </div>
         </div>
 
-        {/* Score row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <span className="mono" style={{ color: '#5A5A5A', width: '60px' }}>SCORE</span>
+          <span className="mono" style={{ color: 'var(--bone-500)', width: '60px' }}>SCORE</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
             <svg width="56" height="56" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-              <circle cx="28" cy="28" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-              <circle cx="28" cy="28" r={radius} fill="none" stroke="var(--maroon)" strokeWidth="3"
+              <circle cx="28" cy="28" r={radius} fill="none" stroke="rgba(245,237,224,0.08)" strokeWidth="3" />
+              <circle cx="28" cy="28" r={radius} fill="none" stroke="var(--burgundy)" strokeWidth="3"
                 strokeDasharray={circ} strokeDashoffset={offset} strokeLinecap="round" />
               <text x="28" y="28" textAnchor="middle" dominantBaseline="central"
-                style={{ fontFamily: 'Playfair Display, Georgia, serif', fill: '#fff', fontSize: '15px', transform: 'rotate(90deg)', transformOrigin: '28px 28px' }}>
+                style={{ fontFamily: 'var(--font-display)', fill: 'var(--bone-100)', fontSize: '15px', transform: 'rotate(90deg)', transformOrigin: '28px 28px' }}>
                 {score}
               </text>
             </svg>
             <div>
               <p className="mono" style={{ color: 'var(--beige)', marginBottom: '2px' }}>Ember score</p>
-              <p style={{ color: '#A0A0A0', fontSize: '14px' }}>Reliable host</p>
+              <p style={{ color: 'var(--bone-400)', fontSize: '14px' }}>Reliable host</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* right — menu card */}
+      {/* menu card */}
       <div className="card-glow" style={{
-        background: '#111',
-        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'linear-gradient(180deg, rgba(26,23,20,0.7) 0%, rgba(13,10,12,0.9) 100%)',
+        border: '1px solid rgba(245,237,224,0.08)',
         borderRadius: '16px',
         padding: '28px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff' }}>The menu so far</h3>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--bone-100)' }}>The menu so far</h3>
           <span className="mono" style={{
-            background: 'rgba(128,0,0,0.2)', color: 'var(--maroon)',
+            background: 'rgba(128,0,0,0.2)', color: 'var(--ember-hi)',
             padding: '4px 10px', borderRadius: '6px', fontSize: '10px',
             border: '1px solid rgba(128,0,0,0.4)',
           }}>
-            <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--maroon)', marginRight: '6px', verticalAlign: 'middle' }} />
+            <span className="animate-ember-pulse" style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--ember-hi)', marginRight: '6px', verticalAlign: 'middle' }} />
             LIVE
           </span>
         </div>
-        <p className="mono" style={{ color: '#5A5A5A', marginBottom: '20px' }}>
+        <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '20px' }}>
           Tap "I'll bring this" to claim a dish
         </p>
 
@@ -209,23 +238,23 @@ function RSVPMenu() {
               className="ember-focus"
               style={{
                 width: '100%', textAlign: 'left',
-                background: item.claimed ? 'var(--maroon)' : 'rgba(255,255,255,0.04)',
-                border: item.claimed ? '1px solid var(--maroon-light)' : '1px solid rgba(255,255,255,0.08)',
+                background: item.claimed ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'rgba(245,237,224,0.04)',
+                border: item.claimed ? '1px solid rgba(184,83,50,0.45)' : '1px solid rgba(245,237,224,0.08)',
                 borderRadius: '12px', padding: '16px 18px',
-                cursor: 'pointer', transition: 'all 0.25s var(--ease-flame)',
+                cursor: 'pointer', transition: 'all 0.25s var(--ease-coal)',
                 position: 'relative', overflow: 'hidden',
                 fontFamily: 'inherit',
               }}
               onMouseEnter={e => {
                 if (!item.claimed) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
-                  e.currentTarget.style.borderColor = 'rgba(228,207,179,0.18)';
+                  e.currentTarget.style.background = 'rgba(245,237,224,0.07)';
+                  e.currentTarget.style.borderColor = 'rgba(217,201,171,0.18)';
                 }
               }}
               onMouseLeave={e => {
                 if (!item.claimed) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                  e.currentTarget.style.background = 'rgba(245,237,224,0.04)';
+                  e.currentTarget.style.borderColor = 'rgba(245,237,224,0.08)';
                 }
               }}
             >
@@ -239,17 +268,17 @@ function RSVPMenu() {
                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <Check size={16} style={{ color: '#fff' }} />
-                      <span className="mono" style={{ color: '#fff', fontSize: '12px', letterSpacing: '0.16em' }}>CLAIMED</span>
+                      <Check size={16} style={{ color: 'var(--bone-100)' }} />
+                      <span className="mono" style={{ color: 'var(--bone-100)', fontSize: '12px', letterSpacing: '0.16em' }}>CLAIMED</span>
                     </div>
                     {item.by && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px' }}>{item.by}</span>
+                        <span style={{ color: 'rgba(245,237,224,0.85)', fontSize: '14px' }}>{item.by}</span>
                         <span style={{
                           width: '24px', height: '24px', borderRadius: '50%',
                           background: 'rgba(0,0,0,0.35)', color: 'var(--beige)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '10px', fontFamily: 'Playfair Display, Georgia, serif',
+                          fontSize: '10px', fontFamily: 'var(--font-display)',
                           fontWeight: 600,
                         }}>
                           {item.by.split(' ').map(w => w[0]).join('').slice(0, 2)}
@@ -264,10 +293,10 @@ function RSVPMenu() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                   >
-                    <p className="mono" style={{ color: 'var(--maroon)', fontSize: '10px', marginBottom: '4px' }}>
+                    <p className="mono" style={{ color: 'var(--burgundy)', fontSize: '10px', marginBottom: '4px' }}>
                       {item.cat}
                     </p>
-                    <p style={{ color: '#fff', fontFamily: 'Playfair Display, Georgia, serif', fontSize: '17px' }}>
+                    <p style={{ color: 'var(--bone-100)', fontFamily: 'var(--font-display)', fontSize: '17px' }}>
                       {item.name}
                     </p>
                   </motion.div>
@@ -281,25 +310,39 @@ function RSVPMenu() {
   );
 }
 
-const btn = {
-  primary: {
-    background: 'var(--maroon)', color: '#fff', border: 'none',
-    borderRadius: '10px', padding: '14px 28px', fontSize: '15px',
-    fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s',
-    fontFamily: 'inherit',
-  } as React.CSSProperties,
-  outline: {
-    background: 'transparent', color: 'var(--beige)',
-    border: '1px solid rgba(228,207,179,0.25)',
-    borderRadius: '10px', padding: '14px 28px', fontSize: '15px',
-    fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s',
-    fontFamily: 'inherit',
-  } as React.CSSProperties,
-};
+/* ── floating hero embers ──────────────────────────────────── */
+function HeroEmbers() {
+  const embers = useMemo(
+    () => Array.from({ length: 22 }, () => ({
+      left: Math.random() * 100,
+      top: 90 + Math.random() * 30,
+      duration: 10 + Math.random() * 14,
+      delay: -Math.random() * 14,
+      opacity: 0.3 + Math.random() * 0.5,
+    })),
+    []
+  );
+  return (
+    <div className="floating-embers" aria-hidden>
+      {embers.map((e, i) => (
+        <span key={i} className="ember" style={{
+          left: `${e.left}%`,
+          top: `${e.top}%`,
+          animationDuration: `${e.duration}s`,
+          animationDelay: `${e.delay}s`,
+          opacity: e.opacity,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+/* ── Landing page ──────────────────────────────────────────── */
 
 export function Landing() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
+
   const handleJoinEvent = () => {
     if (!user) return openAuth('Sign in to join events near you.');
     navigate('/events');
@@ -310,147 +353,197 @@ export function Landing() {
   };
 
   return (
-    <div style={{ background: '#090504', color: '#fff', minHeight: '100vh', overflowX: 'hidden' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
+      {/* fixed ember-tinted background atmosphere */}
+      <div className="page-bg" aria-hidden />
+      <div className="page-heat" aria-hidden />
+      <div className="page-grain" aria-hidden />
+
       <Nav />
 
-      {/* ── HERO ──────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', paddingTop: '120px', paddingBottom: '80px', minHeight: '760px', overflow: 'hidden' }}>
-        {/* FireGraph fills the entire hero as the dominant visual */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-          <FireGraph className="w-full h-full" />
-        </div>
+      {/* ── HERO ───────────────────────────────────────────────── */}
+      <section
+        className="v3-section"
+        style={{
+          position: 'relative',
+          minHeight: '100vh',
+          padding: '140px 0 120px',
+          overflow: 'hidden',
+        }}
+      >
+        <div className="hero-firelight" aria-hidden />
+        <HeroEmbers />
 
-        {/* Soft gradient fade so headline copy reads cleanly over the fire */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-          background: 'linear-gradient(90deg, rgba(9,5,4,0.92) 0%, rgba(9,5,4,0.82) 32%, rgba(9,5,4,0.45) 52%, rgba(9,5,4,0.10) 68%, rgba(9,5,4,0) 80%)',
-        }} />
+        <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="v3-hero-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.1fr 1fr',
+              gap: '64px',
+              alignItems: 'center',
+            }}
+          >
+            {/* Left: copy */}
+            <div style={{ pointerEvents: 'auto' }}>
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ duration: 0.8 }}
+              >
+                <span className="section-label" style={{ color: 'var(--burgundy)', borderBottomColor: 'rgba(128,0,0,0.4)' }}>
+                  The global BBQ brotherhood
+                </span>
+              </motion.div>
 
-        {/* Text content layered above the fire (passes pointer events for the canvas) */}
-        <div className="page-container" style={{ position: 'relative', zIndex: 2, pointerEvents: 'none' }}>
-          <div style={{ maxWidth: '560px' }}>
-            <motion.p
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="mono"
-              style={{ color: 'var(--maroon)', marginBottom: '16px' }}
-            >
-              The global BBQ brotherhood
-            </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.05, ease: [0.4, 0, 0.2, 1] }}
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(56px, 9vw, 132px)',
+                  fontWeight: 400,
+                  lineHeight: 0.94,
+                  letterSpacing: '-0.04em',
+                  color: 'var(--bone-100)',
+                  textShadow: '0 0 40px rgba(184,83,50,0.18)',
+                }}
+              >
+                The world<br />grills.<br />
+                <span className="accent-italic">Join the<br />brotherhood.</span>
+              </motion.h1>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              style={{
-                position: 'relative',
-                fontFamily: 'Playfair Display, Georgia, serif',
-                fontSize: 'clamp(56px, 8.5vw, 128px)',
-                fontWeight: '400', lineHeight: '0.94',
-                letterSpacing: '-0.02em',
-                color: '#fff', marginBottom: '28px',
-                textShadow: '0 2px 40px rgba(128,0,0,0.35)',
-              }}
-            >
-              <span style={{
-                position: 'absolute', inset: '-40px -120px auto auto', width: '600px', height: '300px',
-                background: 'radial-gradient(ellipse at 30% 40%, rgba(128,0,0,0.18) 0%, transparent 60%)',
-                pointerEvents: 'none', zIndex: -1,
-              }} aria-hidden />
-              The world grills.
-              <br />
-              <span style={{ color: 'var(--beige)', fontStyle: 'italic', fontSize: '0.92em' }}>
-                Join the brotherhood.
-              </span>
-            </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                style={{ marginTop: '40px', maxWidth: '480px', fontSize: '19px', lineHeight: 1.6, color: 'var(--bone-300)' }}
+              >
+                Discover BBQ events in 40+ countries. Host your own gathering.
+                Build your rank. Connect with pitmasters worldwide.
+              </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              style={{ color: '#C8B8A2', fontSize: '17px', lineHeight: '1.7', maxWidth: '460px', marginBottom: '40px' }}
-            >
-              Discover BBQ events in 40+ countries. Host your own gathering.
-              Build your rank. Connect with pitmasters worldwide.
-            </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.7 }}
+                style={{ marginTop: '40px', display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}
+              >
+                <button className="btn-v3 primary lg" onClick={handleJoinEvent}>
+                  Find events near you
+                </button>
+                <button className="btn-v3 ghost lg" onClick={handleHostEvent}>
+                  Host an event
+                </button>
+              </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-              style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '48px', pointerEvents: 'auto' }}
-            >
-              <FireButton variant="primary" onClick={handleJoinEvent}>
-                Find events near you
-              </FireButton>
-              <FireButton variant="outline" onClick={handleHostEvent}>
-                Host an event
-              </FireButton>
-            </motion.div>
+              {/* stats bar */}
+              <motion.div
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                transition={{ delay: 0.55, duration: 0.8 }}
+                className="hero-stats"
+                style={{ marginTop: '64px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}
+              >
+                {STATS.map(({ value, suffix, label }) => (
+                  <div key={label}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4.5vw, 56px)', fontWeight: 400, color: 'var(--beige)', lineHeight: 1, letterSpacing: '-0.025em' }}>
+                      <Counter to={value} suffix={suffix} />
+                    </p>
+                    <p className="mono" style={{ color: 'var(--bone-500)', marginTop: '8px' }}>{label}</p>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
 
-            {/* stats bar */}
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              transition={{ delay: 0.55 }}
-              className="hero-stats"
-              style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}
-            >
-              {STATS.map(({ value, suffix, label }) => (
-                <div key={label}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 4.5vw, 56px)', fontWeight: '400', color: 'var(--beige)', lineHeight: 1, letterSpacing: '-0.02em' }}>
-                    <Counter to={value} suffix={suffix} />
-                  </p>
-                  <p className="mono" style={{ color: '#6A6A6A', marginTop: '8px' }}>{label}</p>
-                </div>
-              ))}
-            </motion.div>
+            {/* Right: fire graph stage */}
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              aspectRatio: '1 / 1.05',
+              borderRadius: '20px',
+              overflow: 'hidden',
+            }}>
+              <div style={{
+                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+                background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(8,6,10,0.7) 100%), radial-gradient(circle at 50% 50%, rgba(184,83,50,0.05) 0%, transparent 60%)',
+              }} />
+              <FireGraph className="absolute inset-0 w-full h-full" />
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── CITIES SCROLL ─────────────────────────────────────── */}
-      <div className="city-scroll-mask" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden', padding: '18px 0' }}>
+      <div
+        className="city-scroll-mask"
+        style={{
+          borderTop: '1px solid rgba(245,237,224,0.06)',
+          borderBottom: '1px solid rgba(245,237,224,0.06)',
+          overflow: 'hidden',
+          padding: '18px 0',
+          background: 'rgba(13,10,12,0.4)',
+        }}
+      >
         <div className="city-scroll">
           {[...CITIES, ...CITIES].map((city, i) => (
-            <span key={i} className="mono" style={{ color: '#6A6A6A', padding: '0 28px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '28px' }}>
+            <span key={i} className="mono" style={{ color: 'var(--bone-500)', padding: '0 28px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '28px' }}>
               {city}
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--maroon)', display: 'inline-block', boxShadow: '0 0 8px rgba(128,0,0,0.5)' }} />
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--ember)', display: 'inline-block', boxShadow: '0 0 8px rgba(184,83,50,0.55)' }} />
             </span>
           ))}
         </div>
       </div>
 
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
-      <section style={{ padding: '100px 0' }}>
+      <section className="v3-section" style={{ position: 'relative', padding: '140px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>How it works</p>
-            <span className="maroon-rule" />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '60px', maxWidth: '600px' }}>
-              Three steps. One fire.
+            <div className="section-label">§ How it works</div>
+            <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '0', maxWidth: '1100px' }}>
+              Three steps. <span className="accent-italic">One fire.</span>
             </h2>
           </FadeUp>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div
+            className="v3-three-col"
+            style={{ marginTop: '64px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '56px' }}
+          >
             {HOW_STEPS.map(({ n, title, body }, i) => (
               <FadeUp key={n} delay={i * 0.12}>
-                <div style={{ position: 'relative', paddingLeft: '28px', minHeight: '160px' }}>
-                  {/* vertical maroon-to-transparent rule */}
-                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '2px', background: 'linear-gradient(180deg, var(--maroon) 0%, rgba(128,0,0,0.10) 100%)' }} />
-                  {/* ember dot at top of rule */}
-                  <span className="animate-ember-pulse" style={{ position: 'absolute', left: '-3px', top: '-2px', width: '8px', height: '8px', borderRadius: '50%', background: '#c96e47', boxShadow: '0 0 10px #c96e47' }} />
-                  {/* oversized ghost numeral behind */}
+                <div style={{ position: 'relative', paddingLeft: '28px', borderLeft: '1px solid rgba(128,0,0,0.35)' }}>
+                  {/* pulsing ember dot */}
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: '-5px', top: 0,
+                      width: '9px', height: '9px',
+                      borderRadius: '50%',
+                      background: 'var(--ember-hi)',
+                      boxShadow: '0 0 12px var(--ember-hi)',
+                      animation: 'pulse-dot 2s var(--ease-coal) infinite',
+                    }}
+                  />
+                  {/* ghost numeral */}
                   <span style={{
-                    position: 'absolute', left: '20px', top: '-22px', zIndex: 0,
-                    fontFamily: 'Playfair Display, Georgia, serif', fontSize: '110px', fontWeight: 400,
-                    color: 'rgba(228,207,179,0.05)', lineHeight: 1, letterSpacing: '-0.04em',
-                    pointerEvents: 'none', userSelect: 'none',
-                  }}>
+                    position: 'absolute',
+                    left: '28px', top: '24px',
+                    fontFamily: 'var(--font-display)', fontSize: '220px', fontWeight: 300,
+                    color: 'rgba(245,237,224,0.025)', lineHeight: 1, letterSpacing: '-0.04em',
+                    pointerEvents: 'none', zIndex: 0, userSelect: 'none',
+                  }} aria-hidden>
                     {n}
                   </span>
                   <div style={{ position: 'relative', zIndex: 1 }}>
-                    <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '14px' }}>STEP {n}</p>
-                    <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', marginBottom: '14px', lineHeight: 1.15 }}>{title}</h3>
-                    <p style={{ color: '#A0A0A0', lineHeight: '1.7', fontSize: '15px' }}>{body}</p>
+                    <p className="mono" style={{ color: 'var(--burgundy)', marginBottom: '24px' }}>STEP {n}</p>
+                    <h3 style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '36px',
+                      fontWeight: 500,
+                      letterSpacing: '-0.02em',
+                      marginBottom: '18px',
+                      color: 'var(--bone-100)',
+                    }}>{title}</h3>
+                    <p style={{ color: 'var(--bone-400)', lineHeight: 1.65, fontSize: '16px' }}>{body}</p>
                   </div>
                 </div>
               </FadeUp>
@@ -460,108 +553,146 @@ export function Landing() {
       </section>
 
       {/* ── THE BOARD ─────────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
-        {/* smoke top fade */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, rgba(128,0,0,0.03), transparent)', pointerEvents: 'none' }} />
-        {/* smoke bottom fade */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, rgba(128,0,0,0.03), transparent)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+      <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
+        <div className="page-container">
           <FadeUp>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Board</p>
-            <span className="maroon-rule" />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '16px' }}>
-              Rank earned. Not bought.
+            <div className="section-label">§ The Board</div>
+            <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '24px' }}>
+              Rank earned. <span className="accent-italic">Not bought.</span>
             </h2>
-            <p style={{ color: '#A0A0A0', maxWidth: '520px', marginBottom: '56px', lineHeight: '1.7' }}>
+            <p style={{ color: 'var(--bone-400)', maxWidth: '600px', marginBottom: '0', lineHeight: 1.6, fontSize: '18px' }}>
               Four tiers. Each earned through real events, real ratings, real craft.
               Your rank follows you everywhere fire burns.
             </p>
           </FadeUp>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {BOARD_RANKS.map(({ tier, color, req }, i) => (
-              <FadeUp key={tier} delay={i * 0.1}>
-                <div className="card-glow" style={{
-                  background: `linear-gradient(160deg, #141414 0%, #0E0E0E 100%)`,
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: '16px',
-                  padding: '28px 24px',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-                }}>
-                  <div style={{ width: '44px', height: '44px', borderRadius: '10px', background: `${color}18`, border: `1px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '18px', boxShadow: `0 4px 16px ${color}28` }}>
-                    <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}80` }} />
+          <div
+            className="v3-four-col"
+            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}
+          >
+            {BOARD_RANKS.map(({ tier, name, req }, i) => {
+              const a = rankCardAccents(tier);
+              return (
+                <FadeUp key={tier} delay={i * 0.1}>
+                  <div
+                    className="rank-card-v3"
+                    onMouseEnter={e => {
+                      e.currentTarget.style.boxShadow = a.hoverShadow;
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.boxShadow = '';
+                    }}
+                  >
+                    <div>
+                      <div style={{
+                        width: '56px', height: '56px', borderRadius: '12px',
+                        background: a.iconBg, border: a.iconBorder,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: '32px',
+                      }}>
+                        <div style={{
+                          width: '14px', height: '14px', borderRadius: '50%',
+                          background: a.dot, boxShadow: a.dotShadow,
+                          ...(tier === 'legend' ? { animation: 'pulse-dot 2s var(--ease-coal) infinite' } : {}),
+                        }} />
+                      </div>
+                      <p style={{
+                        fontFamily: 'var(--font-display)', fontSize: '30px', fontWeight: 500,
+                        letterSpacing: '-0.02em', marginBottom: '8px',
+                        color: 'var(--bone-100)',
+                      }}>{name}</p>
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--bone-500)', lineHeight: 1.5 }}>{req}</p>
                   </div>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '10px' }}>{tier}</p>
-                  <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{req}</p>
-                </div>
-              </FadeUp>
-            ))}
+                </FadeUp>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── LIVE EVENTS ───────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#090504' }}>
+      {/* ── LIVE THIS WEEK ────────────────────────────────────── */}
+      <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Live this week</p>
-            <span className="maroon-rule" />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '16px' }}>
-              Fires burning near you.
+            <div className="section-label">§ Live this week</div>
+            <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '24px' }}>
+              Fires burning <span className="accent-italic">near you.</span>
             </h2>
-            <p style={{ color: '#A0A0A0', marginBottom: '48px' }}>
+            <p style={{ color: 'var(--bone-400)', fontSize: '18px', lineHeight: 1.6, marginBottom: '0' }}>
               Real events, real hosts. Join a gathering or{' '}
-              <button onClick={() => navigate('/hosts')} style={{ color: 'var(--beige)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', textUnderlineOffset: '3px', fontFamily: 'inherit', fontSize: 'inherit' }}>
-                start your own.
-              </button>
+              <button
+                onClick={() => navigate('/hosts')}
+                style={{
+                  color: 'var(--beige)',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  textDecoration: 'underline',
+                  textDecorationColor: 'rgba(228,207,179,0.4)',
+                  textUnderlineOffset: '4px',
+                  fontFamily: 'inherit', fontSize: 'inherit',
+                  transition: 'color 0.25s',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--beige)')}
+              >start your own.</button>
             </p>
           </FadeUp>
 
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {EVENTS.map(({ city, flag, title, host, rank, date, time, guests, max }, i) => (
+          <div
+            className="v3-three-col"
+            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}
+          >
+            {EVENTS.map(({ city, cc, title, host, rank, date, time, guests, max }, i) => (
               <FadeUp key={title} delay={i * 0.1}>
-                <div className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <p className="mono" style={{ color: '#5A5A5A', marginBottom: '6px' }}>{flag} {city}</p>
-                      <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff', lineHeight: 1.3 }}>{title}</h3>
+                <article className="event-card-v3">
+                  <span className="heat-bar" aria-hidden />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                    <div className="mono" style={{ color: 'var(--bone-400)' }}>
+                      <span style={{ color: 'var(--bone-500)', marginRight: '6px', fontSize: '10px' }}>{cc}</span>
+                      {city}
                     </div>
-                    <RankBadge rank={rank} />
+                    <div className="rank-badge" style={tierBadgeStyle(rank)}>{rank}</div>
                   </div>
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <span className="mono" style={{ color: '#A0A0A0' }}>{date}</span>
-                    <span className="mono" style={{ color: '#A0A0A0' }}>{time}</span>
+                  <h3 style={{
+                    fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 500,
+                    letterSpacing: '-0.015em', lineHeight: 1.15,
+                    marginBottom: '18px', color: 'var(--bone-100)',
+                  }}>{title}</h3>
+                  <div className="mono" style={{ color: 'var(--bone-300)', marginBottom: '24px', display: 'flex', gap: '18px' }}>
+                    <span>{date}</span>
+                    <span>{time}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <p style={{ color: '#A0A0A0', fontSize: '14px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{host}</span></p>
-                    <p className="mono" style={{ color: guests >= max - 2 ? 'var(--gold)' : '#5A5A5A' }}>
+                  <div style={{ height: '1px', margin: '0 -28px 22px', background: 'linear-gradient(90deg, transparent, rgba(245,237,224,0.08), transparent)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--bone-300)' }}>
+                      Hosted by <strong style={{ color: 'var(--bone-100)', fontWeight: 500 }}>{host}</strong>
+                    </p>
+                    <p className="mono" style={{ color: guests >= max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)' }}>
                       {guests}/{max} going
                     </p>
                   </div>
-                  <FireButton variant="primary" size="sm" fullWidth onClick={handleJoinEvent}>
-                    Join event
-                  </FireButton>
-                </div>
+                  <button
+                    onClick={handleJoinEvent}
+                    className="btn-v3 primary"
+                    style={{ width: '100%' }}
+                  >Join event</button>
+                </article>
               </FadeUp>
             ))}
           </div>
 
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
             <button
-              style={btn.outline}
               onClick={() => navigate('/events')}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(228,207,179,0.07)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              className="btn-v3 ghost"
             >See all events →</button>
           </div>
         </div>
       </section>
 
       {/* ── THE INTERACTION (RSVP + MENU) ─────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, transparent)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+      <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
+        <div className="page-container">
           <FadeUp>
             <RSVPMenu />
           </FadeUp>
@@ -569,53 +700,76 @@ export function Landing() {
       </section>
 
       {/* ── THE VAULT ─────────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#090504', position: 'relative', overflow: 'hidden' }}>
-        {/* Maroon glow behind the section */}
-        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '800px', height: '600px', background: 'radial-gradient(ellipse at 50% 50%, rgba(128,0,0,0.10) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section
+        className="v3-section"
+        style={{
+          position: 'relative',
+          padding: '180px 0',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none',
+            background:
+              'radial-gradient(ellipse 50% 60% at 30% 50%, rgba(85,0,0,0.25) 0%, transparent 60%), ' +
+              'radial-gradient(ellipse 40% 60% at 80% 30%, rgba(184,146,74,0.06) 0%, transparent 55%)',
+          }}
+        />
+        <div className="page-container">
+          <div
+            className="v3-vault-grid"
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}
+          >
             <FadeUp>
-              <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Vault</p>
-              <span className="maroon-rule" />
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '20px' }}>
+              <div className="section-label">§ The Vault</div>
+              <h2 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(48px, 6vw, 88px)',
+                fontWeight: 400, lineHeight: 1, letterSpacing: '-0.03em',
+                marginBottom: '32px',
+                color: 'var(--bone-100)',
+              }}>
                 The inner circle.
               </h2>
-              <p style={{ color: '#A0A0A0', lineHeight: '1.8', marginBottom: '40px', fontSize: '17px' }}>
+              <p style={{ color: 'var(--bone-400)', lineHeight: 1.7, fontSize: '18px', maxWidth: '540px' }}>
                 Exclusive recipes, live masterclasses, The Board certification,
-                Brotherhood Network, vetted partner deals, The Council, and
-                Annual Summit access. Everything the grill deserves.
+                Brotherhood Network, vetted partner deals, The Council, and Annual
+                Summit access. Everything the grill deserves.
               </p>
-              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '40px' }}>
-                <div style={{ textAlign: 'center', background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '20px 28px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€15</p>
-                  <p className="mono" style={{ color: '#5A5A5A', marginTop: '6px' }}>per month</p>
+
+              <div style={{ display: 'flex', gap: '16px', marginTop: '48px' }}>
+                <div className="price-card-v3">
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '56px', fontWeight: 300, letterSpacing: '-0.025em', lineHeight: 1, color: 'var(--bone-100)' }}>€15</p>
+                  <p className="mono" style={{ color: 'var(--bone-400)', marginTop: '14px' }}>Per month</p>
                 </div>
-                <div style={{ textAlign: 'center', background: 'linear-gradient(160deg, rgba(128,0,0,0.22) 0%, rgba(85,0,0,0.12) 100%)', border: '1px solid rgba(228,207,179,0.18)', borderRadius: '14px', padding: '20px 28px', boxShadow: '0 8px 28px rgba(128,0,0,0.20), inset 0 1px 0 rgba(228,207,179,0.08)' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€99</p>
-                  <p className="mono" style={{ color: 'var(--beige)', marginTop: '6px' }}>annual · best value</p>
+                <div className="price-card-v3 featured">
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '56px', fontWeight: 300, letterSpacing: '-0.025em', lineHeight: 1, color: 'var(--bone-100)' }}>€99</p>
+                  <p className="mono" style={{ color: 'var(--beige)', marginTop: '14px' }}>Annual · Best value</p>
                 </div>
               </div>
+
               <button
-                style={btn.primary}
                 onClick={() => navigate('/vault')}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(128,0,0,0.55)'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = ''; }}
+                className="btn-v3 primary lg"
+                style={{ marginTop: '36px' }}
               >Join the Vault →</button>
             </FadeUp>
 
             <FadeUp delay={0.15}>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { title: 'Recipes',            body: 'Member-only. Not on any food blog.' },
-                  { title: 'Knowledge',           body: 'Live masterclasses from real gatherings.' },
-                  { title: 'Brotherhood Network', body: 'Verified members worldwide.' },
-                  { title: 'The Board',           body: 'Four tiers. Earned through craft.' },
-                  { title: 'Partners',            body: 'Premium suppliers, exclusive deals.' },
-                  { title: 'The Council',         body: 'Vote on platform direction.' },
-                ].map(({ title, body }) => (
-                  <div key={title} className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '22px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '15px', color: 'var(--beige)', marginBottom: '6px' }}>{title}</p>
-                    <p style={{ color: '#5A5A5A', fontSize: '13px', lineHeight: '1.6' }}>{body}</p>
+              <div
+                className="v3-vault-features"
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}
+              >
+                {VAULT_FEATURES.map(({ title, body }) => (
+                  <div key={title} className="vault-feature-v3">
+                    <h4 style={{
+                      fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 500,
+                      letterSpacing: '-0.01em', color: 'var(--beige)', marginBottom: '8px',
+                      position: 'relative', zIndex: 1,
+                    }}>{title}</h4>
+                    <p style={{ fontSize: '14px', lineHeight: 1.55, color: 'var(--bone-500)', position: 'relative', zIndex: 1 }}>{body}</p>
                   </div>
                 ))}
               </div>
@@ -624,60 +778,90 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ──────────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: '#0D0D0D', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to bottom, #090504, transparent)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '120px', background: 'linear-gradient(to top, #090504, transparent)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+      {/* ── FROM THE BROTHERHOOD ──────────────────────────────── */}
+      <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
+        <div className="page-container">
           <FadeUp>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>From the brotherhood</p>
-            <span className="maroon-rule" />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '56px' }}>
-              Show up a stranger.
-              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}> Leave a brother.</span>
+            <div className="section-label">§ From the Brotherhood</div>
+            <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '0' }}>
+              Show up a stranger. <span className="accent-italic">Leave a brother.</span>
             </h2>
           </FadeUp>
 
-          <div className="grid md:grid-cols-3 gap-5">
+          <div
+            className="v3-three-col"
+            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}
+          >
             {TESTIMONIALS.map(({ quote, name, city, rank }, i) => (
               <FadeUp key={name} delay={i * 0.1}>
-                <div className="card-glow" style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '24px', height: '100%', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontStyle: 'italic', fontSize: '18px', color: 'var(--beige)', lineHeight: '1.6', flex: 1 }}>
-                    "{quote}"
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <article className="quote-card-v3">
+                  <span className="quote-mark" aria-hidden>“</span>
+                  <p style={{
+                    fontFamily: 'var(--font-display)', fontStyle: 'italic',
+                    fontSize: '19px', lineHeight: 1.55, color: 'var(--beige)',
+                    marginBottom: '32px', position: 'relative',
+                    paddingTop: '8px',
+                  }}>{quote}</p>
+                  <div style={{ height: '1px', margin: '0 -32px 24px', background: 'linear-gradient(90deg, transparent, rgba(245,237,224,0.08), transparent)' }} />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <p style={{ color: '#fff', fontWeight: '500', marginBottom: '2px' }}>{name}</p>
-                      <p className="mono" style={{ color: '#5A5A5A' }}>{city}</p>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '17px', fontWeight: 500, color: 'var(--bone-100)' }}>{name}</p>
+                      <p className="mono" style={{ color: 'var(--bone-500)', marginTop: '4px', fontSize: '10px', letterSpacing: '0.15em' }}>{city}</p>
                     </div>
-                    <RankBadge rank={rank} />
+                    <div className="rank-badge" style={tierBadgeStyle(rank)}>{rank}</div>
                   </div>
-                </div>
+                </article>
               </FadeUp>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── ANNUAL SUMMIT CTA ─────────────────────────────────── */}
-      <section style={{ padding: '100px 0', background: 'linear-gradient(135deg, #0D0000 0%, #0A0A0A 50%, #000D00 100%)', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '800px', height: '400px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.20) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ textAlign: 'center', position: 'relative', zIndex: 1 }}>
+      {/* ── ANNUAL SUMMIT ─────────────────────────────────────── */}
+      <section
+        className="v3-section"
+        style={{
+          position: 'relative',
+          padding: '180px 0 140px',
+          textAlign: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute', inset: 0, zIndex: -1, pointerEvents: 'none',
+            background:
+              'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(85,0,0,0.3) 0%, transparent 60%), ' +
+              'radial-gradient(ellipse 40% 30% at 50% 90%, rgba(184,83,50,0.12) 0%, transparent 60%)',
+          }}
+        />
+        <div className="page-container">
           <FadeUp>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Annual Summit</p>
-            <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', marginBottom: '20px', lineHeight: 1.1 }}>
-              One city. One weekend.
-              <br />
-              <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>The whole brotherhood.</span>
+            <div className="section-label" style={{ marginInline: 'auto', display: 'inline-block' }}>§ Annual Summit</div>
+            <h2 style={{
+              fontSize: 'clamp(48px, 6.5vw, 96px)',
+              color: 'var(--bone-100)',
+              lineHeight: 1.05,
+              margin: '0 auto',
+              maxWidth: '1100px',
+            }}>
+              One city. One weekend.<br />
+              <span className="accent-italic">The whole brotherhood.</span>
             </h2>
-            <p style={{ color: '#A0A0A0', maxWidth: '520px', margin: '0 auto 40px', fontSize: '17px', lineHeight: '1.7' }}>
-              Location revealed exclusively to Vault members. Your subscription
-              is your ticket. Every year, a different city. Always unforgettable.
+            <p style={{
+              margin: '36px auto 0',
+              maxWidth: '620px',
+              fontSize: '18px', lineHeight: 1.65, color: 'var(--bone-400)',
+            }}>
+              Location revealed exclusively to Vault members. Your subscription is your ticket.
+              Every year, a different city. Always unforgettable.
             </p>
-            <FireButton variant="primary" size="lg" onClick={() => navigate('/vault')}>
-              Join the Vault · Get Summit access
-            </FireButton>
+            <button
+              onClick={() => navigate('/vault')}
+              className="btn-v3 primary lg"
+              style={{ marginTop: '56px' }}
+            >Join the Vault · Get Summit access</button>
           </FadeUp>
         </div>
       </section>

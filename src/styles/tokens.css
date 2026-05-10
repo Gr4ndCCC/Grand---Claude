@@ -1,5 +1,5 @@
 :root {
-  /* brand — earth palette */
+  /* ── brand — original earth palette (kept) ─────────────── */
   --maroon:       #800000;
   --maroon-light: #990000;
   --maroon-deep:  #550000;
@@ -9,7 +9,35 @@
   --gold:         #B8860B;
   --gold-bright:  #DAA520;
 
-  /* surfaces — dark luxury */
+  /* ── v3 design tokens ──────────────────────────────────── */
+  /* burgundy / ember system */
+  --burgundy:     #800000;
+  --burgundy-d:   #550000;
+  --ember:        #b85332;
+  --ember-hi:     #d98d6a;
+  --ember-cr:     #ffc28a;
+  --gold-v3:      #b8924a;
+  --gold-hi:      #d4a85f;
+
+  /* charcoal scale */
+  --char-700:     #2a2520;
+  --char-800:     #201c18;
+  --char-900:     #1a1714;
+  --char-950:     #110f0d;
+  --black-v3:     #08060a;
+
+  /* bone scale (warm off-white text) */
+  --bone-100:     #f5ede0;
+  --bone-200:     #eadfca;
+  --bone-300:     #d9c9ab;
+  --bone-400:     #c2ad89;
+  --bone-500:     #8e7a5e;
+
+  /* warm body backgrounds */
+  --bg-warm:      #1a0d10;
+  --bg-soft:      #14101a;
+
+  /* surfaces — dark luxury (kept) */
   --bg:           #0A0A0A;
   --bg-raised:    #111111;
   --bg-card:      #141414;
@@ -22,9 +50,10 @@
   --text-soft:    #5A5A5A;
   --text-beige:   #E4CFB3;
 
-  /* type families */
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-body:    'Playfair Display', Georgia, serif;
+  /* ── type families — Newsreader is the v3 display face ── */
+  --font-display: 'Newsreader', 'Playfair Display', Georgia, serif;
+  --font-body:    'Newsreader', 'Playfair Display', Georgia, serif;
+  --font-serif:   'Newsreader', 'Playfair Display', Georgia, serif;
   --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
 
   /* type scale */
@@ -40,17 +69,20 @@
   --t-5xl:     64px;
   --t-display: 88px;
 
-  /* easing */
-  --ease-spark: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ── easing — v3 curves ────────────────────────────────── */
+  --ease-coal:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spark: cubic-bezier(0.2, 0.9, 0.25, 1.2);
+  --ease-smoke: cubic-bezier(0.6, 0.04, 0.2, 1);
+  /* alias kept for legacy callers */
   --ease-flame: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-smoke: cubic-bezier(0.6, 0.05, 0.4, 1);
 
   /* shadows */
   --shadow-1:      0 1px 0 rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
   --shadow-2:      0 2px 6px rgba(0,0,0,0.5), 0 6px 20px rgba(0,0,0,0.3);
   --shadow-3:      0 12px 36px rgba(0,0,0,0.6);
   --shadow-maroon: 0 8px 28px rgba(128, 0, 0, 0.40);
-  --shadow-focus:  0 0 0 3px rgba(128, 0, 0, 0.45);
+  --shadow-ember:  0 12px 36px rgba(184, 83, 50, 0.45), 0 0 60px rgba(217, 141, 106, 0.25);
+  --shadow-focus:  0 0 0 3px rgba(184, 83, 50, 0.45);
 
   /* radii */
   --r-xs:   2px;
@@ -61,7 +93,7 @@
   --r-pill: 999px;
 
   /* layout */
-  --container: 1200px;
+  --container: 1480px;
 
   /* rank colors */
   --rank-ember:  #800000;
