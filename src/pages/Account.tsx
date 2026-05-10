@@ -70,8 +70,8 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
 
 function SCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '16px' }}>
-      <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff', marginBottom: subtitle ? '6px' : '20px' }}>{title}</h3>
+    <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '16px' }}>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', marginBottom: subtitle ? '6px' : '20px' }}>{title}</h3>
       {subtitle && <p style={{ color: '#666', fontSize: '13px', marginBottom: '20px' }}>{subtitle}</p>}
       {children}
     </div>
@@ -79,7 +79,7 @@ function SCard({ title, subtitle, children }: { title: string; subtitle?: string
 }
 
 const selectStyle: React.CSSProperties = {
-  background: '#1A1A1A', color: '#fff',
+  background: 'rgba(32,28,24,0.8)', color: '#fff',
   border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: '8px', padding: '8px 12px',
   fontSize: '13px', outline: 'none',
@@ -128,13 +128,13 @@ function ProfileTab() {
             {initials(user.name)}
           </div>
           <div>
-            <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff' }}>{user.name}</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff' }}>{user.name}</p>
             <p style={{ color: '#666', fontSize: '13px' }}>{user.email}</p>
           </div>
         </div>
         <Row label="Display name" desc="Shown to other members on the platform">
           <input value={name} onChange={e => setName(e.target.value)}
-            style={{ background: '#1A1A1A', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit', width: '180px' }}
+            style={{ background: 'rgba(32,28,24,0.8)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', outline: 'none', fontFamily: 'inherit', width: '180px' }}
           />
         </Row>
         <Row label="Email address">
@@ -573,13 +573,13 @@ export function Account() {
 
   if (!user) {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div style={{ padding: '160px 24px', textAlign: 'center' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: 'rgba(128,0,0,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
             <User size={24} style={{ color: 'var(--maroon)' }} />
           </div>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '40px', marginBottom: '12px' }}>Sign in to your account</h1>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', marginBottom: '12px' }}>Sign in to your account</h1>
           <p style={{ color: '#A0A0A0', marginBottom: '24px' }}>Access your profile, billing and event history.</p>
           <button onClick={() => openAuth()}
             style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px 28px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '15px', fontWeight: 600 }}
@@ -604,17 +604,17 @@ export function Account() {
   };
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
       <section style={{ paddingTop: '100px', paddingBottom: '80px' }}>
         <div className="page-container">
           <div style={{ marginBottom: '32px' }}>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px' }}>Settings</p>
-            <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', lineHeight: 1.06 }}>Account</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', lineHeight: 1.06 }}>Account</h1>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '220px minmax(0,1fr)', gap: '24px', alignItems: 'start' }} className="account-grid">
-            <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', overflow: 'hidden', position: 'sticky', top: '90px' }}>
+            <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', overflow: 'hidden', position: 'sticky', top: '90px' }}>
               <div style={{ padding: '12px 18px 4px', fontSize: '10px', color: '#444', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Account</div>
               {ACCOUNT_TABS.map(t => <TabBtn key={t.id} {...t} active={tab === t.id} onClick={() => setTab(t.id)} />)}
               <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)', margin: '6px 0' }} />

@@ -53,7 +53,7 @@ export function Events() {
   });
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       {/* header */}
@@ -68,12 +68,12 @@ export function Events() {
               <span className="maroon-rule" />
               <motion.h1
                 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-                style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', marginBottom: '16px', lineHeight: 1.06 }}
+                style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 64px)', color: 'var(--bone-100)', marginBottom: '16px', lineHeight: 1.06 }}
               >
                 Fires burning<br />
-                <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>near you.</span>
+                <span className="accent-italic">near you.</span>
               </motion.h1>
-              <p style={{ color: '#A0A0A0', fontSize: '17px' }}>
+              <p style={{ color: 'var(--bone-400)', fontSize: '17px' }}>
                 Real events. Real hosts. Real fire.
               </p>
             </div>
@@ -81,7 +81,7 @@ export function Events() {
             {/* Host CTA */}
             <motion.div
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
-              style={{ background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.28)', borderRadius: '16px', padding: '24px', maxWidth: '280px', flexShrink: 0 }}
+              style={{ background: 'rgba(85,0,0,0.2)', border: '1px solid rgba(128,0,0,0.35)', borderRadius: '14px', padding: '24px', maxWidth: '280px', flexShrink: 0 }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -92,12 +92,9 @@ export function Events() {
               <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: '1.6', marginBottom: '16px' }}>
                 Customize your gathering. Build the menu. Light the fire.
               </p>
-              <button
-                onClick={handleHostNav}
-                style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', transition: 'background 0.2s' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
-              >Create Event →</button>
+              <button onClick={handleHostNav} className="btn-v3 primary" style={{ width: '100%' }}>
+                Create Event →
+              </button>
             </motion.div>
           </div>
 
@@ -109,10 +106,10 @@ export function Events() {
               onChange={e => setQuery(e.target.value)}
               placeholder="Search by city or event name…"
               style={{
-                width: '100%', background: '#111', border: '1px solid rgba(255,255,255,0.10)',
+                width: '100%', background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.1)',
                 borderRadius: '10px', padding: '14px 16px 14px 44px',
-                color: '#fff', fontSize: '15px', outline: 'none',
-                fontFamily: 'inherit',
+                color: 'var(--bone-100)', fontSize: '15px', outline: 'none',
+                fontFamily: 'var(--font-display)',
               }}
             />
           </div>
@@ -122,11 +119,11 @@ export function Events() {
             {filters.map(f => (
               <button key={f} onClick={() => setActiveFilter(f)}
                 style={{
-                  background: activeFilter === f ? 'var(--maroon)' : 'rgba(255,255,255,0.05)',
-                  color: activeFilter === f ? '#fff' : '#A0A0A0',
-                  border: activeFilter === f ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                  background: activeFilter === f ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'rgba(245,237,224,0.04)',
+                  color: activeFilter === f ? 'var(--bone-100)' : 'var(--bone-400)',
+                  border: activeFilter === f ? '1px solid rgba(184,83,50,0.45)' : '1px solid rgba(245,237,224,0.08)',
                   borderRadius: '8px', padding: '8px 16px', cursor: 'pointer',
-                  fontSize: '13px', fontFamily: 'inherit', transition: 'all 0.2s',
+                  fontSize: '13px', fontFamily: 'var(--font-display)', transition: 'all 0.25s var(--ease-coal)',
                 }}
               >{f}</button>
             ))}
@@ -145,38 +142,37 @@ export function Events() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }}
                 onClick={() => handleJoin(ev.id)}
-                className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px', cursor: 'pointer', overflow: 'hidden', position: 'relative' }}
+                className="event-card-v3"
+                style={{ cursor: 'pointer', gap: '14px', display: 'flex', flexDirection: 'column' }}
               >
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: ev.coverColor }} />
+                <span className="heat-bar" aria-hidden />
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <p className="mono" style={{ color: '#5A5A5A' }}>{ev.flag} {ev.city}</p>
+                  <p className="mono" style={{ color: 'var(--bone-500)' }}>{ev.flag} {ev.city}</p>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    {!ev.isPublic && <span className="rank-badge" style={{ color: '#5A5A5A', border: '1px solid rgba(255,255,255,0.1)' }}>Private</span>}
+                    {!ev.isPublic && <span className="rank-badge" style={{ color: 'var(--bone-500)', border: '1px solid rgba(245,237,224,0.12)' }}>Private</span>}
                     <RankBadge rank={ev.hostRank} />
                   </div>
                 </div>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff', lineHeight: 1.3 }}>{ev.title}</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--bone-100)', lineHeight: 1.3 }}>{ev.title}</h3>
                 <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#A0A0A0', fontSize: '13px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bone-400)', fontSize: '13px' }}>
                     <Calendar size={12} /> {ev.date} · {ev.time}
                   </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.attendees.length >= ev.max - 2 ? 'var(--gold)' : '#A0A0A0', fontSize: '13px' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.attendees.length >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)', fontSize: '13px' }}>
                     <Users size={12} /> {ev.attendees.length}/{ev.max}
                   </span>
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                   {ev.tags.map(t => (
-                    <span key={t} className="mono" style={{ color: '#5A5A5A', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
+                    <span key={t} className="mono" style={{ color: 'var(--bone-500)', background: 'rgba(245,237,224,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
                   ))}
                 </div>
-                <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#A0A0A0', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
+                <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,237,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: 'var(--bone-400)', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleJoin(ev.id); }}
-                    style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', transition: 'background 0.2s' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
+                    className="btn-v3 primary"
+                    style={{ padding: '8px 16px', height: 'auto', fontSize: '13px' }}
                   >Join →</button>
                 </div>
               </motion.div>
@@ -185,13 +181,13 @@ export function Events() {
 
           {/* top cities */}
           <div>
-            <p className="mono" style={{ color: '#5A5A5A', marginBottom: '16px' }}>Top cities</p>
+            <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '16px' }}>Top cities</p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {TOP_CITIES.map(({ city, flag, count }) => (
-                <div key={city} className="card-glow" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: 'pointer' }}>
+                <div key={city} className="vault-feature-v3" style={{ textAlign: 'center', cursor: 'pointer' }}>
                   <p style={{ fontSize: '24px', marginBottom: '6px' }}>{flag}</p>
-                  <p style={{ color: '#fff', fontSize: '14px', fontWeight: '500', marginBottom: '2px' }}>{city}</p>
-                  <p className="mono" style={{ color: 'var(--maroon)' }}>{count} events</p>
+                  <p style={{ color: 'var(--bone-100)', fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>{city}</p>
+                  <p className="mono" style={{ color: 'var(--burgundy)' }}>{count} events</p>
                 </div>
               ))}
             </div>

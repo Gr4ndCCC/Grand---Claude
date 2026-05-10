@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { Check } from 'lucide-react';
@@ -86,7 +86,16 @@ const VAULT_FEATURES = [
   { title: 'The Council',          body: 'Vote on platform direction.' },
 ];
 
-const CITIES = ['Amsterdam', 'Tokyo', 'New York', 'Rome', 'Lisbon', 'Johannesburg', 'São Paulo', 'Singapore', 'Barcelona', 'Berlin', 'Istanbul', 'Sydney', 'Chicago', 'Mumbai', 'Warsaw'];
+const VERSES = [
+  { text: 'Iron sharpens iron, and one man sharpens another.',                                         ref: 'Proverbs 27:17'      },
+  { text: 'Behold, how good and how pleasant it is for brothers to dwell together in unity!',          ref: 'Psalm 133:1'         },
+  { text: 'Two are better than one, for if either falls, the other can help his companion up.',        ref: 'Ecclesiastes 4:9–10' },
+  { text: 'So whether you eat or drink or whatever you do, do it all for the glory of God.',           ref: '1 Corinthians 10:31' },
+  { text: 'A friend loves at all times, and a brother is born for a time of adversity.',               ref: 'Proverbs 17:17'      },
+  { text: 'Bear one another\'s burdens, and so fulfill the law of Christ.',                            ref: 'Galatians 6:2'       },
+  { text: 'Where two or three are gathered together in My name, I am there among them.',               ref: 'Matthew 18:20'       },
+  { text: 'As each has received a gift, use it to serve one another, as good stewards of God\'s grace.', ref: '1 Peter 4:10'     },
+];
 
 /* ── tier styling helpers ──────────────────────────────────── */
 
@@ -310,29 +319,39 @@ function RSVPMenu() {
   );
 }
 
-/* ── floating hero embers ──────────────────────────────────── */
-function HeroEmbers() {
-  const embers = useMemo(
-    () => Array.from({ length: 22 }, () => ({
-      left: Math.random() * 100,
-      top: 90 + Math.random() * 30,
-      duration: 10 + Math.random() * 14,
-      delay: -Math.random() * 14,
-      opacity: 0.3 + Math.random() * 0.5,
-    })),
-    []
-  );
+/* ── rotating Bible verse bar ──────────────────────────────── */
+function VerseBar() {
+  const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIdx(i => (i + 1) % VERSES.length);
+        setVisible(true);
+      }, 650);
+    }, 7500);
+    return () => clearInterval(id);
+  }, []);
+
+  const v = VERSES[idx];
   return (
-    <div className="floating-embers" aria-hidden>
-      {embers.map((e, i) => (
-        <span key={i} className="ember" style={{
-          left: `${e.left}%`,
-          top: `${e.top}%`,
-          animationDuration: `${e.duration}s`,
-          animationDelay: `${e.delay}s`,
-          opacity: e.opacity,
-        }} />
-      ))}
+    <div className="verse-bar">
+      <AnimatePresence mode="wait">
+        {visible && (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <p className="verse-text">"{v.text}"</p>
+            <p className="verse-ref">{v.ref}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -354,11 +373,6 @@ export function Landing() {
 
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
-      {/* fixed ember-tinted background atmosphere */}
-      <div className="page-bg" aria-hidden />
-      <div className="page-heat" aria-hidden />
-      <div className="page-grain" aria-hidden />
-
       <Nav />
 
       {/* ── HERO ───────────────────────────────────────────────── */}
@@ -372,7 +386,6 @@ export function Landing() {
         }}
       >
         <div className="hero-firelight" aria-hidden />
-        <HeroEmbers />
 
         <div className="page-container" style={{ position: 'relative', zIndex: 2 }}>
           <div
@@ -401,7 +414,7 @@ export function Landing() {
                 transition={{ duration: 1, delay: 0.05, ease: [0.4, 0, 0.2, 1] }}
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontSize: 'clamp(56px, 9vw, 132px)',
+                  fontSize: 'clamp(44px, 7vw, 96px)',
                   fontWeight: 400,
                   lineHeight: 0.94,
                   letterSpacing: '-0.04em',
@@ -473,26 +486,8 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ── CITIES SCROLL ─────────────────────────────────────── */}
-      <div
-        className="city-scroll-mask"
-        style={{
-          borderTop: '1px solid rgba(245,237,224,0.06)',
-          borderBottom: '1px solid rgba(245,237,224,0.06)',
-          overflow: 'hidden',
-          padding: '18px 0',
-          background: 'rgba(13,10,12,0.4)',
-        }}
-      >
-        <div className="city-scroll">
-          {[...CITIES, ...CITIES].map((city, i) => (
-            <span key={i} className="mono" style={{ color: 'var(--bone-500)', padding: '0 28px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '28px' }}>
-              {city}
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--ember)', display: 'inline-block', boxShadow: '0 0 8px rgba(184,83,50,0.55)' }} />
-            </span>
-          ))}
-        </div>
-      </div>
+      {/* ── BIBLE VERSE BAR ───────────────────────────────────── */}
+      <VerseBar />
 
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
       <section className="v3-section" style={{ position: 'relative', padding: '140px 0' }}>

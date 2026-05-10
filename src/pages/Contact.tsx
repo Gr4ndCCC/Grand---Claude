@@ -40,7 +40,7 @@ export function Contact() {
   });
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '60px', position: 'relative', overflow: 'hidden' }}>
@@ -49,7 +49,7 @@ export function Contact() {
           <motion.p className="mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Contact</motion.p>
           <span className="maroon-rule" />
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}
           >
             Talk to us.<br />
             <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>We read everything.</span>
@@ -72,7 +72,7 @@ export function Contact() {
                 style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.30)', borderRadius: '16px', padding: '40px', textAlign: 'center' }}
               >
                 <p style={{ fontSize: '32px', marginBottom: '16px' }}>🔥</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '12px' }}>Message received.</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '12px' }}>Message received.</h3>
                 <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.7' }}>We'll reply to {form.email} within 48 hours.</p>
               </motion.div>
             ) : (
@@ -125,7 +125,7 @@ export function Contact() {
               ].map(({ label, email, desc }) => (
                 <div key={label} style={{ paddingBottom: '32px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px' }}>{label}</p>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', color: 'var(--beige)', fontSize: '17px', marginBottom: '6px' }}>{email}</p>
+                  <p style={{ fontFamily: 'var(--font-display)', color: 'var(--beige)', fontSize: '17px', marginBottom: '6px' }}>{email}</p>
                   <p style={{ color: '#666', fontSize: '14px', lineHeight: '1.6' }}>{desc}</p>
                 </div>
               ))}

@@ -120,10 +120,10 @@ export function HostNew() {
 
   if (!user) {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div style={{ padding: '160px 24px', textAlign: 'center' }}>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '40px', marginBottom: '16px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', marginBottom: '16px' }}>
             Sign in to host an event
           </h1>
           <p style={{ color: '#A0A0A0', marginBottom: '24px' }}>You need a free account to create your gathering.</p>
@@ -138,7 +138,7 @@ export function HostNew() {
   }
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       {/* Hero */}
@@ -157,7 +157,7 @@ export function HostNew() {
           <span className="maroon-rule" />
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 60px)', color: '#fff', lineHeight: 1.06, marginBottom: '8px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 60px)', color: '#fff', lineHeight: 1.06, marginBottom: '8px' }}
           >Light your fire.</motion.h1>
           <p style={{ color: '#A0A0A0', fontSize: '16px', maxWidth: '560px' }}>
             Customize every detail. Your event goes live the second you publish.
@@ -172,9 +172,9 @@ export function HostNew() {
             {/* FORM */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {/* Basics */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>01 — Basics</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Name your event</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Name your event</h3>
 
                 <FormLabel label="Event name *">
                   <input
@@ -197,9 +197,9 @@ export function HostNew() {
               </div>
 
               {/* Location */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>02 — Where</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick the spot</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick the spot</h3>
 
                 <FormLabel label="Location *">
                   <div style={{ position: 'relative' }}>
@@ -236,9 +236,9 @@ export function HostNew() {
               </div>
 
               {/* Date / Time */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>03 — When</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Date and time</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Date and time</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <FormLabel label="Date *">
                     <input
@@ -260,9 +260,9 @@ export function HostNew() {
               </div>
 
               {/* Theme */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>04 — Theme</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick the vibe</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick the vibe</h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
                   {THEME_OPTIONS.map(t => (
                     <button
@@ -281,9 +281,9 @@ export function HostNew() {
               </div>
 
               {/* Cover color */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>05 — Cover</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick a cover color</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Pick a cover color</h3>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   {COVER_PALETTE.map(c => (
                     <button
@@ -303,9 +303,9 @@ export function HostNew() {
               </div>
 
               {/* Capacity & Privacy */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>06 — Crew</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Capacity & privacy</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Capacity & privacy</h3>
 
                 <FormLabel label="Max participants *">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -315,7 +315,7 @@ export function HostNew() {
                       onChange={e => setMaxGuests(parseInt(e.target.value))}
                       style={{ flex: 1, accentColor: 'var(--maroon)' }}
                     />
-                    <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: 'var(--beige)', minWidth: '50px', textAlign: 'right' }}>{maxGuests}</span>
+                    <span style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--beige)', minWidth: '50px', textAlign: 'right' }}>{maxGuests}</span>
                   </div>
                 </FormLabel>
 
@@ -334,9 +334,9 @@ export function HostNew() {
               </div>
 
               {/* Tags */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>07 — Tags</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Tag your event</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '20px' }}>Tag your event</h3>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                   <input
                     value={tagInput}
@@ -360,9 +360,9 @@ export function HostNew() {
               </div>
 
               {/* Needed list */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', fontSize: '11px' }}>08 — Menu</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '8px' }}>What do you need covered?</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '8px' }}>What do you need covered?</h3>
                 <p style={{ color: '#A0A0A0', fontSize: '13px', marginBottom: '16px' }}>Guests will see this list and claim items as their contribution.</p>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                   <input
@@ -410,7 +410,7 @@ export function HostNew() {
                   <p className="mono" style={{ color: '#5A5A5A', marginBottom: '6px', fontSize: '11px' }}>
                     {pickFlag(location)} {extractCity(location) || 'City'} · {theme}
                   </p>
-                  <h4 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff', marginBottom: '10px', lineHeight: 1.3 }}>
+                  <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff', marginBottom: '10px', lineHeight: 1.3 }}>
                     {name || 'Your event name'}
                   </h4>
                   <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
@@ -480,7 +480,7 @@ export function HostNew() {
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  background: '#0A0A0A',
+  background: 'rgba(13,10,12,0.8)',
   border: '1px solid rgba(255,255,255,0.10)',
   borderRadius: '8px',
   padding: '12px 14px',

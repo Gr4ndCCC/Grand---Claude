@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Landing }        from './pages/Landing';
 import { Events }         from './pages/Events';
@@ -21,6 +21,43 @@ import { VaultCheckout }  from './pages/VaultCheckout';
 import { AuthProvider }   from './lib/auth';
 import { AuthModal }      from './components/AuthModal';
 
+function GlobalEmbers() {
+  const embers = useMemo(
+    () => Array.from({ length: 14 }, () => ({
+      left:     Math.random() * 100,
+      top:      55 + Math.random() * 60,
+      duration: 16 + Math.random() * 18,
+      delay:    -Math.random() * 22,
+      opacity:  0.2 + Math.random() * 0.35,
+    })),
+    []
+  );
+  return (
+    <div className="floating-embers global" aria-hidden>
+      {embers.map((e, i) => (
+        <span key={i} className="ember" style={{
+          left:              `${e.left}%`,
+          top:               `${e.top}%`,
+          animationDuration: `${e.duration}s`,
+          animationDelay:    `${e.delay}s`,
+          opacity:           e.opacity,
+        }} />
+      ))}
+    </div>
+  );
+}
+
+function GlobalAtmosphere() {
+  return (
+    <>
+      <div className="page-bg"    aria-hidden />
+      <div className="page-heat"  aria-hidden />
+      <div className="page-grain" aria-hidden />
+      <GlobalEmbers />
+    </>
+  );
+}
+
 function RouteTracker() {
   const { pathname } = useLocation();
   useEffect(() => console.log('Route:', pathname), [pathname]);
@@ -37,6 +74,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <GlobalAtmosphere />
         <RouteTracker />
         <ScrollToTop />
         <AuthModal />

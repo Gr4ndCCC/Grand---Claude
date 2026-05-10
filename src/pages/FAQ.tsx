@@ -26,7 +26,7 @@ function Item({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen(!open)}
         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '22px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', gap: '24px' }}
       >
-        <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: open ? 'var(--beige)' : '#fff', lineHeight: '1.3', transition: 'color 0.2s' }}>{q}</span>
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: open ? 'var(--beige)' : '#fff', lineHeight: '1.3', transition: 'color 0.2s' }}>{q}</span>
         {open ? <Minus size={16} style={{ color: 'var(--maroon)', flexShrink: 0 }} /> : <Plus size={16} style={{ color: '#5A5A5A', flexShrink: 0 }} />}
       </button>
       <AnimatePresence>
@@ -49,7 +49,7 @@ function Item({ q, a }: { q: string; a: string }) {
 export function FAQ() {
   const navigate = useNavigate();
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '80px', position: 'relative', overflow: 'hidden' }}>
@@ -61,7 +61,7 @@ export function FAQ() {
           <span className="maroon-rule" />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.06, marginBottom: '16px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.06, marginBottom: '16px' }}
           >
             Questions answered.
           </motion.h1>
@@ -76,11 +76,11 @@ export function FAQ() {
       </section>
 
       {/* dual CTA */}
-      <section style={{ padding: '80px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ padding: '80px 0', background: 'rgba(13,10,12,0.5)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="page-container">
           <div className="grid md:grid-cols-2 gap-4 max-w-2xl">
-            <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '32px' }}>
-              <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '12px' }}>Find an event</p>
+            <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.08)', borderRadius: '16px', padding: '32px' }}>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '12px' }}>Find an event</p>
               <p style={{ color: '#A0A0A0', marginBottom: '24px', lineHeight: '1.7' }}>Browse live gatherings near you. Real hosts. Real fire.</p>
               <button
                 onClick={() => navigate('/events')}
@@ -90,7 +90,7 @@ export function FAQ() {
               >Browse events →</button>
             </div>
             <div style={{ background: 'rgba(128,0,0,0.12)', border: '1px solid rgba(128,0,0,0.3)', borderRadius: '16px', padding: '32px' }}>
-              <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', marginBottom: '12px' }}>Join the Vault</p>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', marginBottom: '12px' }}>Join the Vault</p>
               <p style={{ color: '#A0A0A0', marginBottom: '24px', lineHeight: '1.7' }}>Recipes, masterclasses, The Board, and the Annual Summit.</p>
               <button
                 onClick={() => navigate('/vault')}

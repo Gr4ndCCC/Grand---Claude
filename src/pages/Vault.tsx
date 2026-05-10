@@ -4,7 +4,6 @@ import { Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
-import { FireButton } from '../components/FireButton';
 import { useAuth } from '../lib/auth';
 
 const VAULT_FEATURES = [
@@ -27,6 +26,17 @@ const INCLUDED = [
   'Priority event discovery',
 ];
 
+function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.9, delay, ease: [0.4, 0, 0.2, 1] }}
+    >{children}</motion.div>
+  );
+}
+
 function VaultPricing() {
   const { user, openAuth } = useAuth();
   const navigate = useNavigate();
@@ -39,55 +49,40 @@ function VaultPricing() {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px', maxWidth: '720px', margin: '0 auto', alignItems: 'stretch' }}>
       {/* Monthly */}
-      <div style={{ background: 'linear-gradient(160deg, #141414 0%, #0E0E0E 100%)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '36px', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}>
-        <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>Monthly</p>
-        <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', color: '#fff', marginBottom: '4px', lineHeight: 1 }}>€15</p>
-        <p style={{ color: '#5A5A5A', marginBottom: '28px', fontSize: '14px' }}>per month · cancel anytime</p>
+      <div className="price-card-v3">
+        <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '12px' }}>Monthly</p>
+        <p style={{ fontFamily: 'var(--font-display)', fontSize: '52px', color: 'var(--bone-100)', marginBottom: '4px', lineHeight: 1, letterSpacing: '-0.025em' }}>€15</p>
+        <p style={{ color: 'var(--bone-500)', marginBottom: '28px', fontSize: '14px' }}>per month · cancel anytime</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.slice(0, 6).map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#A0A0A0', fontSize: '13px' }}>
-              <Check size={12} style={{ color: 'var(--maroon)', flexShrink: 0, marginTop: '2px' }} />{f}
+            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--bone-400)', fontSize: '13px' }}>
+              <Check size={12} style={{ color: 'var(--burgundy)', flexShrink: 0, marginTop: '2px' }} />{f}
             </li>
           ))}
         </ul>
-        <button onClick={handleJoin}
-          style={{ width: '100%', background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '10px', padding: '13px', cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit', transition: 'all 0.2s' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.10)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
-        >Start monthly</button>
+        <button onClick={handleJoin} className="btn-v3 ghost" style={{ width: '100%' }}>Start monthly</button>
       </div>
 
-      {/* Annual — the prize */}
-      <div style={{
-        background: 'linear-gradient(160deg, rgba(128,0,0,0.18) 0%, rgba(85,0,0,0.10) 100%)',
-        border: '1px solid rgba(228,207,179,0.18)',
-        borderRadius: '18px', padding: '40px 36px', position: 'relative',
-        transform: 'scale(1.02)',
-        boxShadow: '0 24px 60px rgba(128,0,0,0.28), 0 0 0 1px rgba(228,207,179,0.06), inset 0 1px 0 rgba(228,207,179,0.08)',
-      }}>
-        <span className="mono" style={{ position: 'absolute', top: '-1px', right: '20px', transform: 'translateY(-50%)', color: '#fff', background: 'var(--maroon)', borderRadius: '999px', padding: '5px 12px', fontSize: '10px', boxShadow: '0 4px 16px rgba(128,0,0,0.5)' }}>
+      {/* Annual */}
+      <div className="price-card-v3 featured" style={{ position: 'relative', transform: 'scale(1.02)' }}>
+        <span className="mono" style={{ position: 'absolute', top: '-1px', right: '20px', transform: 'translateY(-50%)', color: 'var(--bone-100)', background: 'var(--burgundy)', borderRadius: '999px', padding: '5px 12px', fontSize: '10px', boxShadow: '0 4px 16px rgba(128,0,0,0.5)' }}>
           ★ Best value
         </span>
-        {/* Ember dot above price */}
-        <span className="animate-ember-pulse" style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: '#c96e47', boxShadow: '0 0 10px #c96e47', marginBottom: '14px' }} />
+        <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--ember-hi)', boxShadow: '0 0 10px var(--ember-hi)', marginBottom: '14px', animation: 'pulse-dot 2s var(--ease-coal) infinite' }} />
         <p className="mono" style={{ color: 'var(--beige)', marginBottom: '12px' }}>Annual · Inner Circle</p>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
-          <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '56px', color: '#fff', lineHeight: 1, letterSpacing: '-0.02em' }}>€99</p>
-          <p style={{ color: '#5A5A5A', textDecoration: 'line-through', fontSize: '15px' }}>€180</p>
+          <p style={{ fontFamily: 'var(--font-display)', fontSize: '56px', color: 'var(--bone-100)', lineHeight: 1, letterSpacing: '-0.025em' }}>€99</p>
+          <p style={{ color: 'var(--bone-500)', textDecoration: 'line-through', fontSize: '15px' }}>€180</p>
         </div>
-        <p style={{ color: 'var(--beige)', marginBottom: '28px', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>SAVE 45% · €8.25/month</p>
+        <p className="mono" style={{ color: 'var(--beige)', marginBottom: '28px' }}>SAVE 45% · €8.25/month</p>
         <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
           {INCLUDED.map(f => (
-            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#C8B8A2', fontSize: '13px' }}>
+            <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--bone-300)', fontSize: '13px' }}>
               <Check size={12} style={{ color: 'var(--beige)', flexShrink: 0, marginTop: '2px' }} />{f}
             </li>
           ))}
         </ul>
-        <button onClick={handleJoin}
-          style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '15px', cursor: 'pointer', fontSize: '15px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s', boxShadow: '0 4px 18px rgba(128,0,0,0.35)', letterSpacing: '0.01em' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(128,0,0,0.55)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(128,0,0,0.35)'; }}
-        >Claim your seat →</button>
+        <button onClick={handleJoin} className="btn-v3 primary" style={{ width: '100%' }}>Claim your seat →</button>
       </div>
     </div>
   );
@@ -104,130 +99,107 @@ export function Vault() {
   };
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
-      {/* hero */}
-      <section style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '700px', height: '500px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.22) 0%, transparent 65%)', pointerEvents: 'none' }} />
-        {/* gradient bleed into next section */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, transparent, #0D0D0D)', pointerEvents: 'none' }} />
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section className="v3-section" style={{ paddingTop: '140px', paddingBottom: '100px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+        <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(128,0,0,0.28) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <motion.p className="mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--maroon)', marginBottom: '8px' }}>The Vault</motion.p>
-          <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <span className="section-label" style={{ display: 'inline-block' }}>§ The Vault</span>
+          </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(40px, 6vw, 80px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
+            transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1] }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 88px)', color: 'var(--bone-100)', lineHeight: 1.05, marginBottom: '24px' }}
           >
             The inner circle.<br />
-            <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Everything the grill deserves.</span>
+            <span className="accent-italic">Everything the grill deserves.</span>
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
-            style={{ color: '#A0A0A0', fontSize: '18px', maxWidth: '540px', margin: '0 auto 48px', lineHeight: '1.7' }}
+            style={{ color: 'var(--bone-400)', fontSize: '18px', maxWidth: '540px', margin: '0 auto 48px', lineHeight: 1.7 }}
           >
             Exclusive recipes. Live masterclasses. The Board. Brotherhood Network.
             The Council. Annual Summit. One membership. Everything.
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}
             role="tablist" aria-label="Choose billing plan"
-            style={{ display: 'inline-flex', gap: '8px', background: 'rgba(255,255,255,0.04)', borderRadius: '14px', padding: '8px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '48px', flexWrap: 'wrap' }}
+            style={{ display: 'inline-flex', gap: '4px', background: 'rgba(26,23,20,0.7)', borderRadius: '999px', padding: '4px', border: '1px solid rgba(245,237,224,0.08)', marginBottom: '40px' }}
           >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={plan === 'monthly'}
-              onClick={() => setPlan('monthly')}
+            <button type="button" role="tab" aria-selected={plan === 'monthly'} onClick={() => setPlan('monthly')}
               style={{
-                padding: '14px 28px', borderRadius: '10px',
-                background: plan === 'monthly' ? 'var(--maroon)' : 'transparent',
-                color: plan === 'monthly' ? '#fff' : '#C8B8A2',
-                fontSize: '16px',
-                fontWeight: plan === 'monthly' ? 700 : 500,
-                fontFamily: 'inherit',
-                border: 'none', cursor: 'pointer',
-                transition: 'all 0.2s',
+                padding: '12px 24px', borderRadius: '999px',
+                background: plan === 'monthly' ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'transparent',
+                color: plan === 'monthly' ? 'var(--bone-100)' : 'var(--bone-300)',
+                fontFamily: 'var(--font-display)', fontSize: '15px', border: 'none', cursor: 'pointer',
+                transition: 'all 0.25s var(--ease-coal)',
                 boxShadow: plan === 'monthly' ? '0 4px 16px rgba(128,0,0,0.4)' : 'none',
               }}
             >Monthly · €15</button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={plan === 'annual'}
-              onClick={() => setPlan('annual')}
+            <button type="button" role="tab" aria-selected={plan === 'annual'} onClick={() => setPlan('annual')}
               style={{
-                padding: '14px 28px', borderRadius: '10px',
-                background: plan === 'annual' ? 'var(--maroon)' : 'transparent',
-                color: plan === 'annual' ? '#fff' : '#C8B8A2',
-                fontSize: '16px',
-                fontWeight: plan === 'annual' ? 700 : 500,
-                fontFamily: 'inherit',
-                border: 'none', cursor: 'pointer',
-                transition: 'all 0.2s',
+                padding: '12px 24px', borderRadius: '999px',
+                background: plan === 'annual' ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'transparent',
+                color: plan === 'annual' ? 'var(--bone-100)' : 'var(--bone-300)',
+                fontFamily: 'var(--font-display)', fontSize: '15px', border: 'none', cursor: 'pointer',
+                transition: 'all 0.25s var(--ease-coal)',
                 boxShadow: plan === 'annual' ? '0 4px 16px rgba(128,0,0,0.4)' : 'none',
               }}
             >Annual · €99 · Save 45%</button>
           </motion.div>
           <br />
-          <button onClick={handleJoin}
-            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px 32px', cursor: 'pointer', fontSize: '16px', fontWeight: 700, fontFamily: 'inherit', transition: 'all 0.2s' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'var(--maroon-light)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.transform = 'none'; }}
-          >Join the Vault</button>
-          <p className="mono" style={{ color: '#5A5A5A', marginTop: '16px' }}>Cancel anytime · No contracts · Instant access</p>
+          <button onClick={handleJoin} className="btn-v3 primary lg">Join the Vault</button>
+          <p className="mono" style={{ color: 'var(--bone-500)', marginTop: '16px' }}>Cancel anytime · No contracts · Instant access</p>
         </div>
       </section>
 
-      {/* features grid */}
-      <section style={{ padding: '80px 0 100px', background: '#0D0D0D', position: 'relative' }}>
-        {/* top fade from hero */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '60px', background: 'linear-gradient(to bottom, #0A0A0A, transparent)', pointerEvents: 'none' }} />
-        {/* bottom fade into pricing */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, transparent, #0A0A0A)', pointerEvents: 'none' }} />
-        <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
-          <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>What's inside</p>
-          <span className="maroon-rule" />
-          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', marginBottom: '20px', lineHeight: 1.06 }}>
-            Behind the door.<br />
-            <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Six things you can't get anywhere else.</span>
-          </h2>
-          <p style={{ color: '#A0A0A0', maxWidth: '520px', marginBottom: '48px', fontSize: '17px', lineHeight: '1.7' }}>
-            Recipes that don't exist on any blog. Live masterclasses from real
-            gatherings. Verified members worldwide. The Board, The Council, and
-            the Annual Summit. One membership. Everything.
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* ── FEATURES ─────────────────────────────────────────── */}
+      <section className="v3-section" style={{ padding: '80px 0 100px', borderTop: '1px solid rgba(245,237,224,0.06)', background: 'rgba(13,10,12,0.4)' }}>
+        <div className="page-container">
+          <FadeUp>
+            <div className="section-label">§ What's inside</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 4.5vw, 56px)', color: 'var(--bone-100)', marginBottom: '20px', lineHeight: 1.05 }}>
+              Behind the door.<br />
+              <span className="accent-italic">Six things you can't get anywhere else.</span>
+            </h2>
+            <p style={{ color: 'var(--bone-400)', maxWidth: '520px', marginBottom: '48px', fontSize: '17px', lineHeight: 1.7 }}>
+              Recipes that don't exist on any blog. Live masterclasses from real
+              gatherings. Verified members worldwide. The Board, The Council, and
+              the Annual Summit. One membership. Everything.
+            </p>
+          </FadeUp>
+          <div className="v3-three-col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
             {VAULT_FEATURES.map(({ title, body }, i) => (
-              <motion.div key={title}
-                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-60px' }} transition={{ delay: i * 0.08 }}
-                className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}
-              >
-                <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: 'var(--beige)', marginBottom: '12px' }}>{title}</p>
-                <p style={{ color: '#A0A0A0', lineHeight: '1.7', fontSize: '14px' }}>{body}</p>
-              </motion.div>
+              <FadeUp key={title} delay={i * 0.08}>
+                <div className="vault-feature-v3">
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--beige)', marginBottom: '12px', position: 'relative', zIndex: 1 }}>{title}</p>
+                  <p style={{ color: 'var(--bone-500)', lineHeight: 1.7, fontSize: '14px', position: 'relative', zIndex: 1 }}>{body}</p>
+                </div>
+              </FadeUp>
             ))}
           </div>
-          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            style={{ textAlign: 'center', marginTop: '48px' }}
-          >
-            <FireButton variant="primary" size="lg">Join the Vault for more</FireButton>
-            <p className="mono" style={{ color: '#5A5A5A', marginTop: '12px' }}>Cancel anytime · Instant access</p>
-          </motion.div>
+          <FadeUp>
+            <div style={{ textAlign: 'center', marginTop: '48px' }}>
+              <button className="btn-v3 primary lg" onClick={handleJoin}>Join the Vault for more</button>
+              <p className="mono" style={{ color: 'var(--bone-500)', marginTop: '12px' }}>Cancel anytime · Instant access</p>
+            </div>
+          </FadeUp>
         </div>
       </section>
 
-      {/* pricing */}
-      <section style={{ padding: '100px 0', position: 'relative' }}>
+      {/* ── PRICING ──────────────────────────────────────────── */}
+      <section className="v3-section" style={{ padding: '120px 0' }}>
         <div className="page-container">
-          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Membership</p>
-            <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
-            <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(28px, 4vw, 48px)', color: '#fff', marginBottom: '8px' }}>
-              Choose your tier.
-            </h2>
-            <p style={{ color: '#A0A0A0', fontSize: '16px' }}>Every plan unlocks the full Vault.</p>
-          </div>
+          <FadeUp>
+            <div style={{ textAlign: 'center', marginBottom: '56px' }}>
+              <div className="section-label" style={{ display: 'inline-block' }}>§ Membership</div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 56px)', color: 'var(--bone-100)', marginBottom: '8px' }}>
+                Choose your tier.
+              </h2>
+              <p style={{ color: 'var(--bone-400)', fontSize: '16px' }}>Every plan unlocks the full Vault.</p>
+            </div>
+          </FadeUp>
           <VaultPricing />
         </div>
       </section>

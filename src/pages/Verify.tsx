@@ -24,11 +24,11 @@ export function Verify() {
 
   if (!user) {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div style={{ paddingTop: '160px', textAlign: 'center' }}>
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>Verification</p>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '16px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '16px' }}>
             Sign in first.
           </h1>
           <p style={{ color: '#A0A0A0', marginBottom: '32px' }}>
@@ -69,7 +69,7 @@ export function Verify() {
   // Already verified or pending → show status banner
   if ((status === 'pending' || status === 'verified') && step === 'intro') {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div className="page-container" style={{ paddingTop: '140px', paddingBottom: '120px', maxWidth: '720px' }}>
           <motion.div
@@ -88,7 +88,7 @@ export function Verify() {
             }}>
               {status === 'verified' ? <Check size={32} style={{ color: '#5cb85c' }} /> : <Loader size={32} style={{ color: '#DAA520' }} />}
             </div>
-            <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>
               {status === 'verified' ? 'You\'re verified.' : 'Under review.'}
             </h1>
             <p style={{ color: '#A0A0A0', fontSize: '16px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 32px' }}>
@@ -110,7 +110,7 @@ export function Verify() {
   }
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <div className="page-container" style={{ paddingTop: '120px', paddingBottom: '100px', maxWidth: '720px' }}>
@@ -138,7 +138,7 @@ export function Verify() {
           {step === 'intro' && (
             <motion.div key="intro" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px', letterSpacing: '0.14em' }}>VAULT VERIFICATION</p>
-              <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', marginBottom: '20px', lineHeight: 1.05 }}>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 56px)', color: '#fff', marginBottom: '20px', lineHeight: 1.05 }}>
                 Verify your identity.<br />
                 <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Earn the badge.</span>
               </h1>
@@ -146,7 +146,7 @@ export function Verify() {
                 The Vault is real members only. We verify every account so the Brotherhood Network stays trustworthy. It takes 2 minutes. We&apos;ll never share your documents.
               </p>
 
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '24px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '24px' }}>
                 <p className="mono" style={{ color: '#5A5A5A', marginBottom: '20px', letterSpacing: '0.12em' }}>WHAT YOU&apos;LL NEED</p>
                 {[
                   { icon: FileText, label: 'A government-issued photo ID', desc: 'Passport, driver\'s license, or national ID card' },
@@ -181,7 +181,7 @@ export function Verify() {
           {step === 'document' && (
             <motion.div key="document" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>STEP 1 OF 3</p>
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Upload your ID</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Upload your ID</h2>
               <p style={{ color: '#A0A0A0', marginBottom: '32px', fontSize: '15px' }}>Pick a document type and upload a clear photo of both sides.</p>
 
               {/* doc type selector */}
@@ -269,7 +269,7 @@ export function Verify() {
           {step === 'selfie' && (
             <motion.div key="selfie" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>STEP 2 OF 3</p>
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Take a selfie</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Take a selfie</h2>
               <p style={{ color: '#A0A0A0', marginBottom: '32px', fontSize: '15px' }}>Show your face clearly. We&apos;ll match it against your ID photo.</p>
 
               <input
@@ -332,10 +332,10 @@ export function Verify() {
           {step === 'review' && (
             <motion.div key="review" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>STEP 3 OF 3</p>
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Review and submit</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '12px' }}>Review and submit</h2>
               <p style={{ color: '#A0A0A0', marginBottom: '32px', fontSize: '15px' }}>Confirm everything looks right. You won&apos;t be able to edit after submitting.</p>
 
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
                 <p className="mono" style={{ color: '#5A5A5A', marginBottom: '12px' }}>NAME ON FILE</p>
                 <p style={{ color: '#fff', fontSize: '15px', marginBottom: '20px' }}>{user.name}</p>
 
@@ -393,7 +393,7 @@ export function Verify() {
               <div style={{ width: '88px', height: '88px', borderRadius: '50%', background: 'rgba(60,140,80,0.18)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
                 <Check size={40} style={{ color: '#5cb85c' }} />
               </div>
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '40px', color: '#fff', marginBottom: '16px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '40px', color: '#fff', marginBottom: '16px' }}>
                 Submitted.
               </h2>
               <p style={{ color: '#A0A0A0', fontSize: '16px', maxWidth: '460px', margin: '0 auto 32px', lineHeight: 1.7 }}>
