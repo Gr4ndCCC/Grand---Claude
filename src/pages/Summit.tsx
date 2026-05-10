@@ -18,7 +18,7 @@ const PROGRAM = [
 export function Summit() {
   const navigate = useNavigate();
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '80px', position: 'relative', overflow: 'hidden' }}>
@@ -28,7 +28,7 @@ export function Summit() {
           <span className="maroon-rule" style={{ margin: '0 auto 16px' }} />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(44px, 7vw, 96px)', color: '#fff', lineHeight: 1.04, marginBottom: '24px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 7vw, 96px)', color: '#fff', lineHeight: 1.04, marginBottom: '24px' }}
           >
             One city.<br />
             One weekend.<br />
@@ -43,28 +43,28 @@ export function Summit() {
           </motion.p>
           <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', padding: '24px 48px', background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.30)', borderRadius: '16px' }}>
             <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '10px' }}>2026 SUMMIT — REVEAL</p>
-            <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '32px', color: '#fff', marginBottom: '4px' }}>September · TBD</p>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: '#fff', marginBottom: '4px' }}>September · TBD</p>
             <p style={{ color: '#A0A0A0', fontSize: '14px' }}>Location revealed exclusively to Vault members</p>
           </div>
         </div>
       </section>
 
       {/* program */}
-      <section style={{ padding: '80px 0', background: '#0D0D0D', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <section style={{ padding: '80px 0', background: 'rgba(13,10,12,0.5)', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="page-container">
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Three days</p>
           <span className="maroon-rule" />
-          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '48px' }}>The program.</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '48px' }}>The program.</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {PROGRAM.map(({ d, t, b }, i) => (
               <motion.div key={d}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-60px' }} transition={{ delay: i * 0.1 }}
                 className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '28px' }}
+                style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px' }}
               >
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '12px' }}>{d}</p>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: 'var(--beige)', marginBottom: '12px' }}>{t}</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--beige)', marginBottom: '12px' }}>{t}</h3>
                 <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.7' }}>{b}</p>
               </motion.div>
             ))}
@@ -77,20 +77,20 @@ export function Summit() {
         <div className="page-container">
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Past summits</p>
           <span className="maroon-rule" />
-          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '48px' }}>The road so far.</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 4vw, 52px)', color: '#fff', marginBottom: '48px' }}>The road so far.</h2>
           <div className="grid md:grid-cols-2 gap-6 mb-12">
             {PAST.map(({ year, city, country, attendees, theme }, i) => (
               <motion.div key={year}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                 className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '32px' }}
+                style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '16px', padding: '32px' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '40px', color: 'var(--beige)', lineHeight: 1 }}>{year}</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '40px', color: 'var(--beige)', lineHeight: 1 }}>{year}</p>
                   <span className="mono" style={{ color: '#5A5A5A' }}>{attendees} attendees</span>
                 </div>
-                <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '4px' }}>{city}, {country}</h3>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '4px' }}>{city}, {country}</h3>
                 <p style={{ color: 'var(--beige)', fontStyle: 'italic', fontSize: '15px' }}>"{theme}"</p>
               </motion.div>
             ))}

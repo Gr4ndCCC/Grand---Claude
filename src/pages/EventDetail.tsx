@@ -76,11 +76,11 @@ export function EventDetail() {
 
   if (!event) {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div style={{ padding: '160px 24px', textAlign: 'center' }}>
           <p className="mono" style={{ color: '#5A5A5A', marginBottom: '16px' }}>Event not found</p>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '48px', marginBottom: '24px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '48px', marginBottom: '24px' }}>
             That fire has gone cold.
           </h1>
           <button
@@ -153,7 +153,7 @@ export function EventDetail() {
   };
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       {/* Hero */}
@@ -182,7 +182,7 @@ export function EventDetail() {
               <span className="maroon-rule" />
               <motion.h1
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}
+                style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.06, marginBottom: '20px' }}
               >{event.title}</motion.h1>
               <p style={{ color: '#A0A0A0', fontSize: '16px', lineHeight: '1.7', maxWidth: '600px', marginBottom: '28px' }}>
                 {event.description}
@@ -205,7 +205,7 @@ export function EventDetail() {
                   <Avatar name={event.host} rank={event.hostRank} size={40} />
                   <div>
                     <p style={{ fontSize: '13px', color: '#A0A0A0' }}>Hosted by</p>
-                    <p style={{ fontSize: '14px', color: 'var(--beige)', fontFamily: 'Playfair Display, Georgia, serif' }}>{event.host}</p>
+                    <p style={{ fontSize: '14px', color: 'var(--beige)', fontFamily: 'var(--font-display)' }}>{event.host}</p>
                   </div>
                 </div>
                 <RankPill rank={event.hostRank} />
@@ -265,11 +265,11 @@ export function EventDetail() {
             {/* LEFT — Attendees + Contributions */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* Attendees */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <Users size={16} style={{ color: 'var(--maroon)' }} />
-                    <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff' }}>
                       Who's coming
                     </h3>
                   </div>
@@ -289,11 +289,11 @@ export function EventDetail() {
               </div>
 
               {/* Contributions */}
-              <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px' }}>
+              <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <ChefHat size={16} style={{ color: 'var(--maroon)' }} />
-                    <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff' }}>
                       What people are bringing
                     </h3>
                   </div>
@@ -327,7 +327,7 @@ export function EventDetail() {
             </div>
 
             {/* RIGHT — Tabs (Chat | Ember AI) */}
-            <div style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '640px', position: 'sticky', top: '90px' }}>
+            <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '640px', position: 'sticky', top: '90px' }}>
               <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                 <button
                   onClick={() => setTab('chat')}
@@ -389,7 +389,7 @@ export function EventDetail() {
                       onChange={e => setChatInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && sendChat()}
                       placeholder={user ? 'Write a message…' : 'Sign in to chat…'}
-                      style={{ flex: 1, background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '10px 12px', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
+                      style={{ flex: 1, background: 'rgba(26,23,20,0.8)', border: '1px solid rgba(245,237,224,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: 'inherit' }}
                     />
                     <button
                       onClick={sendChat}
@@ -420,7 +420,7 @@ export function EventDetail() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
                       <span style={{ fontSize: '32px' }}>{event.weather.icon}</span>
                       <div>
-                        <p style={{ fontSize: '22px', color: '#fff', fontFamily: 'Playfair Display, Georgia, serif' }}>{event.weather.temp}</p>
+                        <p style={{ fontSize: '22px', color: '#fff', fontFamily: 'var(--font-display)' }}>{event.weather.temp}</p>
                         <p style={{ fontSize: '12px', color: '#A0A0A0' }}>{event.weather.condition}</p>
                       </div>
                     </div>
@@ -518,7 +518,7 @@ export function EventDetail() {
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
                 <Flame size={20} style={{ color: '#fff' }} />
               </div>
-              <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
                 Join {event.title}?
               </h3>
               <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
@@ -552,7 +552,7 @@ export function EventDetail() {
               onClick={e => e.stopPropagation()}
               style={{ background: '#111', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', padding: '32px', maxWidth: '480px', width: '100%' }}
             >
-              <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
                 What are you bringing?
               </h3>
               <p style={{ color: '#A0A0A0', fontSize: '13px', marginBottom: '20px' }}>
@@ -579,7 +579,7 @@ export function EventDetail() {
                   onChange={e => setContribItem(e.target.value)}
                   placeholder="Steaks, drinks, charcoal…"
                   autoFocus
-                  style={{ width: '100%', background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '12px', color: '#fff', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
+                  style={{ width: '100%', background: 'rgba(26,23,20,0.8)', border: '1px solid rgba(245,237,224,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
                 />
               </label>
               <label style={{ display: 'block', marginBottom: '20px' }}>
@@ -588,7 +588,7 @@ export function EventDetail() {
                   value={contribQty}
                   onChange={e => setContribQty(e.target.value)}
                   placeholder="2kg, ×6, large bowl…"
-                  style={{ width: '100%', background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '12px', color: '#fff', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
+                  style={{ width: '100%', background: 'rgba(26,23,20,0.8)', border: '1px solid rgba(245,237,224,0.1)', borderRadius: '8px', padding: '12px', color: '#fff', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
                 />
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>

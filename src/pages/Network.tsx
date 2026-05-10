@@ -40,7 +40,7 @@ export function Network() {
   );
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '60px', position: 'relative', overflow: 'hidden' }}>
@@ -50,7 +50,7 @@ export function Network() {
           <span className="maroon-rule" />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
           >
             Show up a stranger.<br />
             <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Leave a brother.</span>
@@ -99,7 +99,7 @@ export function Network() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }} transition={{ delay: i * 0.05 }}
                 className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px' }}
+                style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -107,11 +107,11 @@ export function Network() {
                       width: '42px', height: '42px', borderRadius: '50%',
                       background: 'rgba(128,0,0,0.25)', color: 'var(--beige)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: 'Playfair Display, Georgia, serif', fontSize: '15px', fontWeight: 600,
+                      fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600,
                       border: '1px solid rgba(228,207,179,0.15)',
                     }}>{name.split(' ').map(w => w[0]).join('').slice(0, 2)}</div>
                     <div>
-                      <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '17px', color: '#fff' }}>{name}</p>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: '#fff' }}>{name}</p>
                       <p className="mono" style={{ color: '#5A5A5A' }}>{country} {city}</p>
                     </div>
                   </div>

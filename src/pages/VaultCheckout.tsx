@@ -113,13 +113,13 @@ export function VaultCheckout() {
 
   if (!user) {
     return (
-      <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
         <Nav />
         <div style={{ padding: '160px 24px', textAlign: 'center', maxWidth: '480px', margin: '0 auto' }}>
           <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'center' }}>
             <FlameMark />
           </div>
-          <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 400, marginBottom: '14px' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 400, marginBottom: '14px' }}>
             Sign in to join the Vault.
           </h1>
           <p style={{ color: '#6A6A6A', marginBottom: '28px', fontSize: '15px', lineHeight: 1.6 }}>
@@ -169,7 +169,7 @@ export function VaultCheckout() {
     .toUpperCase();
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       {/* Ambient radial glow */}
@@ -199,10 +199,10 @@ export function VaultCheckout() {
                   <FlameMark />
                 </div>
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '10px' }}>Vault Membership</p>
-                <h1 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(30px, 4vw, 50px)', fontWeight: 400, lineHeight: 1.06, color: '#fff', marginBottom: '8px' }}>
+                <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(30px, 4vw, 50px)', fontWeight: 400, lineHeight: 1.06, color: '#fff', marginBottom: '8px' }}>
                   Join the Vault.
                 </h1>
-                <p style={{ color: '#6A6A6A', fontStyle: 'italic', fontFamily: 'Playfair Display, Georgia, serif', fontSize: '15px' }}>
+                <p style={{ color: '#6A6A6A', fontStyle: 'italic', fontFamily: 'var(--font-display)', fontSize: '15px' }}>
                   Full access. Lifetime brotherhood.
                 </p>
               </motion.div>
@@ -235,7 +235,7 @@ export function VaultCheckout() {
                     <p style={{ color: '#4A4A4A', fontSize: '12px' }}>€8.25/month · billed €99/year</p>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '26px', color: '#fff', lineHeight: 1 }}>€99</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: '#fff', lineHeight: 1 }}>€99</p>
                     <p style={{ color: '#383838', fontSize: '11px', textDecoration: 'line-through', marginTop: '2px' }}>€180</p>
                   </div>
                 </button>
@@ -260,7 +260,7 @@ export function VaultCheckout() {
                     <p style={{ color: '#4A4A4A', fontSize: '12px' }}>Flexible · cancel anytime</p>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '26px', color: '#fff', lineHeight: 1 }}>€15</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '26px', color: '#fff', lineHeight: 1 }}>€15</p>
                     <p style={{ color: '#4A4A4A', fontSize: '11px', marginTop: '2px' }}>per month</p>
                   </div>
                 </button>
@@ -279,7 +279,7 @@ export function VaultCheckout() {
                 <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '11px', letterSpacing: '0.18em' }}>
                   WHAT YOU GET
                 </p>
-                <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '26px', fontWeight: 400, lineHeight: 1.15, color: '#fff', marginBottom: '6px' }}>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 400, lineHeight: 1.15, color: '#fff', marginBottom: '6px' }}>
                   Everything Ember has to offer.<br />
                   <span style={{ color: '#E4CFB3', fontStyle: 'italic' }}>One membership. No gates.</span>
                 </h2>
@@ -314,7 +314,7 @@ export function VaultCheckout() {
                 {/* Closing line */}
                 <div style={{ marginTop: '26px', paddingTop: '20px', borderTop: '1px solid rgba(228,207,179,0.10)', textAlign: 'center' }}>
                   <p style={{
-                    color: '#E4CFB3', fontFamily: 'Playfair Display, Georgia, serif',
+                    color: '#E4CFB3', fontFamily: 'var(--font-display)',
                     fontStyle: 'italic', fontSize: '17px', lineHeight: 1.4,
                   }}>
                     "The world grills. The Vault is where the brotherhood keeps the fire."
@@ -355,7 +355,7 @@ export function VaultCheckout() {
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: '#fff', lineHeight: 1 }}>{price}</p>
+                          <p style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: '#fff', lineHeight: 1 }}>{price}</p>
                           {selected === 'annual' && (
                             <p style={{ color: '#383838', fontSize: '10px', textDecoration: 'line-through', marginTop: '2px' }}>€180</p>
                           )}
@@ -384,7 +384,7 @@ export function VaultCheckout() {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
                       <span style={{ color: '#C0C0C0', fontSize: '14px', fontWeight: 600 }}>Total today</span>
-                      <span style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '18px', color: '#fff' }}>{priceNum}</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: '18px', color: '#fff' }}>{priceNum}</span>
                     </div>
                   </div>
 

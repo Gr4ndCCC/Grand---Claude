@@ -55,7 +55,7 @@ const SECTIONS = [
 
 export function Terms() {
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '60px', position: 'relative', overflow: 'hidden' }}>
@@ -64,7 +64,7 @@ export function Terms() {
           <motion.p className="mono" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Legal</motion.p>
           <span className="maroon-rule" />
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.1, marginBottom: '16px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 5vw, 64px)', color: '#fff', lineHeight: 1.1, marginBottom: '16px' }}
           >Terms & Conditions</motion.h1>
           <p className="mono" style={{ color: '#5A5A5A' }}>Last updated: 1 January 2026</p>
         </div>
@@ -78,7 +78,7 @@ export function Terms() {
               viewport={{ once: true, margin: '-40px' }} transition={{ delay: i * 0.04 }}
               style={{ paddingBottom: '40px', marginBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}
             >
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: 'var(--beige)', marginBottom: '14px' }}>{title}</h2>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--beige)', marginBottom: '14px' }}>{title}</h2>
               <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.85' }}>{body}</p>
             </motion.div>
           ))}

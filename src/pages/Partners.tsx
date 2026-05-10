@@ -21,7 +21,7 @@ export function Partners() {
   const filtered = filter === 'All' ? PARTNERS : PARTNERS.filter(p => p.cat === filter);
 
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '60px', position: 'relative', overflow: 'hidden' }}>
@@ -31,7 +31,7 @@ export function Partners() {
           <span className="maroon-rule" />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
           >
             Vetted by the brotherhood.<br />
             <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Discounted for the Vault.</span>
@@ -69,12 +69,12 @@ export function Partners() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-40px' }} transition={{ delay: i * 0.06 }}
                 className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}
+                style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '4px' }}>{cat}</p>
-                    <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '20px', color: '#fff', lineHeight: 1.2 }}>{name}</p>
+                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff', lineHeight: 1.2 }}>{name}</p>
                     <p className="mono" style={{ color: '#5A5A5A', marginTop: '4px' }}>{city}</p>
                   </div>
                 </div>
@@ -90,7 +90,7 @@ export function Partners() {
           <div className="card-glow" style={{ background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.30)', borderRadius: '16px', padding: '32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'center' }}>
             <div>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Apply</p>
-              <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', marginBottom: '8px' }}>Run a business the brotherhood would trust?</h3>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: '#fff', marginBottom: '8px' }}>Run a business the brotherhood would trust?</h3>
               <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.7' }}>
                 Apply for partner status. We review every application personally. No fees. No paid placement.
               </p>

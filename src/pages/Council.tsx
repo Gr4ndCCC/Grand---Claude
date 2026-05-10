@@ -14,7 +14,7 @@ const VOTES = [
 export function Council() {
   const navigate = useNavigate();
   return (
-    <div style={{ background: '#0A0A0A', color: '#fff', minHeight: '100vh' }}>
+    <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
 
       <section style={{ paddingTop: '140px', paddingBottom: '60px', position: 'relative', overflow: 'hidden' }}>
@@ -24,7 +24,7 @@ export function Council() {
           <span className="maroon-rule" />
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 72px)', color: '#fff', lineHeight: 1.06, marginBottom: '24px' }}
           >
             Your membership<br />
             <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>shapes Ember.</span>
@@ -49,14 +49,14 @@ export function Council() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }} transition={{ delay: i * 0.06 }}
                 className="card-glow"
-                style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px', display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '24px', alignItems: 'center' }}
+                style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px', display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '24px', alignItems: 'center' }}
               >
                 <span className="mono" style={{
                   background: `${color}22`, color, padding: '4px 10px', borderRadius: '6px',
                   fontSize: '10px', border: `1px solid ${color}55`,
                 }}>{status}</span>
                 <div>
-                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '17px', color: '#fff', marginBottom: '4px' }}>{title}</p>
+                  <p style={{ fontFamily: 'var(--font-display)', fontSize: '17px', color: '#fff', marginBottom: '4px' }}>{title}</p>
                   <p style={{ color: '#A0A0A0', fontSize: '13px' }}>{desc}</p>
                 </div>
                 <p className="mono" style={{ color: '#5A5A5A' }}>{n}</p>
@@ -70,7 +70,7 @@ export function Council() {
         <div className="page-container" style={{ maxWidth: '720px' }}>
           <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>How voting works</p>
           <span className="maroon-rule" />
-          <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '36px', color: '#fff', marginBottom: '32px' }}>One member. One vote.</h2>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '36px', color: '#fff', marginBottom: '32px' }}>One member. One vote.</h2>
           {[
             { n: '01', t: 'Proposals come from anywhere',  b: 'Vault members, the Ember team, or the Council itself can put a question forward.' },
             { n: '02', t: '30-day window',                  b: 'Every vote runs for 30 days. Open and transparent. Real-time tally visible to all members.' },
@@ -80,7 +80,7 @@ export function Council() {
               <div style={{ display: 'flex', gap: '16px', alignItems: 'baseline' }}>
                 <p className="mono" style={{ color: 'var(--maroon)' }}>{n}</p>
                 <div>
-                  <h3 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '22px', color: 'var(--beige)', marginBottom: '8px' }}>{t}</h3>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', color: 'var(--beige)', marginBottom: '8px' }}>{t}</h3>
                   <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.7' }}>{b}</p>
                 </div>
               </div>

@@ -216,13 +216,19 @@ p { margin: 0; }
   animation: firepulse 5s var(--ease-coal) infinite;
 }
 
-/* floating embers field — used by hero ambient layer */
+/* floating embers field */
 .floating-embers { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+/* site-wide variant: fixed so it escapes any overflow:hidden container */
+.floating-embers.global {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+}
 .floating-embers .ember {
   position: absolute; width: 3px; height: 3px; border-radius: 50%;
   background: var(--ember-cr);
   box-shadow: 0 0 8px var(--ember-hi);
   animation: rise linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* v3 buttons */
@@ -440,7 +446,36 @@ p { margin: 0; }
   box-shadow: 0 0 0 1px rgba(228,207,179,0.08), 0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* city scroll animation */
+/* verse bar */
+.verse-bar {
+  border-top: 1px solid rgba(245, 237, 224, 0.06);
+  border-bottom: 1px solid rgba(245, 237, 224, 0.06);
+  padding: 28px 0;
+  background: rgba(13, 10, 12, 0.4);
+  text-align: center;
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.verse-bar .verse-text {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(15px, 2vw, 19px);
+  color: var(--bone-300);
+  line-height: 1.5;
+  margin: 0;
+}
+.verse-bar .verse-ref {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--burgundy);
+  margin-top: 10px;
+}
+
+/* city scroll animation (kept as fallback) */
 @keyframes scroll-left {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
