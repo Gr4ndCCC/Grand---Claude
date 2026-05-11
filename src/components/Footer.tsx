@@ -10,11 +10,12 @@ const LEGAL = [
 ];
 
 const PLATFORM_BASE = [
-  { label: 'Events',  to: '/events' },
-  { label: 'Vault',   to: '/vault'  },
-  { label: 'Hosts',   to: '/hosts'  },
-  { label: 'About',   to: '/about'  },
-  { label: 'FAQ',     to: '/faq'    },
+  { label: 'Events',  to: '/events'  },
+  { label: 'Vault',   to: '/vault'   },
+  { label: 'Hosts',   to: '/hosts'   },
+  { label: 'About',   to: '/about'   },
+  { label: 'FAQ',     to: '/faq'     },
+  { label: 'Contact', to: '/contact' },
 ];
 
 const BROTHERHOOD = [
