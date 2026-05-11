@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import {
   EMAIL_CATEGORIES,
+  paymentConfirmationEmail,
   sendEmail,
   subscriptionUpdatedEmail,
   vaultWelcomeEmail,
@@ -52,8 +53,19 @@ export default async function handler(req, res) {
   const email = custom.email || event.data?.attributes?.user_email || event.data?.attributes?.email;
   const name = custom.name || event.data?.attributes?.user_name || email;
   const plan = custom.plan;
+  const amount = event.data?.attributes?.total_formatted || event.data?.attributes?.subtotal_formatted;
 
-  if (eventName === 'order_created' || eventName === 'subscription_created') {
+  if (eventName === 'order_created') {
+    if (email) {
+      const message = paymentConfirmationEmail({ name, plan, amount, orderId: event.data?.id });
+      await sendEmail({
+        to: email,
+        subject: message.subject,
+        html: message.html,
+        tags: [{ name: 'category', value: EMAIL_CATEGORIES.BILLING }],
+      });
+    }
+  } else if (eventName === 'subscription_created') {
     if (email) {
       const message = vaultWelcomeEmail({ name, plan });
       await sendEmail({

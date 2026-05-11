@@ -6,6 +6,7 @@ export const EMAIL_CATEGORIES = {
   BILLING: 'billing',
   NEWSLETTER: 'newsletter',
   SUPPORT: 'support',
+  EVENTS: 'events',
 };
 
 export function siteUrl() {
@@ -84,7 +85,7 @@ export async function sendEmail({ to, subject, html, replyTo, tags = [] }) {
       to,
       subject,
       html,
-      reply_to: replyTo || process.env.EMAIL_REPLY_TO || 'support@emberworld.co',
+      reply_to: replyTo || process.env.EMAIL_REPLY_TO || 'emberworldwide@gmail.com',
       tags,
     }),
   });
@@ -102,11 +103,11 @@ export function welcomeEmail({ name }) {
     subject: 'Welcome to Ember',
     html: emailShell({
       title: 'Welcome to Ember.',
-      preheader: 'Your Ember account is ready.',
+      preheader: 'Your account is ready. The world grills.',
       body: `
         <p style="margin:0 0 18px">Hey ${firstName},</p>
-        <p style="margin:0 0 18px">Your Ember account is live. You can now discover events, join the Vault, and start building your place in the brotherhood.</p>
-        <p style="margin:0">The fire is lit. Start with the Vault or browse upcoming gatherings.</p>
+        <p style="margin:0 0 18px">Your Ember account is live. You can discover BBQ gatherings, host your own fire, and join the Vault when you are ready.</p>
+        <p style="margin:0">Start by browsing events or opening the Vault. The first step is yours.</p>
       `,
       cta: { label: 'Open Ember', href: siteUrl() },
     }),
@@ -124,22 +125,46 @@ export function vaultWelcomeEmail({ name, plan }) {
       body: `
         <p style="margin:0 0 18px">Hey ${firstName},</p>
         <p style="margin:0 0 18px">Your ${escapeHtml(planLabel)} membership is active. The Vault is now open: recipes, masterclasses, partner deals, Council access, and Summit updates.</p>
-        <p style="margin:0">Keep this email for your records. Your receipt and billing details are handled securely by Lemon Squeezy.</p>
+        <p style="margin:0">Your membership starts now. Keep an eye on your inbox for Vault drops and member-only updates.</p>
       `,
       cta: { label: 'Open the Vault', href: `${siteUrl()}/#/vault` },
     }),
   };
 }
 
-export function subscriptionUpdatedEmail({ name, status }) {
+export function paymentConfirmationEmail({ name, plan, amount, orderId }) {
+  const planLabel = plan === 'monthly' ? 'Monthly' : plan === 'annual' ? 'Annual' : 'Vault';
+  const amountLine = amount ? `<p style="margin:0 0 8px"><strong style="color:#ffffff">Amount:</strong> ${escapeHtml(amount)}</p>` : '';
+  const orderLine = orderId ? `<p style="margin:0 0 8px"><strong style="color:#ffffff">Reference:</strong> ${escapeHtml(orderId)}</p>` : '';
   return {
-    subject: 'Your Ember Vault membership was updated',
+    subject: `Ember ${planLabel} payment confirmed`,
     html: emailShell({
-      title: 'Membership updated.',
+      title: 'Payment confirmed.',
+      preheader: 'Your Ember Vault payment was successful.',
+      body: `
+        <p style="margin:0 0 18px">Hey ${escapeHtml((name || 'there').split(' ')[0])},</p>
+        <p style="margin:0 0 18px">Your Ember Vault ${escapeHtml(planLabel)} payment was successful.</p>
+        ${amountLine}
+        ${orderLine}
+        <p style="margin:18px 0 0">Lemon Squeezy handles the official tax receipt and billing record. This Ember email confirms your membership access.</p>
+      `,
+      cta: { label: 'View account', href: `${siteUrl()}/#/account` },
+    }),
+  };
+}
+
+export function subscriptionUpdatedEmail({ name, status }) {
+  const normalized = String(status || 'updated').replaceAll('_', ' ');
+  const isEnded = ['cancelled', 'expired', 'unpaid', 'past due', 'paused'].includes(normalized.toLowerCase());
+  return {
+    subject: isEnded ? 'Your Ember Vault access changed' : 'Your Ember Vault membership was updated',
+    html: emailShell({
+      title: isEnded ? 'Vault access changed.' : 'Membership updated.',
       preheader: 'Your Ember Vault membership status changed.',
       body: `
         <p style="margin:0 0 18px">Hey ${escapeHtml((name || 'there').split(' ')[0])},</p>
-        <p style="margin:0">Your Vault membership status is now <strong style="color:#ffffff">${escapeHtml(status || 'updated')}</strong>.</p>
+        <p style="margin:0 0 18px">Your Vault membership status is now <strong style="color:#ffffff">${escapeHtml(normalized)}</strong>.</p>
+        <p style="margin:0">If this does not look right, reply to this email and we will check it.</p>
       `,
       cta: { label: 'View account', href: `${siteUrl()}/#/account` },
     }),
@@ -155,7 +180,7 @@ export function contactReceivedEmail({ name, topic }) {
       body: `
         <p style="margin:0 0 18px">Hey ${escapeHtml((name || 'there').split(' ')[0])},</p>
         <p style="margin:0 0 18px">We received your message about <strong style="color:#ffffff">${escapeHtml(topic || 'General')}</strong>.</p>
-        <p style="margin:0">A person on the Ember side will reply as soon as possible.</p>
+        <p style="margin:0">A person on the Ember side will reply from emberworldwide@gmail.com as soon as possible.</p>
       `,
     }),
   };
@@ -169,7 +194,7 @@ export function newsletterWelcomeEmail({ email }) {
       preheader: 'Ember updates, Vault drops, and event signals.',
       body: `
         <p style="margin:0 0 18px">You are subscribed as <strong style="color:#ffffff">${escapeHtml(email)}</strong>.</p>
-        <p style="margin:0">We will send the good stuff only: Vault drops, event signals, partner notes, and Ember updates worth opening.</p>
+        <p style="margin:0">We will send the good stuff only: Vault drops, event signals, partner notes, and Ember updates worth opening. No noise.</p>
       `,
       cta: { label: 'Visit Ember', href: siteUrl() },
     }),

@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const result = await sendEmail({
       to: email,
       subject: `Your Ember event is live: ${eventTitle}`,
-      tags: [{ name: 'category', value: EMAIL_CATEGORIES.ACCOUNT }],
+      tags: [{ name: 'category', value: EMAIL_CATEGORIES.EVENTS }],
       html: emailShell({
         title: 'Your event is live.',
         preheader: `${eventTitle} is now listed on Ember.`,
