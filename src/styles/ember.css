@@ -622,3 +622,20 @@ p { margin: 0; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── FireGraph hero — responsive ─────────────────────────── */
+/* On mobile the graph stacks below copy; cap its height so it
+   doesn't dominate the viewport */
+@media (max-width: 1100px) {
+  .firegraph-container {
+    aspect-ratio: unset !important;
+    height: 70vw;
+    max-height: 480px;
+  }
+}
+@media (max-width: 640px) {
+  .firegraph-container {
+    height: 90vw;
+    max-height: 380px;
+  }
+}
