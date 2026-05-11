@@ -10,6 +10,7 @@ export function Contact() {
   const [form, setForm] = useState({ name: '', email: '', topic: 'General', message: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
 
   const set = (k: string, v: string) => {
     setForm(f => ({ ...f, [k]: v }));
@@ -24,11 +25,24 @@ export function Contact() {
     return e;
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
-    setSent(true);
+    setSending(true);
+    try {
+      const response = await fetch('/api/email/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!response.ok) throw new Error('Message could not be sent');
+      setSent(true);
+    } catch {
+      setErrors({ message: 'Message could not be sent. Please email support@emberworld.co directly.' });
+    } finally {
+      setSending(false);
+    }
   };
 
   const inputStyle = (err?: string): React.CSSProperties => ({
@@ -108,7 +122,7 @@ export function Contact() {
                 </div>
 
                 <FireButton variant="primary" size="lg" onClick={() => submit({ preventDefault: () => {} } as React.FormEvent)}>
-                  Send message
+                  {sending ? 'Sending...' : 'Send message'}
                 </FireButton>
               </form>
             )}

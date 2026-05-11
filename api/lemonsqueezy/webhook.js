@@ -1,4 +1,10 @@
 import crypto from 'node:crypto';
+import {
+  EMAIL_CATEGORIES,
+  sendEmail,
+  subscriptionUpdatedEmail,
+  vaultWelcomeEmail,
+} from '../_lib/email.js';
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
@@ -43,19 +49,41 @@ export default async function handler(req, res) {
 
   const eventName = event.meta?.event_name || req.headers['x-event-name'];
   const custom = event.meta?.custom_data || {};
+  const email = custom.email || event.data?.attributes?.user_email || event.data?.attributes?.email;
+  const name = custom.name || event.data?.attributes?.user_name || email;
+  const plan = custom.plan;
 
-  if ([
-    'order_created',
-    'subscription_created',
+  if (eventName === 'order_created' || eventName === 'subscription_created') {
+    if (email) {
+      const message = vaultWelcomeEmail({ name, plan });
+      await sendEmail({
+        to: email,
+        subject: message.subject,
+        html: message.html,
+        tags: [{ name: 'category', value: EMAIL_CATEGORIES.VAULT }],
+      });
+    }
+  } else if ([
     'subscription_updated',
     'subscription_cancelled',
     'subscription_expired',
     'subscription_resumed',
-  ].includes(eventName)) {
+  ].includes(eventName) && email) {
+    const status = event.data?.attributes?.status || eventName.replace('subscription_', '');
+    const message = subscriptionUpdatedEmail({ name, status });
+    await sendEmail({
+      to: email,
+      subject: message.subject,
+      html: message.html,
+      tags: [{ name: 'category', value: EMAIL_CATEGORIES.BILLING }],
+    });
+  }
+
+  if (eventName) {
     console.log('[lemonsqueezy webhook]', {
       eventName,
-      email: custom.email || event.data?.attributes?.user_email,
-      plan: custom.plan,
+      email,
+      plan,
       objectId: event.data?.id,
       status: event.data?.attributes?.status,
     });

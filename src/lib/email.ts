@@ -1,4 +1,4 @@
-const API = (import.meta.env.VITE_EMAIL_API_URL ?? '').replace(/\/$/, '');
+const API = (import.meta.env.VITE_EMAIL_API_URL ?? '/api').replace(/\/$/, '');
 
 async function post(path: string, body: Record<string, unknown>) {
   if (!API) return;
