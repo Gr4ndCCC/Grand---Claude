@@ -63,11 +63,18 @@ function VaultPricing() {
         <button onClick={handleJoin} className="btn-v3 ghost" style={{ width: '100%' }}>Start monthly</button>
       </div>
 
-      {/* Annual */}
-      <div className="price-card-v3 featured" style={{ position: 'relative', transform: 'scale(1.02)' }}>
-        <span className="mono" style={{ position: 'absolute', top: '-1px', right: '20px', transform: 'translateY(-50%)', color: 'var(--bone-100)', background: 'var(--burgundy)', borderRadius: '999px', padding: '5px 12px', fontSize: '10px', boxShadow: '0 4px 16px rgba(128,0,0,0.5)' }}>
+      {/* Annual — outer wrapper keeps overflow visible so badge never clips */}
+      <div style={{ position: 'relative', transform: 'scale(1.02)' }}>
+        <span className="mono" style={{
+          position: 'absolute', top: '-13px', right: '20px', zIndex: 10,
+          color: 'var(--bone-100)', background: 'var(--burgundy)',
+          borderRadius: '999px', padding: '5px 14px', fontSize: '10px',
+          letterSpacing: '0.08em', whiteSpace: 'nowrap',
+          boxShadow: '0 4px 16px rgba(128,0,0,0.55)',
+        }}>
           ★ Best value
         </span>
+      <div className="price-card-v3 featured" style={{ position: 'relative' }}>
         <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: 'var(--ember-hi)', boxShadow: '0 0 10px var(--ember-hi)', marginBottom: '14px', animation: 'pulse-dot 2s var(--ease-coal) infinite' }} />
         <p className="mono" style={{ color: 'var(--beige)', marginBottom: '12px' }}>Annual · Inner Circle</p>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '4px' }}>
@@ -83,6 +90,7 @@ function VaultPricing() {
           ))}
         </ul>
         <button onClick={handleJoin} className="btn-v3 primary" style={{ width: '100%' }}>Claim your seat →</button>
+      </div>
       </div>
     </div>
   );

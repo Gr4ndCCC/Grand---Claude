@@ -90,7 +90,7 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       const shuffled = [...CITIES].sort(() => Math.random() - 0.5);
       nodes = Array.from({ length: NODE_COUNT }, (_, i) => ({
         id: i,
-        x: w * 0.20 + Math.random() * w * 0.75,
+        x: w * 0.12 + Math.random() * w * 0.76,
         y: h * 0.10 + Math.random() * h * 0.80,
         vx: 0, vy: 0,
         heat: Math.random() * 0.4 + 0.1,
@@ -108,6 +108,39 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
           }
         }
       }
+      /* Pre-settle physics so nodes start calm, not flying in from random spots */
+      const cx = w * 0.5, cy = h * 0.5;
+      for (let step = 0; step < 180; step++) {
+        for (let i = 0; i < nodes.length; i++) {
+          const n = nodes[i];
+          let fx = 0, fy = 0;
+          for (let j = 0; j < nodes.length; j++) {
+            if (i === j) continue;
+            const m = nodes[j];
+            const dx = n.x - m.x, dy = n.y - m.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            fx += (dx / dist) * (REPULSION / (dist * dist));
+            fy += (dy / dist) * (REPULSION / (dist * dist));
+          }
+          edges.forEach(ed => {
+            const other = ed.a === i ? ed.b : ed.b === i ? ed.a : -1;
+            if (other < 0) return;
+            const m = nodes[other];
+            const dx = m.x - n.x, dy = m.y - n.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+            const f = SPRING_K * (dist - SPRING_LEN);
+            fx += (dx / dist) * f;
+            fy += (dy / dist) * f;
+          });
+          fx += (cx - n.x) * CENTER_K;
+          fy += (cy - n.y) * CENTER_K;
+          n.vx = (n.vx + fx) * DAMPING;
+          n.vy = (n.vy + fy) * DAMPING;
+          n.x += n.vx; n.y += n.vy;
+        }
+      }
+      /* Zero velocities — network starts still */
+      nodes.forEach(n => { n.vx = 0; n.vy = 0; });
     }
 
     function getDims() {
@@ -241,7 +274,7 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       const time = ts - startTime;
       const { w: W, h: H } = getDims();
       // Center of gravity shifted right so the network clusters on the right side
-      const cx = W * 0.65, cy = H / 2;
+      const cx = W * 0.5, cy = H * 0.5;
 
       /* ── physics ── */
       for (let i = 0; i < nodes.length; i++) {

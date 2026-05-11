@@ -468,16 +468,20 @@ export function Landing() {
               </motion.div>
             </div>
 
-            {/* Right: fire graph — free-floating, no box, edges fade out */}
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: '1 / 1.05',
-              maskImage:
-                'radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)',
-              WebkitMaskImage:
-                'radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)',
-            }}>
+            {/* Right: fire graph — free-floating, edges fade out, no box */}
+            <div
+              className="firegraph-container"
+              style={{
+                position: 'relative',
+                width: '100%',
+                aspectRatio: '1 / 1',
+                /* Generous mask: 96% wide so right-side labels never clip */
+                maskImage:
+                  'radial-gradient(ellipse 96% 88% at 50% 50%, black 35%, transparent 100%)',
+                WebkitMaskImage:
+                  'radial-gradient(ellipse 96% 88% at 50% 50%, black 35%, transparent 100%)',
+              }}
+            >
               <FireGraph className="absolute inset-0 w-full h-full" />
             </div>
           </div>
