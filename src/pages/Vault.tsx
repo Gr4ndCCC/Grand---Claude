@@ -107,7 +107,7 @@ export function Vault() {
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 55% at 50% 0%, rgba(128,0,0,0.28) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <span className="section-label" style={{ display: 'inline-block' }}>§ The Vault</span>
+            <span className="section-label" style={{ display: 'inline-block' }}>The Vault</span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -158,7 +158,7 @@ export function Vault() {
       <section className="v3-section" style={{ padding: '80px 0 100px', borderTop: '1px solid rgba(245,237,224,0.06)', background: 'rgba(13,10,12,0.4)' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ What's inside</div>
+            <div className="section-label">What's inside</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 4.5vw, 56px)', color: 'var(--bone-100)', marginBottom: '20px', lineHeight: 1.05 }}>
               Behind the door.<br />
               <span className="accent-italic">Six things you can't get anywhere else.</span>
@@ -193,7 +193,7 @@ export function Vault() {
         <div className="page-container">
           <FadeUp>
             <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-              <div className="section-label" style={{ display: 'inline-block' }}>§ Membership</div>
+              <div className="section-label" style={{ display: 'inline-block' }}>Membership</div>
               <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 56px)', color: 'var(--bone-100)', marginBottom: '8px' }}>
                 Choose your tier.
               </h2>

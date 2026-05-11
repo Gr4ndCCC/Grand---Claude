@@ -49,7 +49,7 @@ export function Hosts() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '80px', alignItems: 'center' }}>
             <div>
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <span className="section-label">§ For hosts</span>
+                <span className="section-label">For hosts</span>
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -97,7 +97,7 @@ export function Hosts() {
       <section className="v3-section" style={{ padding: '80px 0', borderTop: '1px solid rgba(245,237,224,0.06)', borderBottom: '1px solid rgba(245,237,224,0.06)', background: 'rgba(13,10,12,0.4)' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ Why host on Ember</div>
+            <div className="section-label">Why host on Ember</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4.5vw, 60px)', color: 'var(--bone-100)', marginBottom: '48px' }}>Built for hosts.</h2>
           </FadeUp>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -117,7 +117,7 @@ export function Hosts() {
       <section className="v3-section" style={{ padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ How to host</div>
+            <div className="section-label">How to host</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4.5vw, 60px)', color: 'var(--bone-100)', marginBottom: '56px' }}>
               Four steps. <span className="accent-italic">One fire.</span>
             </h2>
