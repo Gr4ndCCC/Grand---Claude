@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     const result = await sendEmail({
       to: email,
       subject: `You joined ${eventTitle}`,
-      tags: [{ name: 'category', value: EMAIL_CATEGORIES.ACCOUNT }],
+      tags: [{ name: 'category', value: EMAIL_CATEGORIES.EVENTS }],
       html: emailShell({
         title: 'You are on the list.',
         preheader: `RSVP confirmed for ${eventTitle}`,
