@@ -39,7 +39,7 @@ export function Board() {
         <div aria-hidden style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '700px', height: '500px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.22) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <span className="section-label">§ The Board</span>
+            <span className="section-label">The Board</span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}

@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
-import { CityNetwork } from '../components/CityNetwork';
 
 const RANK_COLORS: Record<string, { fg: string; bg: string; border: string }> = {
   Legend: { fg: 'var(--gold-hi)',  bg: 'rgba(212,168,95,0.08)',  border: 'rgba(212,168,95,0.4)'  },
@@ -65,7 +64,7 @@ export function Network() {
         <div aria-hidden style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', width: '700px', height: '400px', background: 'radial-gradient(ellipse at 50% 0%, rgba(128,0,0,0.18) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <span className="section-label">§ Brotherhood Network</span>
+            <span className="section-label">Brotherhood Network</span>
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
@@ -86,53 +85,11 @@ export function Network() {
         </div>
       </section>
 
-      {/* ── WORLD CITY NETWORK ───────────────────────────────── */}
-      <section style={{ padding: '0 0 72px', overflow: 'visible' }}>
-        <FadeUp delay={0.1}>
-          <div style={{
-            position: 'relative',
-            width: '100%',
-            overflow: 'visible',
-            /* no border, no container box — map bleeds edge to edge */
-          }}>
-            {/* Faint ember glow behind the map centre */}
-            <div aria-hidden style={{
-              position: 'absolute',
-              top: '30%', left: '48%',
-              transform: 'translate(-50%, -50%)',
-              width: '600px', height: '300px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(128,0,0,0.08) 0%, transparent 70%)',
-              pointerEvents: 'none', zIndex: 0,
-            }} />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <CityNetwork />
-            </div>
-          </div>
-        </FadeUp>
-
-        {/* Live fire count badge */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-8px', marginBottom: '0' }}>
-          <div style={{
-            background: 'rgba(128,0,0,0.18)',
-            border: '1px solid rgba(128,0,0,0.4)',
-            borderRadius: '999px',
-            padding: '6px 18px',
-            backdropFilter: 'blur(4px)',
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-          }}>
-            <span style={{ display: 'inline-block', width: 7, height: 7, borderRadius: '50%', background: 'var(--maroon)', boxShadow: '0 0 6px rgba(180,0,0,0.8)' }} />
-            <span className="mono" style={{ color: 'var(--maroon)', fontSize: '11px', letterSpacing: '0.14em' }}>
-              19 CITIES · 40+ COUNTRIES
-            </span>
-          </div>
-        </div>
-      </section>
-
       {/* ── MEMBER DIRECTORY ─────────────────────────────────── */}
       <section style={{ padding: '20px 0 100px', borderTop: '1px solid rgba(245,237,224,0.06)' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label" style={{ marginBottom: '32px' }}>§ The Brotherhood</div>
+            <div className="section-label" style={{ marginBottom: '32px' }}>The Brotherhood</div>
           </FadeUp>
 
           {/* Search + rank filter */}

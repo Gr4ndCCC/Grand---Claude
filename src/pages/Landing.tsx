@@ -6,7 +6,6 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import { FireGraph } from '../components/ui/FireGraph';
-import { CityNetwork } from '../components/CityNetwork';
 
 /* ── tiny utilities ────────────────────────────────────────── */
 
@@ -164,7 +163,7 @@ function RSVPMenu() {
   return (
     <div className="grid lg:grid-cols-2 gap-12 items-center">
       <div>
-        <div className="section-label">§ The interaction</div>
+        <div className="section-label">The interaction</div>
         <h2 style={{ fontSize: 'clamp(36px, 4.5vw, 64px)', color: 'var(--bone-100)', marginBottom: '20px' }}>
           Tap once.<br />
           <span className="accent-italic">You're in.</span>
@@ -469,18 +468,16 @@ export function Landing() {
               </motion.div>
             </div>
 
-            {/* Right: fire graph stage */}
+            {/* Right: fire graph — free-floating, no box, edges fade out */}
             <div style={{
               position: 'relative',
               width: '100%',
               aspectRatio: '1 / 1.05',
-              borderRadius: '20px',
-              overflow: 'hidden',
+              maskImage:
+                'radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)',
+              WebkitMaskImage:
+                'radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%)',
             }}>
-              <div style={{
-                position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-                background: 'radial-gradient(ellipse at 50% 50%, transparent 40%, rgba(8,6,10,0.7) 100%), radial-gradient(circle at 50% 50%, rgba(184,83,50,0.05) 0%, transparent 60%)',
-              }} />
               <FireGraph className="absolute inset-0 w-full h-full" />
             </div>
           </div>
@@ -490,48 +487,11 @@ export function Landing() {
       {/* ── BIBLE VERSE BAR ───────────────────────────────────── */}
       <VerseBar />
 
-      {/* ── CITY NETWORK MAP ──────────────────────────────────── */}
-      <section style={{ padding: '80px 0 40px', overflow: 'visible', position: 'relative' }}>
-        <div className="page-container" style={{ overflow: 'visible' }}>
-          <FadeUp>
-            <div className="section-label" style={{ marginBottom: '20px' }}>§ Where the fire burns</div>
-          </FadeUp>
-        </div>
-        {/* Full-width map — no box, bleeds edge to edge */}
-        <FadeUp delay={0.1}>
-          <div style={{ position: 'relative', overflow: 'visible' }}>
-            <div aria-hidden style={{
-              position: 'absolute', top: '40%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '700px', height: '280px',
-              background: 'radial-gradient(ellipse at 50% 50%, rgba(128,0,0,0.07) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }} />
-            <CityNetwork />
-          </div>
-        </FadeUp>
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-          <div style={{
-            background: 'rgba(128,0,0,0.16)',
-            border: '1px solid rgba(128,0,0,0.38)',
-            borderRadius: '999px',
-            padding: '6px 18px',
-            backdropFilter: 'blur(4px)',
-            display: 'inline-flex', alignItems: 'center', gap: '8px',
-          }}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: 'var(--maroon)', boxShadow: '0 0 6px rgba(180,0,0,0.8)' }} />
-            <span className="mono" style={{ color: 'var(--maroon)', fontSize: '11px', letterSpacing: '0.14em' }}>
-              LIVE FIRES ACROSS 40+ COUNTRIES
-            </span>
-          </div>
-        </div>
-      </section>
-
       {/* ── HOW IT WORKS ──────────────────────────────────────── */}
       <section className="v3-section" style={{ position: 'relative', padding: '140px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ How it works</div>
+            <div className="section-label">How it works</div>
             <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '0', maxWidth: '1100px' }}>
               Three steps. <span className="accent-italic">One fire.</span>
             </h2>
@@ -589,7 +549,7 @@ export function Landing() {
       <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ The Board</div>
+            <div className="section-label">The Board</div>
             <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '24px' }}>
               Rank earned. <span className="accent-italic">Not bought.</span>
             </h2>
@@ -648,7 +608,7 @@ export function Landing() {
       <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ Live this week</div>
+            <div className="section-label">Live this week</div>
             <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '24px' }}>
               Fires burning <span className="accent-italic">near you.</span>
             </h2>
@@ -756,7 +716,7 @@ export function Landing() {
             style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}
           >
             <FadeUp>
-              <div className="section-label">§ The Vault</div>
+              <div className="section-label">The Vault</div>
               <h2 style={{
                 fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(48px, 6vw, 88px)',
@@ -815,7 +775,7 @@ export function Landing() {
       <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">§ From the Brotherhood</div>
+            <div className="section-label">From the Brotherhood</div>
             <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '0' }}>
               Show up a stranger. <span className="accent-italic">Leave a brother.</span>
             </h2>
@@ -871,7 +831,7 @@ export function Landing() {
         />
         <div className="page-container">
           <FadeUp>
-            <div className="section-label" style={{ marginInline: 'auto', display: 'inline-block' }}>§ Annual Summit</div>
+            <div className="section-label" style={{ marginInline: 'auto', display: 'inline-block' }}>Annual Summit</div>
             <h2 style={{
               fontSize: 'clamp(48px, 6.5vw, 96px)',
               color: 'var(--bone-100)',

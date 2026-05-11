@@ -37,7 +37,7 @@ export function About() {
 
         <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <span className="section-label">§ About Ember</span>
+            <span className="section-label">About Ember</span>
           </motion.div>
 
           <motion.h1
@@ -111,7 +111,7 @@ export function About() {
       <section className="v3-section" style={{ padding: '140px 0' }}>
         <div className="page-container">
           <FadeUp style={{ marginBottom: '80px', maxWidth: '600px' }}>
-            <div className="section-label">§ What we stand for</div>
+            <div className="section-label">What we stand for</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 5.5vw, 72px)', lineHeight: 1.05, color: 'var(--bone-100)', letterSpacing: '-0.02em' }}>
               Four things.<br />
               <span className="accent-italic">One fire.</span>
@@ -177,7 +177,7 @@ export function About() {
         <div aria-hidden style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(85,0,0,0.28) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div className="page-container" style={{ position: 'relative', zIndex: 1, maxWidth: '900px' }}>
           <FadeUp>
-            <div className="section-label" style={{ display: 'inline-block' }}>§ Ready?</div>
+            <div className="section-label" style={{ display: 'inline-block' }}>Ready?</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(48px, 8vw, 110px)', lineHeight: 0.95, letterSpacing: '-0.03em', color: 'var(--bone-100)', marginBottom: '40px' }}>
               The fire's<br />
               <span className="accent-italic">already lit.</span>

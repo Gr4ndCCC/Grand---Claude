@@ -8,12 +8,12 @@ export interface FireGraphProps {
 }
 
 const NODE_COUNT = 30;
-const SPRING_LEN = 140;
-const SPRING_K   = 0.025;
-const REPULSION  = 6500;
-const DAMPING    = 0.82;
-const CENTER_K   = 0.004;
-const EDGE_PROB  = 0.22;
+const SPRING_LEN = 150;
+const SPRING_K   = 0.022;
+const REPULSION  = 7500;
+const DAMPING    = 0.84;
+const CENTER_K   = 0.0035;
+const EDGE_PROB  = 0.24;
 
 const CITIES = [
   'New York', 'London', 'Tokyo', 'Paris', 'Dubai', 'Singapore',
@@ -24,8 +24,8 @@ const CITIES = [
   'Chicago', 'Miami', 'Barcelona', 'Athens', 'Casablanca',
 ];
 
-const DOT_COLORS = ['#bf4a14', '#f69742', '#951902', '#fba24b'];
-const LINE_COLOR = { r: 67, g: 34, b: 16 }; // #432210
+const DOT_COLORS = ['#d4551a', '#ff8c3a', '#a01f04', '#ffb356'];
+const LINE_COLOR = { r: 90, g: 42, b: 18 };
 
 const DOT_RGB = DOT_COLORS.map(hex => ({
   r: parseInt(hex.slice(1, 3), 16),
@@ -33,12 +33,12 @@ const DOT_RGB = DOT_COLORS.map(hex => ({
   b: parseInt(hex.slice(5, 7), 16),
 }));
 
-// Flame variant per color: glowMult controls halo size, particleMult controls spark density
+// glowMult: halo radius multiplier  glowAlpha: peak glow opacity  particleMult: spark count scale
 const FLAME_VARIANTS = [
-  { glowMult: 3.8, glowAlpha: 0.42, particleMult: 1.0 }, // #bf4a14 orange-red, medium
-  { glowMult: 4.5, glowAlpha: 0.36, particleMult: 1.3 }, // #f69742 bright orange, wide
-  { glowMult: 2.8, glowAlpha: 0.54, particleMult: 0.7 }, // #951902 deep crimson, tight
-  { glowMult: 5.0, glowAlpha: 0.30, particleMult: 1.6 }, // #fba24b warm gold, softest
+  { glowMult: 5.2, glowAlpha: 0.52, particleMult: 1.2 }, // orange-red
+  { glowMult: 6.0, glowAlpha: 0.44, particleMult: 1.6 }, // bright orange
+  { glowMult: 3.8, glowAlpha: 0.68, particleMult: 0.9 }, // deep crimson
+  { glowMult: 6.8, glowAlpha: 0.38, particleMult: 2.0 }, // warm gold
 ];
 
 interface Node {
@@ -90,11 +90,11 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       const shuffled = [...CITIES].sort(() => Math.random() - 0.5);
       nodes = Array.from({ length: NODE_COUNT }, (_, i) => ({
         id: i,
-        x: w * 0.35 + Math.random() * w * 0.60,
-        y: h * 0.15 + Math.random() * h * 0.70,
+        x: w * 0.20 + Math.random() * w * 0.75,
+        y: h * 0.10 + Math.random() * h * 0.80,
         vx: 0, vy: 0,
-        heat: Math.random() * 0.3 + 0.05,
-        radius: 6 + Math.random() * 12,
+        heat: Math.random() * 0.4 + 0.1,
+        radius: 7 + Math.random() * 14,
         label: shuffled[i % shuffled.length],
         ignited: false,
         igniteTimer: 0,
@@ -287,38 +287,38 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       /* ── spawn particles ── */
       nodes.forEach(n => {
         const variant = FLAME_VARIANTS[n.colorIdx];
-        const count = n.ignited ? 6 : Math.floor(n.heat * 2.5 * variant.particleMult);
+        const count = n.ignited ? 10 : Math.floor(n.heat * 3.5 * variant.particleMult);
         for (let k = 0; k < count; k++) {
           particles.push({
             x: n.x + (Math.random() - 0.5) * n.radius,
             y: n.y + (Math.random() - 0.5) * n.radius,
-            vx: (Math.random() - 0.5) * 1.2,
-            vy: -(Math.random() * 1.5 + 0.5),
-            life: 1.0, size: Math.random() * 2 + 1, heat: n.heat,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: -(Math.random() * 2.2 + 0.6),
+            life: 1.0, size: Math.random() * 2.5 + 1.2, heat: n.heat,
             colorIdx: n.colorIdx,
           });
         }
       });
-      if (particles.length > 900) particles.splice(0, particles.length - 900);
+      if (particles.length > 1200) particles.splice(0, particles.length - 1200);
 
       /* ── update particles ── */
-      particles = particles.filter(p => p.life > 0.05);
+      particles = particles.filter(p => p.life > 0.04);
       particles.forEach(p => {
-        p.vy -= 0.05;
-        p.life *= 0.91;
-        p.size *= 0.97;
-        p.vx += (Math.random() - 0.5) * 0.36;
+        p.vy -= 0.06;
+        p.life *= 0.93;
+        p.size *= 0.975;
+        p.vx += (Math.random() - 0.5) * 0.42;
         p.x += p.vx; p.y += p.vy;
       });
 
       /* ── 1. clear ── */
       ctx.clearRect(0, 0, W, H);
 
-      /* ── 2. soft warm hearth glow centered on right cluster ── */
-      const bg = ctx.createRadialGradient(W * 0.65, H / 2, 0, W * 0.65, H / 2, Math.max(W, H) * 0.6);
-      bg.addColorStop(0,    'rgba(40,22,14,0.28)');
-      bg.addColorStop(0.55, 'rgba(20,10,6,0.10)');
-      bg.addColorStop(1,    'rgba(9,5,4,0)');
+      /* ── 2. deep warm atmosphere — hearth glow + subtle vignette ── */
+      const bg = ctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, Math.max(W, H) * 0.65);
+      bg.addColorStop(0,    'rgba(55, 26, 12, 0.32)');
+      bg.addColorStop(0.45, 'rgba(28, 12, 5, 0.14)');
+      bg.addColorStop(1,    'rgba(8, 4, 2, 0)');
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, W, H);
 
@@ -347,9 +347,19 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
       ctx.globalCompositeOperation = 'screen';
       particles.forEach(p => {
         const col = DOT_RGB[p.colorIdx];
+        /* Outer soft glow around each spark */
+        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 2.8);
+        grad.addColorStop(0, `rgba(${col.r},${col.g},${col.b},${p.life * 0.85})`);
+        grad.addColorStop(0.5, `rgba(${col.r},${col.g},${col.b},${p.life * 0.3})`);
+        grad.addColorStop(1, `rgba(${col.r},${col.g},${col.b},0)`);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, Math.max(0.1, p.size), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${col.r},${col.g},${col.b},${p.life * 0.7})`;
+        ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        /* Bright spark core */
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.max(0.1, p.size * 0.55), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 240, 210, ${p.life * 0.9})`;
         ctx.fill();
       });
       ctx.restore();
@@ -362,23 +372,35 @@ export function FireGraph({ width, height, className, style }: FireGraphProps) {
         const r = n.radius;
         const col = DOT_RGB[n.colorIdx];
         const variant = FLAME_VARIANTS[n.colorIdx];
-        const glowR = n.ignited ? r * 7 : r * variant.glowMult;
+        const glowR = n.ignited ? r * 8 : r * variant.glowMult;
 
+        /* Wide atmospheric halo */
         const outerG = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
-        outerG.addColorStop(0, `rgba(${col.r},${col.g},${col.b},${variant.glowAlpha * t + 0.05})`);
-        outerG.addColorStop(1, `rgba(${col.r},${col.g},${col.b},0)`);
+        outerG.addColorStop(0,   `rgba(${col.r},${col.g},${col.b},${(variant.glowAlpha * t + 0.08)})`);
+        outerG.addColorStop(0.4, `rgba(${col.r},${col.g},${col.b},${(variant.glowAlpha * t * 0.35)})`);
+        outerG.addColorStop(1,   `rgba(${col.r},${col.g},${col.b},0)`);
         ctx.beginPath();
         ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
         ctx.fillStyle = outerG;
         ctx.fill();
 
-        const hotX = n.x - r * 0.25, hotY = n.y - r * 0.25;
+        /* Mid bloom ring for depth */
+        const midG = ctx.createRadialGradient(n.x, n.y, r * 0.5, n.x, n.y, r * 2.2);
+        midG.addColorStop(0, `rgba(${col.r},${col.g},${col.b},${0.3 * t})`);
+        midG.addColorStop(1, `rgba(${col.r},${col.g},${col.b},0)`);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r * 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = midG;
+        ctx.fill();
+
+        /* Core — off-center hot-spot for organic ember feel */
+        const hotX = n.x - r * 0.28, hotY = n.y - r * 0.28;
         const coreG = ctx.createRadialGradient(hotX, hotY, 0, n.x, n.y, r);
-        coreG.addColorStop(0,    'rgba(255,250,235,1.0)');
-        coreG.addColorStop(0.18, 'rgba(255,225,170,0.98)');
-        coreG.addColorStop(0.45, `rgba(${col.r},${col.g},${col.b},0.95)`);
-        coreG.addColorStop(0.75, `rgba(${col.r},${col.g},${col.b},0.80)`);
-        coreG.addColorStop(1,    `rgba(${Math.round(col.r * 0.6)},${Math.round(col.g * 0.6)},${Math.round(col.b * 0.6)},0.5)`);
+        coreG.addColorStop(0,    'rgba(255,252,240,1.0)');
+        coreG.addColorStop(0.12, 'rgba(255,232,180,1.0)');
+        coreG.addColorStop(0.38, `rgba(${col.r},${col.g},${col.b},0.97)`);
+        coreG.addColorStop(0.72, `rgba(${col.r},${col.g},${col.b},0.82)`);
+        coreG.addColorStop(1,    `rgba(${Math.round(col.r * 0.55)},${Math.round(col.g * 0.4)},${Math.round(col.b * 0.3)},0.55)`);
         ctx.beginPath();
         ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
         ctx.fillStyle = coreG;
