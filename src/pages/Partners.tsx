@@ -90,7 +90,7 @@ export function Partners() {
           <div className="card-glow" style={{ background: 'rgba(128,0,0,0.10)', border: '1px solid rgba(128,0,0,0.30)', borderRadius: '16px', padding: '32px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', alignItems: 'center' }}>
             <div>
               <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '8px' }}>Apply</p>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: '#fff', marginBottom: '8px' }}>Run a business the brotherhood would trust?</h3>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '28px', color: '#fff', marginBottom: '8px' }}>Run a business Ember would trust?</h3>
               <p style={{ color: '#A0A0A0', fontSize: '15px', lineHeight: '1.7' }}>
                 Apply for partner status. We review every application personally. No fees. No paid placement.
               </p>
