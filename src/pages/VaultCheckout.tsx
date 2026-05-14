@@ -103,6 +103,13 @@ export function VaultCheckout() {
   const [overlayOpen, setOverlayOpen]   = useState(false);
 
   useEffect(() => {
+    // Initialise the Lemon Squeezy overlay SDK as soon as the page mounts
+    if (typeof window.createLemonSqueezy === 'function') {
+      window.createLemonSqueezy();
+    }
+  }, []);
+
+  useEffect(() => {
     const p = params.get('plan');
     if (p === 'monthly' || p === 'annual') setSelected(p);
   }, [params]);
