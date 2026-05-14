@@ -15,8 +15,8 @@
  */
 export const LEMONSQUEEZY_CHECKOUT = {
   default: 'https://checkout.emberworld.co/checkout/buy/d93985c6-4550-4d51-80de-35d6fce07aa2',
-  monthly: '',  // ← optional: separate URL for the monthly variant
-  annual:  '',  // ← optional: separate URL for the annual variant
+  monthly: 'https://checkout.emberworld.co/checkout/buy/d93985c6-4550-4d51-80de-35d6fce07aa2?variant=1608126',
+  annual:  'https://checkout.emberworld.co/checkout/buy/d93985c6-4550-4d51-80de-35d6fce07aa2?variant=1608155',
 };
 
 export function getCheckoutUrl(plan: 'monthly' | 'annual'): string | undefined {
