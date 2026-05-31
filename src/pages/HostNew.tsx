@@ -83,39 +83,48 @@ export function HostNew() {
   };
   const removeNeeded = (n: string) => setNeeded(needed.filter(x => x !== n));
 
-  const handlePublish = () => {
+  const [publishError, setPublishError] = useState('');
+
+  const handlePublish = async () => {
     if (!user) return openAuth('Sign in to host an event.');
     if (!canPublish) return;
     setSubmitting(true);
-    const newEvent = createEvent({
+    setPublishError('');
+    const loc = location.trim();
+    const { id, error } = await createEvent({
+      title: name.trim(),
+      description: description.trim(),
       city: extractCity(location),
       flag: pickFlag(location),
-      title: name.trim(),
-      host: user.name,
-      hostId: user.email,
-      hostRank: 'Iron',
-      date: formattedDate,
+      locationName: loc,
+      address: loc,
+      date,
       time,
-      max: maxGuests,
       isPublic,
-      tags: tags.length ? tags : [theme.toLowerCase().split(' ')[0]],
-      location: location.trim(),
-      description: description.trim(),
+      max: maxGuests,
       theme,
       coverColor,
+      tags: tags.length ? tags : [theme.toLowerCase().split(' ')[0]],
       needed,
-    });
+    }, user);
+
+    if (error || !id) {
+      setPublishError(error ?? 'Could not create event.');
+      setSubmitting(false);
+      return;
+    }
+
     sendEventHostEmail({
       name: user.name,
       email: user.email,
       eventTitle: name.trim(),
       eventDate: formattedDate,
       eventTime: time,
-      eventLocation: location.trim(),
-      eventId: newEvent.id,
+      eventLocation: loc,
+      eventId: id,
       maxGuests,
     });
-    setTimeout(() => navigate(`/events/${newEvent.id}`), 300);
+    navigate(`/events/${id}`);
   };
 
   if (!user) {
@@ -460,6 +469,11 @@ export function HostNew() {
               {!canPublish && (
                 <p style={{ color: '#5A5A5A', fontSize: '11px', textAlign: 'center' }}>
                   Fill in all required fields to publish.
+                </p>
+              )}
+              {publishError && (
+                <p style={{ color: '#ef4444', fontSize: '12px', textAlign: 'center' }}>
+                  {publishError}
                 </p>
               )}
             </div>

@@ -3,14 +3,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Calendar, MapPin, Users, ArrowLeft, Send, Sparkles,
-  MessageCircle, Plus, Check, Cloud, ChefHat, Lock, Globe, Flame,
+  MessageCircle, Plus, Check, Cloud, ChefHat, Lock, Globe, Flame, Trash2, Clock,
 } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import {
   EmberEvent, getEvent, joinEvent, addContribution, postChat,
-  summarizeContributions, Rank,
+  requestToJoin, getMyRequest, listRequests, acceptRequest, declineRequest,
+  deleteEvent, subscribeToMessages,
+  summarizeContributions, Rank, JoinRequest,
 } from '../data/events';
 import { sendEventRsvpEmail } from '../lib/email';
 
@@ -59,20 +61,85 @@ export function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
-  const [event, setEvent] = useState<EmberEvent | undefined>(() => id ? getEvent(id) : undefined);
+  const [event, setEvent] = useState<EmberEvent | null>(null);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'chat' | 'ai'>('chat');
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [chatInput, setChatInput] = useState('');
   const [contribItem, setContribItem] = useState('');
   const [contribQty, setContribQty] = useState('');
+  const [myRequest, setMyRequest] = useState<JoinRequest | null>(null);
+  const [requests, setRequests] = useState<JoinRequest[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const reloadEvent = async () => {
+    if (!id) return;
+    const ev = await getEvent(id);
+    setEvent(ev);
+  };
+
+  useEffect(() => {
+    if (!id) { setLoading(false); return; }
+    let active = true;
+    setLoading(true);
+    getEvent(id)
+      .then(ev => { if (active) setEvent(ev); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id]);
+
+  const isHost = !!user && !!event && user.id === event.hostUserId;
+  const isAttendee = !!user && !!event && event.attendees.some(a => a.id === user.id);
+  const isParticipant = isHost || isAttendee;
+
+  // Host: load pending requests
+  useEffect(() => {
+    if (!isHost || !event) return;
+    let active = true;
+    listRequests(event.id).then(rs => { if (active) setRequests(rs); });
+    return () => { active = false; };
+  }, [isHost, event?.id]);
+
+  // Private events: load my own request status
+  useEffect(() => {
+    if (!event || !user || isHost || isAttendee || event.isPublic) { setMyRequest(null); return; }
+    let active = true;
+    getMyRequest(event.id, user.id).then(r => { if (active) setMyRequest(r); });
+    return () => { active = false; };
+  }, [event?.id, user?.id, isHost, isAttendee, event?.isPublic]);
+
+  // Realtime chat
+  useEffect(() => {
+    if (!event) return;
+    const unsub = subscribeToMessages(event.id, msg => {
+      setEvent(prev => {
+        if (!prev) return prev;
+        if (prev.chat.some(m => m.id === msg.id)) return prev;
+        return { ...prev, chat: [...prev.chat, msg] };
+      });
+    });
+    return unsub;
+  }, [event?.id]);
 
   useEffect(() => {
     if (chatEndRef.current && tab === 'chat') {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [event?.chat.length, tab]);
+
+  if (loading) {
+    return (
+      <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
+        <Nav />
+        <div style={{ padding: '160px 24px', textAlign: 'center' }}>
+          <p className="mono" style={{ color: '#5A5A5A' }}>Stoking the coals…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!event) {
     return (
@@ -93,63 +160,86 @@ export function EventDetail() {
     );
   }
 
-  const isAttending = !!user && event.attendees.some(a => a.name === user.name);
-  const summary = useMemo(() => summarizeContributions(event), [event]);
+  const ev = event;
+  const isFull = ev.guests >= ev.max;
+  const remaining = Math.max(0, ev.max - ev.guests);
+  const summary = useMemo(() => summarizeContributions(ev), [ev]);
+  const canSeeAddress = isHost || isAttendee;
 
+  // Primary CTA for the "Your spot" card and contribution buttons
   const handleJoinClick = () => {
-    if (!user) return openAuth(`Sign in to join "${event.title}".`);
-    if (isAttending) {
-      setShowAddModal(true);
-      return;
+    if (!user) return openAuth(`Sign in to join "${ev.title}".`);
+    if (isParticipant) { setShowAddModal(true); return; }
+    if (ev.isPublic) {
+      if (isFull) return;
+      setShowJoinModal(true);
+    } else {
+      handleRequestToJoin();
     }
-    setShowJoinModal(true);
   };
 
-  const confirmJoin = () => {
+  const confirmJoin = async () => {
     if (!user) return;
-    const updated = joinEvent(event.id, {
-      id: user.email, name: user.name, rank: 'Ember',
-    });
-    if (updated) setEvent({ ...updated });
+    const { error } = await joinEvent(ev.id, user);
     setShowJoinModal(false);
+    if (error) return;
+    await reloadEvent();
     setShowAddModal(true);
     sendEventRsvpEmail({
       name: user.name,
       email: user.email,
-      eventTitle: event.title,
-      eventDate: event.date,
-      eventTime: event.time,
-      eventLocation: event.location,
-      eventId: event.id,
+      eventTitle: ev.title,
+      eventDate: ev.date,
+      eventTime: ev.time,
+      eventLocation: ev.location,
+      eventId: ev.id,
     });
   };
 
-  const submitContribution = () => {
-    if (!user || !contribItem.trim()) return;
-    const updated = addContribution(event.id, {
-      id: `co-${Date.now()}`,
-      userId: user.email,
-      userName: user.name,
-      item: contribItem.trim(),
-      quantity: contribQty.trim() || undefined,
-      emoji: '🔥',
-    });
-    if (updated) setEvent({ ...updated });
+  const handleRequestToJoin = async () => {
+    if (!user) return openAuth(`Sign in to request to join "${ev.title}".`);
+    const { error } = await requestToJoin(ev.id, user);
+    if (error) return;
+    setMyRequest({ id: 'pending', eventId: ev.id, userId: user.id, displayName: user.name, status: 'pending' });
+  };
+
+  const handleAccept = async (requestId: string) => {
+    await acceptRequest(requestId);
+    const rs = await listRequests(ev.id);
+    setRequests(rs);
+    await reloadEvent();
+  };
+
+  const handleDecline = async (requestId: string) => {
+    await declineRequest(requestId);
+    const rs = await listRequests(ev.id);
+    setRequests(rs);
+    await reloadEvent();
+  };
+
+  const handleDelete = async () => {
+    await deleteEvent(ev.id);
+    navigate('/events');
+  };
+
+  const submitContribution = async () => {
+    if (!user || !contribItem.trim() || !isParticipant) return;
+    const { error } = await addContribution(
+      ev.id, user, contribItem.trim(), contribQty.trim() || undefined, '🔥',
+    );
     setContribItem('');
     setContribQty('');
     setShowAddModal(false);
+    if (!error) await reloadEvent();
   };
 
-  const sendChat = () => {
+  const sendChat = async () => {
     if (!user) return openAuth('Sign in to chat with the crew.');
+    if (!isParticipant) return;
     if (!chatInput.trim()) return;
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const updated = postChat(event.id, {
-      id: `m-${Date.now()}`, author: user.name, rank: 'Ember', text: chatInput.trim(), time,
-    });
-    if (updated) setEvent({ ...updated });
+    const text = chatInput.trim();
     setChatInput('');
+    await postChat(ev.id, user, text);
   };
 
   return (
@@ -193,12 +283,18 @@ export function EventDetail() {
                   <Calendar size={14} /> {event.date} · {event.time}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A0A0A0', fontSize: '14px' }}>
-                  <MapPin size={14} /> {event.location}
+                  <MapPin size={14} /> {canSeeAddress && ev.address ? ev.address : event.location}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: event.attendees.length >= event.max - 2 ? 'var(--gold)' : '#A0A0A0', fontSize: '14px' }}>
                   <Users size={14} /> {event.attendees.length}/{event.max} guests
                 </div>
               </div>
+
+              {!ev.isPublic && !canSeeAddress && (
+                <p style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#5A5A5A', fontSize: '12px', fontFamily: 'JetBrains Mono, monospace', marginBottom: '28px' }}>
+                  <Lock size={11} /> Full address shown once you're accepted.
+                </p>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -218,31 +314,71 @@ export function EventDetail() {
               style={{ background: 'rgba(17,17,17,0.85)', backdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', padding: '24px', minWidth: '280px', maxWidth: '320px' }}
             >
               <p className="mono" style={{ color: '#5A5A5A', marginBottom: '14px' }}>Your spot</p>
-              {isAttending ? (
+              {isParticipant ? (
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold)', marginBottom: '12px' }}>
                     <Check size={16} />
-                    <span style={{ fontSize: '15px', fontWeight: 500 }}>You're going</span>
+                    <span style={{ fontSize: '15px', fontWeight: 500 }}>{isHost ? "You're hosting" : "You're going"}</span>
                   </div>
                   <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
-                    The host has been notified. Make sure to add what you're bringing.
+                    {isHost ? 'This is your event. Add what you’re bringing or manage requests below.' : 'The host has been notified. Make sure to add what you’re bringing.'}
                   </p>
                   <button
                     onClick={() => setShowAddModal(true)}
                     style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   ><Plus size={14} /> Add a contribution</button>
+                  {isHost && (
+                    <button
+                      onClick={() => setShowDeleteModal(true)}
+                      style={{ width: '100%', marginTop: '10px', background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '10px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    ><Trash2 size={14} /> Delete event</button>
+                  )}
+                </>
+              ) : !ev.isPublic && myRequest?.status === 'pending' ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--gold)', marginBottom: '12px' }}>
+                    <Clock size={16} />
+                    <span style={{ fontSize: '15px', fontWeight: 500 }}>Request pending</span>
+                  </div>
+                  <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+                    The host will review your request to join. You'll get the full details once accepted.
+                  </p>
+                  <button
+                    disabled
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', color: '#A0A0A0', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'not-allowed', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }}
+                  >Request pending</button>
+                </>
+              ) : !ev.isPublic && myRequest?.status === 'declined' ? (
+                <>
+                  <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+                    Your request to join wasn't accepted this time.
+                  </p>
+                  <button
+                    disabled
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', color: '#A0A0A0', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'not-allowed', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }}
+                  >Request declined</button>
+                </>
+              ) : isFull ? (
+                <>
+                  <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
+                    This fire is at capacity.
+                  </p>
+                  <button
+                    disabled
+                    style={{ width: '100%', background: 'rgba(255,255,255,0.05)', color: '#A0A0A0', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'not-allowed', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }}
+                  >Event full</button>
                 </>
               ) : (
                 <>
                   <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
-                    {event.max - event.attendees.length} spots left. Tap to confirm and add what you're bringing.
+                    {remaining} spot{remaining !== 1 ? 's' : ''} left. {ev.isPublic ? 'Tap to confirm and add what you’re bringing.' : 'Request to join this private gathering.'}
                   </p>
                   <button
                     onClick={handleJoinClick}
                     style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--maroon-light)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'var(--maroon)')}
-                  ><Flame size={14} /> Join Event</button>
+                  ><Flame size={14} /> {ev.isPublic ? 'Join Event' : 'Request to Join'}</button>
                 </>
               )}
               <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
@@ -287,6 +423,41 @@ export function EventDetail() {
                   ))}
                 </div>
               </div>
+
+              {/* Host: Pending requests */}
+              {isHost && (
+                <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
+                    <Lock size={16} style={{ color: 'var(--maroon)' }} />
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: '#fff' }}>
+                      Pending requests
+                    </h3>
+                    <span className="mono" style={{ color: '#5A5A5A', marginLeft: 'auto' }}>{requests.length}</span>
+                  </div>
+                  {requests.length === 0 ? (
+                    <p style={{ color: '#5A5A5A', fontSize: '13px', textAlign: 'center', padding: '16px' }}>
+                      No pending requests.
+                    </p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {requests.map(r => (
+                        <div key={r.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }}>
+                          <Avatar name={r.displayName} size={36} />
+                          <p style={{ flex: 1, minWidth: 0, fontSize: '14px', color: '#fff', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{r.displayName}</p>
+                          <button
+                            onClick={() => handleAccept(r.id)}
+                            style={{ background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                          ><Check size={12} /> Accept</button>
+                          <button
+                            onClick={() => handleDecline(r.id)}
+                            style={{ background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}
+                          >Decline</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Contributions */}
               <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '24px' }}>
@@ -353,7 +524,16 @@ export function EventDetail() {
                 ><Sparkles size={14} /> Ember AI</button>
               </div>
 
-              {tab === 'chat' && (
+              {tab === 'chat' && !isParticipant && (
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px', gap: '12px', textAlign: 'center' }}>
+                  <Lock size={20} style={{ color: '#5A5A5A' }} />
+                  <p style={{ color: '#A0A0A0', fontSize: '13px', lineHeight: 1.6 }}>
+                    Join the event to access the chat.
+                  </p>
+                </div>
+              )}
+
+              {tab === 'chat' && isParticipant && (
                 <>
                   <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     {event.chat.length === 0 && (
@@ -478,7 +658,7 @@ export function EventDetail() {
                         • Event starts at <span style={{ color: '#fff' }}>{event.time}</span> on <span style={{ color: '#fff' }}>{event.date}</span>
                       </li>
                       <li style={{ fontSize: '12px', color: '#A0A0A0', lineHeight: 1.6 }}>
-                        • Location: <span style={{ color: '#fff' }}>{event.location}</span>
+                        • Location: <span style={{ color: '#fff' }}>{canSeeAddress && ev.address ? ev.address : event.location}</span>
                       </li>
                       {event.weather.condition.toLowerCase().includes('rain') && (
                         <li style={{ fontSize: '12px', color: 'var(--gold)', lineHeight: 1.6 }}>
@@ -601,6 +781,43 @@ export function EventDetail() {
                   disabled={!contribItem.trim()}
                   style={{ flex: 2, background: contribItem.trim() ? 'var(--maroon)' : 'rgba(255,255,255,0.05)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: contribItem.trim() ? 'pointer' : 'not-allowed', fontWeight: 600, fontFamily: 'inherit' }}
                 >Add Contribution</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setShowDeleteModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#111', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', padding: '32px', maxWidth: '440px', width: '100%' }}
+            >
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(239,68,68,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                <Trash2 size={20} style={{ color: '#ef4444' }} />
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
+                Delete this event?
+              </h3>
+              <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
+                This cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  style={{ flex: 1, background: 'transparent', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
+                >Cancel</button>
+                <button
+                  onClick={handleDelete}
+                  style={{ flex: 2, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
+                >Delete event</button>
               </div>
             </motion.div>
           </motion.div>

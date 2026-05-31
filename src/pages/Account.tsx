@@ -10,7 +10,7 @@ import {
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { getAllEvents } from '../data/events';
+import { getHostedEvents, getAttendingEvents, EmberEvent } from '../data/events';
 
 type Tab =
   | 'profile' | 'billing' | 'events' | 'settings'
@@ -115,8 +115,8 @@ function ProfileTab() {
   const [saved, setSaved] = useState(false);
   if (!user) return null;
   const status = user.verifyStatus ?? 'unverified';
-  const save = () => {
-    updateUser({ name: name.trim() || user.name });
+  const save = async () => {
+    await updateUser({ name: name.trim() || user.name });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -251,12 +251,23 @@ function BillingTab() {
 function EventsTab() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const allEvents = getAllEvents();
-  if (!user) return null;
-  const attended = allEvents.filter(e => e.attendees.some((a: { name: string }) => a.name === user.name));
-  const hosted   = allEvents.filter(e => e.host === user.name);
+  const [hosted, setHosted] = useState<EmberEvent[]>([]);
+  const [attended, setAttended] = useState<EmberEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const ERow = ({ ev, badge }: { ev: typeof allEvents[0]; badge: string }) => (
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    setLoading(true);
+    Promise.all([getHostedEvents(user.id), getAttendingEvents(user.id)])
+      .then(([h, a]) => { if (active) { setHosted(h); setAttended(a); } })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [user]);
+
+  if (!user) return null;
+
+  const ERow = ({ ev, badge }: { ev: EmberEvent; badge: string }) => (
     <div onClick={() => navigate(`/events/${ev.id}`)}
       style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', cursor: 'pointer', transition: 'background 0.15s' }}
       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
@@ -270,6 +281,14 @@ function EventsTab() {
       <span style={{ fontSize: '10px', color: '#A0A0A0', background: 'rgba(255,255,255,0.06)', borderRadius: '4px', padding: '3px 7px', fontFamily: 'JetBrains Mono, monospace', flexShrink: 0 }}>{badge}</span>
     </div>
   );
+
+  if (loading) {
+    return (
+      <SCard title="Your events" subtitle="Loading…">
+        <p style={{ color: '#5A5A5A', fontSize: '13px', textAlign: 'center', padding: '24px' }}>Stoking the coals…</p>
+      </SCard>
+    );
+  }
 
   return (
     <>
