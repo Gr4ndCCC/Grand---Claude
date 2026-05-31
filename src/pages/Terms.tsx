@@ -17,7 +17,7 @@ const SECTIONS = [
   },
   {
     title: '4. The Vault',
-    body: `Vault membership is billed monthly (€12/month) or annually (€89/year). All prices include applicable taxes. You may cancel at any time; access continues until the end of the current billing period. No refunds are issued for partial periods unless required by law. Vault membership may require identity verification. Providing false documents is grounds for permanent ban and may be reported to relevant authorities.`,
+    body: `Vault membership is billed monthly (€15/month) or annually (€99/year). All prices include applicable taxes. You may cancel at any time; access continues until the end of the current billing period. No refunds are issued for partial periods unless required by law. Vault membership may require identity verification. Providing false documents is grounds for permanent ban and may be reported to relevant authorities.`,
   },
   {
     title: '5. Events',
@@ -49,7 +49,7 @@ const SECTIONS = [
   },
   {
     title: '12. Contact',
-    body: `For legal queries: legal@ember.community. For general support: support@ember.community.`,
+    body: `For legal queries or general support, contact us at emberworldwide@gmail.com.`,
   },
 ];
 

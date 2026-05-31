@@ -13,7 +13,7 @@ const SECTIONS = [
   },
   {
     title: '3. Identity Verification',
-    body: `Vault membership requires identity verification. If you choose to submit a document (passport, national ID, or driver's licence), it is: (a) encrypted using AES-256 before storage; (b) reviewed only by verified Ember staff; (c) deleted within 30 days of a successful verification; (d) never sold, rented, or shared with any third party. You may request deletion of your verification document at any time by contacting support@ember.community.`,
+    body: `Vault membership requires identity verification. If you choose to submit a document (passport, national ID, or driver's licence), it is: (a) encrypted using AES-256 before storage; (b) reviewed only by verified Ember staff; (c) deleted within 30 days of a successful verification; (d) never sold, rented, or shared with any third party. You may request deletion of your verification document at any time by contacting emberworldwide@gmail.com.`,
   },
   {
     title: '4. How We Use Your Data',
@@ -25,7 +25,7 @@ const SECTIONS = [
   },
   {
     title: '6. Your Rights',
-    body: `Depending on your jurisdiction, you have the right to access the personal data we hold about you, correct inaccurate data, request deletion of your account and data, object to or restrict certain processing, and port your data to another service. To exercise any right, email privacy@ember.community. We will respond within 30 days.`,
+    body: `Depending on your jurisdiction, you have the right to access the personal data we hold about you, correct inaccurate data, request deletion of your account and data, object to or restrict certain processing, and port your data to another service. To exercise any right, email emberworldwide@gmail.com. We will respond within 30 days.`,
   },
   {
     title: '7. Data Retention',
@@ -41,7 +41,7 @@ const SECTIONS = [
   },
   {
     title: '10. Contact',
-    body: `For privacy questions or to exercise your rights: privacy@ember.community. For general support: support@ember.community.`,
+    body: `For privacy questions or to exercise your rights, contact us at emberworldwide@gmail.com.`,
   },
 ];
 

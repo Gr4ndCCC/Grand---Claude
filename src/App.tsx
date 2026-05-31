@@ -20,6 +20,7 @@ import { Account }        from './pages/Account';
 import { VaultCheckout }  from './pages/VaultCheckout';
 import { AuthProvider }   from './lib/auth';
 import { AuthModal }      from './components/AuthModal';
+import { EmberAssistant } from './components/EmberAssistant';
 
 function GlobalEmbers() {
   const embers = useMemo(
@@ -78,6 +79,7 @@ export default function App() {
         <RouteTracker />
         <ScrollToTop />
         <AuthModal />
+        <EmberAssistant />
         <Routes>
           <Route path="/"                 element={<Landing />}       />
           <Route path="/events"           element={<Events />}        />
