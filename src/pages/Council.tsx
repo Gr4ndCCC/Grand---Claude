@@ -8,7 +8,7 @@ const VOTES = [
   { status: 'OPEN',    title: '2026 Annual Summit · Host city',           desc: 'Three finalists. Members vote until June 1.', n: '1,847 votes', color: 'var(--maroon)' },
   { status: 'OPEN',    title: 'New rank between Iron and Gold?',           desc: 'Proposal from the Council. 30-day vote.',     n: '623 votes',   color: 'var(--maroon)' },
   { status: 'CLOSED',  title: 'Allow co-hosted events on Ember',           desc: 'Passed 81% / 19%. Ships in v2.4.',           n: '2,104 votes', color: '#6B7280' },
-  { status: 'CLOSED',  title: '€89 → €99 annual price for new members',    desc: 'Rejected 67% / 33%. Pricing held.',           n: '1,956 votes', color: '#6B7280' },
+  { status: 'CLOSED',  title: 'Lock founding annual price at €99',          desc: 'Passed 88% / 12%. Price locked for early members.', n: '1,956 votes', color: '#6B7280' },
 ];
 
 export function Council() {
