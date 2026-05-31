@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -163,7 +163,7 @@ export function EventDetail() {
   const ev = event;
   const isFull = ev.guests >= ev.max;
   const remaining = Math.max(0, ev.max - ev.guests);
-  const summary = useMemo(() => summarizeContributions(ev), [ev]);
+  const summary = summarizeContributions(ev);
   const canSeeAddress = isHost || isAttendee;
 
   // Primary CTA for the "Your spot" card and contribution buttons

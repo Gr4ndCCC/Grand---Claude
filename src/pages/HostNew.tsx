@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Calendar, Users, Globe, Lock,
@@ -54,6 +54,7 @@ export function HostNew() {
   const [needed, setNeeded] = useState<string[]>(['Drinks', 'Sides', 'Dessert']);
   const [neededInput, setNeededInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [published, setPublished] = useState(false);
 
   useEffect(() => {
     if (!user) openAuth('Sign in to host an event.');
@@ -124,7 +125,10 @@ export function HostNew() {
       eventId: id,
       maxGuests,
     });
-    navigate(`/events/${id}`);
+
+    // Celebrate, then lead the host to the live events board.
+    setPublished(true);
+    setTimeout(() => navigate('/events'), 2100);
   };
 
   if (!user) {
@@ -149,6 +153,64 @@ export function HostNew() {
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
       <Nav />
+
+      {/* ── Fire-up celebration overlay ─────────────────────────── */}
+      <AnimatePresence>
+        {published && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 10000,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              background: 'radial-gradient(ellipse at 50% 50%, rgba(40,8,4,0.96) 0%, rgba(6,4,5,0.98) 70%)',
+              backdropFilter: 'blur(6px)',
+            }}
+          >
+            {/* glow burst */}
+            <motion.div
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{ scale: [0.2, 1.5, 1.2], opacity: [0, 0.9, 0.5] }}
+              transition={{ duration: 1.1, ease: 'easeOut' }}
+              style={{
+                position: 'absolute', width: '320px', height: '320px', borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(214,85,26,0.55) 0%, rgba(128,0,0,0.25) 40%, transparent 70%)',
+                pointerEvents: 'none',
+              }}
+            />
+            {/* flame */}
+            <motion.div
+              initial={{ scale: 0, y: 30, rotate: -8 }}
+              animate={{ scale: [0, 1.25, 1], y: [30, -6, 0], rotate: [-8, 4, 0] }}
+              transition={{ duration: 0.9, ease: [0.34, 1.56, 0.64, 1] }}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              <motion.div
+                animate={{ scale: [1, 1.08, 0.96, 1.05, 1], rotate: [0, -3, 3, -2, 0] }}
+                transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ filter: 'drop-shadow(0 0 28px rgba(214,85,26,0.85))' }}
+              >
+                <Flame size={88} style={{ color: '#ff8c3a', fill: '#d4551a' }} strokeWidth={1.4} />
+              </motion.div>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.5 }}
+              style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 40px)', color: '#fff', marginTop: '28px', zIndex: 1 }}
+            >
+              Your fire is lit.
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ delay: 0.85, duration: 0.5 }}
+              className="mono"
+              style={{ color: 'var(--beige)', fontSize: '13px', marginTop: '10px', letterSpacing: '0.08em', zIndex: 1 }}
+            >
+              Taking you to the events board…
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Hero */}
       <section style={{ paddingTop: '120px', paddingBottom: '40px', position: 'relative', overflow: 'hidden' }}>
