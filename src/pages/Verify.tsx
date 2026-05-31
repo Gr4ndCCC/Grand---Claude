@@ -59,7 +59,7 @@ export function Verify() {
   const submit = async () => {
     setSubmitting(true);
     await new Promise(r => setTimeout(r, 1500));
-    updateUser({ verifyStatus: 'pending', verifySubmittedAt: Date.now() });
+    await updateUser({ verifyStatus: 'pending' });
     setSubmitting(false);
     setStep('submitted');
   };

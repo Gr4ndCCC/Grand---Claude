@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Users, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { getAllEvents } from '../data/events';
+import { getAllEvents, EmberEvent } from '../data/events';
 
 const RANK_COLORS: Record<string, string> = {
   Legend: '#DAA520', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
@@ -34,6 +34,16 @@ export function Events() {
   const { user, openAuth } = useAuth();
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [allEvents, setAllEvents] = useState<EmberEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getAllEvents()
+      .then(evs => { if (active) setAllEvents(evs); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleJoin = (eventId: string) => {
     navigate(`/events/${eventId}`);
@@ -44,7 +54,6 @@ export function Events() {
   };
 
   const filters = ['All', 'Nearby', 'This weekend', 'Public', 'Private'];
-  const allEvents = getAllEvents();
   const filtered = allEvents.filter(e => {
     if (query && !e.title.toLowerCase().includes(query.toLowerCase()) && !e.city.toLowerCase().includes(query.toLowerCase())) return false;
     if (activeFilter === 'Public' && !e.isPublic) return false;
@@ -134,6 +143,23 @@ export function Events() {
       {/* events grid */}
       <section style={{ padding: '0 0 80px' }}>
         <div className="page-container">
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+              <p className="mono" style={{ color: 'var(--bone-500)' }}>Stoking the coals…</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '80px 24px', marginBottom: '48px' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '32px', color: 'var(--bone-100)', marginBottom: '8px' }}>
+                No live events yet.
+              </h2>
+              <p style={{ color: 'var(--bone-400)', fontSize: '15px', marginBottom: '24px' }}>
+                Host the first one.
+              </p>
+              <button onClick={() => navigate('/hosts/new')} className="btn-v3 primary">
+                Host an Event →
+              </button>
+            </div>
+          ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
             {filtered.map((ev, i) => (
               <motion.div
@@ -178,6 +204,7 @@ export function Events() {
               </motion.div>
             ))}
           </div>
+          )}
 
           {/* top cities */}
           <div>
