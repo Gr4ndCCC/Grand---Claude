@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, Mail } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { FireButton } from './FireButton';
 import { sendWelcomeEmail } from '../lib/email';
@@ -13,12 +13,13 @@ function isOver18(dob: string) {
 }
 
 export function AuthModal() {
-  const { isOpen, closeAuth, pendingReason, signIn } = useAuth();
+  const { isOpen, closeAuth, pendingReason, signUp, signInWithPassword, signInWithGoogle } = useAuth();
   const [mode, setMode] = useState<'signin' | 'join'>('join');
   const [form, setForm] = useState({ email: '', name: '', dob: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirmSent, setConfirmSent] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const set = (k: string, v: string) => {
@@ -42,11 +43,26 @@ export function AuthModal() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    const name = form.name || form.email.split('@')[0];
-    signIn({ email: form.email, name, dob: form.dob, joinedAt: Date.now() });
-    if (mode === 'join') sendWelcomeEmail(name, form.email);
-    setLoading(false);
+    if (mode === 'join') {
+      const res = await signUp({ email: form.email, password: form.password, name: form.name, dob: form.dob });
+      setLoading(false);
+      if (res.error) { setErrors({ form: res.error }); return; }
+      sendWelcomeEmail(form.name, form.email);
+      if (res.needsConfirmation) { setConfirmSent(true); return; }
+      // else onAuthStateChange closes the modal
+    } else {
+      const res = await signInWithPassword(form.email, form.password);
+      setLoading(false);
+      if (res.error) { setErrors({ form: res.error }); return; }
+      // onAuthStateChange closes the modal
+    }
+  };
+
+  const google = async () => {
+    setLoading(true);
+    const res = await signInWithGoogle();
+    if (res.error) { setLoading(false); setErrors({ form: res.error }); }
+    // On success the browser redirects to Google.
   };
 
   const inputStyle = (err?: string): React.CSSProperties => ({
@@ -57,20 +73,19 @@ export function AuthModal() {
     transition: 'border-color 0.2s',
   });
 
+  const reset = () => { setConfirmSent(false); setForm({ email: '', name: '', dob: '', password: '' }); setErrors({}); };
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
           ref={overlayRef}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={e => { if (e.target === overlayRef.current) closeAuth(); }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          onClick={e => { if (e.target === overlayRef.current) { closeAuth(); reset(); } }}
           style={{
             position: 'fixed', inset: 0, zIndex: 9999,
             background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '24px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px',
           }}
         >
           <motion.div
@@ -80,126 +95,128 @@ export function AuthModal() {
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             style={{
               background: '#0A0A0A', border: '1px solid rgba(255,255,255,0.10)',
-              borderRadius: '20px', padding: '40px', width: '100%', maxWidth: '440px',
-              position: 'relative',
+              borderRadius: '20px', padding: '40px', width: '100%', maxWidth: '440px', position: 'relative',
             }}
           >
-            {/* close */}
-            <button onClick={closeAuth} style={{
+            <button onClick={() => { closeAuth(); reset(); }} style={{
               position: 'absolute', top: '16px', right: '16px',
               background: 'rgba(255,255,255,0.06)', border: 'none',
               borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#888',
             }}><X size={18} /></button>
 
-            {/* header */}
-            <div style={{ marginBottom: '32px' }}>
-              <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '12px', color: 'var(--maroon)', letterSpacing: '0.14em', marginBottom: '8px', textTransform: 'uppercase' }}>
-                EMBER
-              </p>
-              <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', lineHeight: 1.2, marginBottom: '8px' }}>
-                {mode === 'join' ? 'Join the brotherhood.' : 'Welcome back.'}
-              </h2>
-              {pendingReason && (
-                <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.5' }}>
-                  {pendingReason}
+            {confirmSent ? (
+              <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '50%', margin: '0 auto 20px',
+                  background: 'rgba(128,0,0,0.25)', border: '1px solid rgba(128,0,0,0.5)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}><Mail size={24} style={{ color: 'var(--beige)' }} /></div>
+                <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '26px', color: '#fff', marginBottom: '12px' }}>
+                  Check your email.
+                </h2>
+                <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.6 }}>
+                  We sent a confirmation link to <span style={{ color: 'var(--beige)' }}>{form.email}</span>.
+                  Click it to activate your account, then sign in.
                 </p>
-              )}
-            </div>
-
-            {/* tab toggle */}
-            <div style={{
-              display: 'flex', background: '#111', borderRadius: '10px',
-              padding: '4px', marginBottom: '28px', gap: '4px',
-            }}>
-              {(['join', 'signin'] as const).map(m => (
-                <button key={m} onClick={() => setMode(m)}
-                  style={{
-                    flex: 1, padding: '9px', borderRadius: '8px', border: 'none',
-                    cursor: 'pointer', fontSize: '14px', fontFamily: 'inherit',
-                    background: mode === m ? 'var(--maroon)' : 'transparent',
-                    color: mode === m ? '#fff' : '#888',
-                    transition: 'all 0.2s',
-                  }}
-                >{m === 'join' ? 'Join Ember' : 'Sign in'}</button>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              {mode === 'join' && (
-                <div>
-                  <input
-                    placeholder="Full name"
-                    value={form.name}
-                    onChange={e => set('name', e.target.value)}
-                    style={inputStyle(errors.name)}
-                  />
-                  {errors.name && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.name}</p>}
-                </div>
-              )}
-
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  value={form.email}
-                  onChange={e => set('email', e.target.value)}
-                  style={inputStyle(errors.email)}
-                />
-                {errors.email && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.email}</p>}
               </div>
+            ) : (
+              <>
+                <div style={{ marginBottom: '28px' }}>
+                  <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '12px', color: 'var(--maroon)', letterSpacing: '0.14em', marginBottom: '8px', textTransform: 'uppercase' }}>EMBER</p>
+                  <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', lineHeight: 1.2, marginBottom: '8px' }}>
+                    {mode === 'join' ? 'Join the brotherhood.' : 'Welcome back.'}
+                  </h2>
+                  {pendingReason && <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.5' }}>{pendingReason}</p>}
+                </div>
 
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  placeholder="Password"
-                  value={form.password}
-                  onChange={e => set('password', e.target.value)}
-                  style={{ ...inputStyle(errors.password), paddingRight: '48px' }}
-                  onKeyDown={e => { if (e.key === 'Enter') submit(); }}
-                />
-                <button onClick={() => setShowPw(s => !s)} style={{
-                  position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
-                  background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: '2px',
+                {/* Google */}
+                <button onClick={google} disabled={loading} style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  background: '#fff', color: '#1a1a1a', border: 'none', borderRadius: '10px',
+                  padding: '12px', cursor: loading ? 'wait' : 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit',
+                  marginBottom: '18px',
                 }}>
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.71-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.83.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.94H.96a9 9 0 0 0 0 8.12l3.01-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.94l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+                  Continue with Google
                 </button>
-                {errors.password && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.password}</p>}
-              </div>
 
-              {mode === 'join' && (
-                <div>
-                  <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: '6px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>
-                    DATE OF BIRTH (18+ only)
-                  </label>
-                  <input
-                    type="date"
-                    value={form.dob}
-                    onChange={e => set('dob', e.target.value)}
-                    max={new Date(Date.now() - 18 * 365.25 * 86400000).toISOString().split('T')[0]}
-                    style={{ ...inputStyle(errors.dob), colorScheme: 'dark' }}
-                  />
-                  {errors.dob && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.dob}</p>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '18px' }}>
+                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
+                  <span style={{ color: '#555', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>OR</span>
+                  <span style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.08)' }} />
                 </div>
-              )}
 
-              <div style={{ marginTop: '4px' }}>
-                <FireButton
-                  variant="primary" size="lg" fullWidth
-                  onClick={submit}
-                >
-                  {loading ? '…' : mode === 'join' ? 'Create account' : 'Sign in'}
-                </FireButton>
-              </div>
+                <div style={{ display: 'flex', background: '#111', borderRadius: '10px', padding: '4px', marginBottom: '24px', gap: '4px' }}>
+                  {(['join', 'signin'] as const).map(m => (
+                    <button key={m} onClick={() => { setMode(m); setErrors({}); }}
+                      style={{
+                        flex: 1, padding: '9px', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                        fontSize: '14px', fontFamily: 'inherit',
+                        background: mode === m ? 'var(--maroon)' : 'transparent',
+                        color: mode === m ? '#fff' : '#888', transition: 'all 0.2s',
+                      }}
+                    >{m === 'join' ? 'Join Ember' : 'Sign in'}</button>
+                  ))}
+                </div>
 
-              {mode === 'join' && (
-                <p style={{ color: '#555', fontSize: '12px', lineHeight: '1.6', textAlign: 'center' }}>
-                  By joining you agree to the{' '}
-                  <a href="/terms" target="_blank" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Terms</a>
-                  {' & '}
-                  <a href="/privacy" target="_blank" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Privacy Policy</a>.
-                </p>
-              )}
-            </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  {mode === 'join' && (
+                    <div>
+                      <input placeholder="Full name" value={form.name} onChange={e => set('name', e.target.value)} style={inputStyle(errors.name)} />
+                      {errors.name && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.name}</p>}
+                    </div>
+                  )}
+                  <div>
+                    <input type="email" placeholder="Email address" value={form.email} onChange={e => set('email', e.target.value)} style={inputStyle(errors.email)} />
+                    {errors.email && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.email}</p>}
+                  </div>
+                  <div style={{ position: 'relative' }}>
+                    <input type={showPw ? 'text' : 'password'} placeholder="Password" value={form.password}
+                      onChange={e => set('password', e.target.value)}
+                      style={{ ...inputStyle(errors.password), paddingRight: '48px' }}
+                      onKeyDown={e => { if (e.key === 'Enter') submit(); }} />
+                    <button onClick={() => setShowPw(s => !s)} style={{
+                      position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: '2px',
+                    }}>{showPw ? <EyeOff size={16} /> : <Eye size={16} />}</button>
+                    {errors.password && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.password}</p>}
+                  </div>
+
+                  {mode === 'join' && (
+                    <div>
+                      <label style={{ display: 'block', color: '#888', fontSize: '12px', marginBottom: '6px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>
+                        DATE OF BIRTH (18+ only)
+                      </label>
+                      <input type="date" value={form.dob} onChange={e => set('dob', e.target.value)}
+                        max={new Date(Date.now() - 18 * 365.25 * 86400000).toISOString().split('T')[0]}
+                        style={{ ...inputStyle(errors.dob), colorScheme: 'dark' }} />
+                      {errors.dob && <p style={{ color: '#cc3333', fontSize: '12px', marginTop: '4px' }}>{errors.dob}</p>}
+                    </div>
+                  )}
+
+                  {errors.form && (
+                    <div style={{ background: 'rgba(204,51,51,0.1)', border: '1px solid rgba(204,51,51,0.3)', borderRadius: '8px', padding: '10px 12px' }}>
+                      <p style={{ color: '#e08585', fontSize: '13px' }}>{errors.form}</p>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: '4px' }}>
+                    <FireButton variant="primary" size="lg" fullWidth onClick={submit}>
+                      {loading ? '…' : mode === 'join' ? 'Create account' : 'Sign in'}
+                    </FireButton>
+                  </div>
+
+                  {mode === 'join' && (
+                    <p style={{ color: '#555', fontSize: '12px', lineHeight: '1.6', textAlign: 'center' }}>
+                      By joining you agree to the{' '}
+                      <a href="/terms" target="_blank" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Terms</a>
+                      {' & '}
+                      <a href="/privacy" target="_blank" style={{ color: 'var(--beige)', textDecoration: 'none' }}>Privacy Policy</a>.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
           </motion.div>
         </motion.div>
       )}
