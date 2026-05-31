@@ -30,7 +30,7 @@ export function AuthModal() {
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.email.match(/^[^@]+@[^@]+\.[^@]+$/)) e.email = 'Enter a valid email';
-    if (!form.password || form.password.length < 6) e.password = 'Min 6 characters';
+    if (!form.password || form.password.length < 8) e.password = 'Min 8 characters';
     if (mode === 'join') {
       if (!form.name.trim()) e.name = 'Enter your name';
       if (!form.dob) e.dob = 'Enter your date of birth';
