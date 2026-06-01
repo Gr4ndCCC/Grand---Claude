@@ -6,6 +6,7 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import { FireGraph } from '../components/ui/FireGraph';
+import { getLiveEventCount, getAllEvents, EmberEvent } from '../data/events';
 
 /* ── tiny utilities ────────────────────────────────────────── */
 
@@ -42,34 +43,25 @@ function FadeUp({ children, delay = 0, className = '', style }: {
   );
 }
 
-/* ── content (kept verbatim) ───────────────────────────────── */
+/* ── content ────────────────────────────────────────────────── */
 
-const STATS = [
-  { value: 15,  suffix: '',  label: 'Live events'   },
-  { value: 40,  suffix: '+', label: 'Countries'     },
-  { value: 4,   suffix: '',  label: 'Board tiers'   },
-  { value: 1,   suffix: '',  label: 'Annual Summit' },
-];
+const TIER_CONFIG = [
+  { tier: 'ember',    name: 'Ember',    req: 'Host your first fire' },
+  { tier: 'iron',     name: 'Iron',     req: '5+ events hosted' },
+  { tier: 'gold',     name: 'Gold',     req: '15+ events hosted' },
+  { tier: 'platinum', name: 'Platinum', req: '30+ events hosted' },
+  { tier: 'legend',   name: 'Legend',   req: '50+ events · Top 1% globally' },
+] as const;
 
-const HOW_STEPS = [
+const BOARD_TIER_COUNT = TIER_CONFIG.length;
+
+const HOW_STEPS_DATA = [
   { n: '01', title: 'Discover',           body: 'Find BBQ gatherings near you on the live map. Every pin is a real event, a real host, a real fire.' },
   { n: '02', title: 'Join & Contribute',  body: "RSVP, tell the host what you're bringing — meat, charcoal, drinks. No doubling up. No gaps." },
   { n: '03', title: 'Level up',           body: "Host. Get rated. Earn your rank on The Board. Build a reputation that follows you everywhere fire burns." },
 ];
 
-type RankTier = 'ember' | 'iron' | 'gold' | 'legend';
-const BOARD_RANKS: { tier: RankTier; name: string; req: string }[] = [
-  { tier: 'ember',  name: 'Ember',  req: 'Join the Vault · Host your first event' },
-  { tier: 'iron',   name: 'Iron',   req: '5+ events · 4.5★ average rating' },
-  { tier: 'gold',   name: 'Gold',   req: '20+ events · 4.8★ · Vault contributor' },
-  { tier: 'legend', name: 'Legend', req: 'Top 1% globally · Invitation only' },
-];
-
-const EVENTS = [
-  { city: 'Amsterdam', cc: 'NL', title: 'Amsterdam Sunset BBQ',     host: 'Lars V.',    rank: 'Gold'   as const, date: 'Sat, Apr 19', time: '18:00', guests: 8,  max: 12 },
-  { city: 'Tokyo',     cc: 'JP', title: 'Tokyo Garden Grill',        host: 'Hiro M.',    rank: 'Iron'   as const, date: 'Sun, Apr 20', time: '17:00', guests: 6,  max: 10 },
-  { city: 'New York',  cc: 'US', title: 'Brooklyn Smokehouse Night', host: 'Marcus B.',  rank: 'Legend' as const, date: 'Fri, Apr 25', time: '19:00', guests: 14, max: 20 },
-];
+type RankTier = 'ember' | 'iron' | 'gold' | 'platinum' | 'legend';
 
 const TESTIMONIALS = [
   { quote: "I flew to Amsterdam for an Ember gathering. Left with four guys I'll grill with for life. That doesn't happen on Eventbrite.", name: 'Kofi A.',  city: 'Accra → Amsterdam', rank: 'Iron'  as const },
@@ -123,12 +115,14 @@ const VERSES = [
 
 /* ── tier styling helpers ──────────────────────────────────── */
 
-function tierBadgeStyle(rank: 'Ember' | 'Iron' | 'Gold' | 'Legend'): React.CSSProperties {
+function tierBadgeStyle(rank: string): React.CSSProperties {
   switch (rank) {
     case 'Gold':
       return { color: 'var(--gold-v3)', border: '1px solid rgba(184,146,74,0.4)', background: 'rgba(184,146,74,0.06)' };
     case 'Iron':
       return { color: 'var(--bone-300)', border: '1px solid rgba(245,237,224,0.15)', background: 'rgba(245,237,224,0.03)' };
+    case 'Platinum':
+      return { color: '#8B5CF6', border: '1px solid rgba(139,92,246,0.4)', background: 'rgba(139,92,246,0.08)' };
     case 'Legend':
       return { color: 'var(--gold-hi)', border: '1px solid rgba(212,168,95,0.5)', background: 'rgba(212,168,95,0.08)', boxShadow: '0 0 20px rgba(212,168,95,0.15)' };
     case 'Ember':
@@ -145,6 +139,8 @@ function rankCardAccents(tier: RankTier) {
       return { iconBg: 'rgba(245,237,224,0.04)', iconBorder: '1px solid rgba(245,237,224,0.1)', dot: 'var(--bone-300)', dotShadow: '0 0 8px rgba(217,201,171,0.4)', hoverShadow: '0 24px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(245,237,224,0.18)' };
     case 'gold':
       return { iconBg: 'rgba(184,146,74,0.12)', iconBorder: '1px solid rgba(184,146,74,0.4)', dot: 'var(--gold-v3)', dotShadow: '0 0 12px var(--gold-v3)', hoverShadow: '0 24px 60px rgba(184,146,74,0.18), 0 0 0 1px var(--gold-v3)' };
+    case 'platinum':
+      return { iconBg: 'rgba(139,92,246,0.12)', iconBorder: '1px solid rgba(139,92,246,0.4)', dot: '#8B5CF6', dotShadow: '0 0 12px #8B5CF6', hoverShadow: '0 24px 60px rgba(139,92,246,0.18), 0 0 0 1px #8B5CF6' };
     case 'legend':
       return { iconBg: 'rgba(212,168,95,0.18)', iconBorder: '1px solid rgba(212,168,95,0.5)', dot: 'var(--gold-hi)', dotShadow: '0 0 16px var(--gold-hi)', hoverShadow: '0 24px 60px rgba(212,168,95,0.25), 0 0 0 1px var(--gold-hi), 0 0 100px rgba(212,168,95,0.15)' };
   }
@@ -385,15 +381,19 @@ function VerseBar() {
 export function Landing() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
+  const [liveCount, setLiveCount] = useState(0);
+  const [featuredEvents, setFeaturedEvents] = useState<EmberEvent[]>([]);
+
+  useEffect(() => {
+    getLiveEventCount().then(setLiveCount);
+    getAllEvents().then(evs => setFeaturedEvents(evs.slice(0, 3)));
+  }, []);
 
   const handleJoinEvent = () => {
     if (!user) return openAuth('Sign in to join events near you.');
     navigate('/events');
   };
-  const handleHostEvent = () => {
-    if (!user) return openAuth('Sign in to host an event.');
-    navigate('/hosts');
-  };
+  const handleJoinVault = () => navigate('/vault');
 
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh', overflowX: 'hidden', position: 'relative' }}>
@@ -447,7 +447,7 @@ export function Landing() {
                 }}
               >
                 The world<br />grills.<br />
-                <span className="accent-italic">Join the<br />brotherhood.</span>
+                <span className="accent-italic">Join the<br />fire.</span>
               </motion.h1>
 
               <motion.p
@@ -456,8 +456,8 @@ export function Landing() {
                 transition={{ delay: 0.2, duration: 0.8 }}
                 style={{ marginTop: '40px', maxWidth: '480px', fontSize: '19px', lineHeight: 1.6, color: 'var(--bone-300)' }}
               >
-                Discover BBQ events in 40+ countries. Host your own gathering.
-                Build your rank. Connect with pitmasters worldwide.
+                Discover BBQ events worldwide. Host your own gathering.
+                Build your rank. Connect with pitmasters across the globe.
               </motion.p>
 
               <motion.div
@@ -469,19 +469,24 @@ export function Landing() {
                 <button className="btn-v3 primary lg" onClick={handleJoinEvent}>
                   Find events near you
                 </button>
-                <button className="btn-v3 ghost lg" onClick={handleHostEvent}>
-                  Host an event
+                <button className="btn-v3 ghost lg" onClick={handleJoinVault}>
+                  Join the Vault
                 </button>
               </motion.div>
 
-              {/* stats bar */}
+              {/* stats bar — live data */}
               <motion.div
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 transition={{ delay: 0.55, duration: 0.8 }}
                 className="hero-stats"
                 style={{ marginTop: '64px', display: 'flex', gap: '40px', flexWrap: 'wrap' }}
               >
-                {STATS.map(({ value, suffix, label }) => (
+                {[
+                  { value: liveCount, suffix: '',  label: 'Live events'   },
+                  { value: 195,       suffix: '',  label: 'Countries'     },
+                  { value: BOARD_TIER_COUNT, suffix: '', label: 'Board tiers' },
+                  { value: 1,         suffix: '',  label: 'Annual Summit' },
+                ].map(({ value, suffix, label }) => (
                   <div key={label}>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(36px, 4.5vw, 56px)', fontWeight: 400, color: 'var(--beige)', lineHeight: 1, letterSpacing: '-0.025em' }}>
                       <Counter to={value} suffix={suffix} />
@@ -529,7 +534,7 @@ export function Landing() {
             className="v3-three-col"
             style={{ marginTop: '64px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '56px' }}
           >
-            {HOW_STEPS.map(({ n, title, body }, i) => (
+            {HOW_STEPS_DATA.map(({ n, title, body }, i) => (
               <FadeUp key={n} delay={i * 0.12}>
                 <div style={{ position: 'relative', paddingLeft: '28px', borderLeft: '1px solid rgba(128,0,0,0.35)' }}>
                   {/* pulsing ember dot */}
@@ -588,40 +593,22 @@ export function Landing() {
           </FadeUp>
 
           <div
-            className="v3-four-col"
-            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}
+            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}
           >
-            {BOARD_RANKS.map(({ tier, name, req }, i) => {
+            {TIER_CONFIG.map(({ tier, name, req }, i) => {
               const a = rankCardAccents(tier);
               return (
                 <FadeUp key={tier} delay={i * 0.1}>
                   <div
                     className="rank-card-v3"
-                    onMouseEnter={e => {
-                      e.currentTarget.style.boxShadow = a.hoverShadow;
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.boxShadow = '';
-                    }}
+                    onMouseEnter={e => { e.currentTarget.style.boxShadow = a.hoverShadow; }}
+                    onMouseLeave={e => { e.currentTarget.style.boxShadow = ''; }}
                   >
                     <div>
-                      <div style={{
-                        width: '56px', height: '56px', borderRadius: '12px',
-                        background: a.iconBg, border: a.iconBorder,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: '32px',
-                      }}>
-                        <div style={{
-                          width: '14px', height: '14px', borderRadius: '50%',
-                          background: a.dot, boxShadow: a.dotShadow,
-                          ...(tier === 'legend' ? { animation: 'pulse-dot 2s var(--ease-coal) infinite' } : {}),
-                        }} />
+                      <div style={{ width: '56px', height: '56px', borderRadius: '12px', background: a.iconBg, border: a.iconBorder, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '32px' }}>
+                        <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: a.dot, boxShadow: a.dotShadow, ...(tier === 'legend' ? { animation: 'pulse-dot 2s var(--ease-coal) infinite' } : {}) }} />
                       </div>
-                      <p style={{
-                        fontFamily: 'var(--font-display)', fontSize: '30px', fontWeight: 500,
-                        letterSpacing: '-0.02em', marginBottom: '8px',
-                        color: 'var(--bone-100)',
-                      }}>{name}</p>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '30px', fontWeight: 500, letterSpacing: '-0.02em', marginBottom: '8px', color: 'var(--bone-100)' }}>{name}</p>
                     </div>
                     <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--bone-500)', lineHeight: 1.5 }}>{req}</p>
                   </div>
@@ -644,69 +631,55 @@ export function Landing() {
               Real events, real hosts. Join a gathering or{' '}
               <button
                 onClick={() => navigate('/hosts')}
-                style={{
-                  color: 'var(--beige)',
-                  background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  textDecoration: 'underline',
-                  textDecorationColor: 'rgba(228,207,179,0.4)',
-                  textUnderlineOffset: '4px',
-                  fontFamily: 'inherit', fontSize: 'inherit',
-                  transition: 'color 0.25s',
-                }}
+                style={{ color: 'var(--beige)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline', textDecorationColor: 'rgba(228,207,179,0.4)', textUnderlineOffset: '4px', fontFamily: 'inherit', fontSize: 'inherit', transition: 'color 0.25s' }}
                 onMouseEnter={e => (e.currentTarget.style.color = 'var(--bone-100)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'var(--beige)')}
               >start your own.</button>
             </p>
           </FadeUp>
 
-          <div
-            className="v3-three-col"
-            style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}
-          >
-            {EVENTS.map(({ city, cc, title, host, rank, date, time, guests, max }, i) => (
-              <FadeUp key={title} delay={i * 0.1}>
-                <article className="event-card-v3">
-                  <span className="heat-bar" aria-hidden />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
-                    <div className="mono" style={{ color: 'var(--bone-400)' }}>
-                      <span style={{ color: 'var(--bone-500)', marginRight: '6px', fontSize: '10px' }}>{cc}</span>
-                      {city}
+          {featuredEvents.length === 0 ? (
+            <FadeUp delay={0.1}>
+              <div style={{ marginTop: '72px', textAlign: 'center', padding: '60px 24px', background: 'rgba(245,237,224,0.03)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '16px' }}>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: 'var(--bone-400)', marginBottom: '16px' }}>
+                  No live events yet.
+                </p>
+                <button onClick={() => navigate('/hosts/new')} className="btn-v3 primary">Host the first one →</button>
+              </div>
+            </FadeUp>
+          ) : (
+            <div className="v3-three-col" style={{ marginTop: '72px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
+              {featuredEvents.map((ev, i) => (
+                <FadeUp key={ev.id} delay={i * 0.1}>
+                  <article className="event-card-v3" style={{ cursor: 'pointer' }} onClick={() => navigate(`/events/${ev.id}`)}>
+                    <span className="heat-bar" aria-hidden />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '14px' }}>
+                      <div className="mono" style={{ color: 'var(--bone-400)' }}>{ev.flag} {ev.city}</div>
+                      <div className="rank-badge" style={tierBadgeStyle(ev.hostRank)}>{ev.hostRank}</div>
                     </div>
-                    <div className="rank-badge" style={tierBadgeStyle(rank)}>{rank}</div>
-                  </div>
-                  <h3 style={{
-                    fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 500,
-                    letterSpacing: '-0.015em', lineHeight: 1.15,
-                    marginBottom: '18px', color: 'var(--bone-100)',
-                  }}>{title}</h3>
-                  <div className="mono" style={{ color: 'var(--bone-300)', marginBottom: '24px', display: 'flex', gap: '18px' }}>
-                    <span>{date}</span>
-                    <span>{time}</span>
-                  </div>
-                  <div style={{ height: '1px', margin: '0 -28px 22px', background: 'linear-gradient(90deg, transparent, rgba(245,237,224,0.08), transparent)' }} />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
-                    <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--bone-300)' }}>
-                      Hosted by <strong style={{ color: 'var(--bone-100)', fontWeight: 500 }}>{host}</strong>
-                    </p>
-                    <p className="mono" style={{ color: guests >= max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)' }}>
-                      {guests}/{max} going
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleJoinEvent}
-                    className="btn-v3 primary"
-                    style={{ width: '100%' }}
-                  >Join event</button>
-                </article>
-              </FadeUp>
-            ))}
-          </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '26px', fontWeight: 500, letterSpacing: '-0.015em', lineHeight: 1.15, marginBottom: '18px', color: 'var(--bone-100)' }}>{ev.title}</h3>
+                    <div className="mono" style={{ color: 'var(--bone-300)', marginBottom: '24px', display: 'flex', gap: '18px' }}>
+                      <span>{ev.date}</span>
+                      <span>{ev.time}</span>
+                    </div>
+                    <div style={{ height: '1px', margin: '0 -28px 22px', background: 'linear-gradient(90deg, transparent, rgba(245,237,224,0.08), transparent)' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
+                      <p style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--bone-300)' }}>
+                        Hosted by <strong style={{ color: 'var(--bone-100)', fontWeight: 500 }}>{ev.host}</strong>
+                      </p>
+                      <p className="mono" style={{ color: ev.guests >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)' }}>
+                        {ev.guests}/{ev.max} going
+                      </p>
+                    </div>
+                    <button onClick={e => { e.stopPropagation(); handleJoinEvent(); }} className="btn-v3 primary" style={{ width: '100%' }}>Join event</button>
+                  </article>
+                </FadeUp>
+              ))}
+            </div>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '48px' }}>
-            <button
-              onClick={() => navigate('/events')}
-              className="btn-v3 ghost"
-            >See all events →</button>
+            <button onClick={() => navigate('/events')} className="btn-v3 ghost">See all events →</button>
           </div>
         </div>
       </section>

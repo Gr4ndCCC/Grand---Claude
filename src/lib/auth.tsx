@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 
 export type VerifyStatus = 'unverified' | 'pending' | 'verified' | 'rejected';
 export type SubPlan = 'monthly' | 'annual' | null;
-export type Rank = 'Ember' | 'Iron' | 'Gold' | 'Legend';
+export type Rank = 'Ember' | 'Iron' | 'Gold' | 'Platinum' | 'Legend';
 
 export interface User {
   id: string;

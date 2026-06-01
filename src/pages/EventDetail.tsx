@@ -9,7 +9,7 @@ import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 import {
-  EmberEvent, getEvent, joinEvent, addContribution, postChat,
+  EmberEvent, getEvent, joinEvent, leaveEvent, addContribution, postChat,
   requestToJoin, getMyRequest, listRequests, acceptRequest, declineRequest,
   deleteEvent, subscribeToMessages,
   summarizeContributions, Rank, JoinRequest,
@@ -17,7 +17,7 @@ import {
 import { sendEventRsvpEmail } from '../lib/email';
 
 const RANK_COLORS: Record<Rank, string> = {
-  Legend: '#DAA520', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
+  Legend: '#DAA520', Platinum: '#8B5CF6', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
 };
 
 function initials(name: string) {
@@ -72,6 +72,8 @@ export function EventDetail() {
   const [contribQty, setContribQty] = useState('');
   const [myRequest, setMyRequest] = useState<JoinRequest | null>(null);
   const [requests, setRequests] = useState<JoinRequest[]>([]);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const reloadEvent = async () => {
@@ -178,13 +180,20 @@ export function EventDetail() {
     }
   };
 
+  const handleLeave = async () => {
+    if (!user) return;
+    await leaveEvent(ev.id, user.id);
+    setShowLeaveModal(false);
+    await reloadEvent();
+  };
+
   const confirmJoin = async () => {
     if (!user) return;
     const { error } = await joinEvent(ev.id, user);
     setShowJoinModal(false);
     if (error) return;
     await reloadEvent();
-    setShowAddModal(true);
+    setShowCalendarModal(true);
     sendEventRsvpEmail({
       name: user.name,
       email: user.email,
@@ -327,6 +336,12 @@ export function EventDetail() {
                     onClick={() => setShowAddModal(true)}
                     style={{ width: '100%', background: 'var(--maroon)', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                   ><Plus size={14} /> Add a contribution</button>
+                  {!isHost && (
+                    <button
+                      onClick={() => setShowLeaveModal(true)}
+                      style={{ width: '100%', marginTop: '10px', background: 'transparent', color: '#ef4444', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '10px', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >Leave Event</button>
+                  )}
                   {isHost && (
                     <button
                       onClick={() => setShowDeleteModal(true)}
@@ -819,6 +834,133 @@ export function EventDetail() {
                   style={{ flex: 2, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
                 >Delete event</button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Leave Event Modal */}
+      <AnimatePresence>
+        {showLeaveModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setShowLeaveModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#111', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', padding: '32px', maxWidth: '440px', width: '100%' }}
+            >
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>Leave this event?</h3>
+              <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
+                You'll be removed from the attendee list and lose access to the private chat.
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => setShowLeaveModal(false)}
+                  style={{ flex: 1, background: 'transparent', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontFamily: 'inherit' }}
+                >Cancel</button>
+                <button onClick={handleLeave}
+                  style={{ flex: 2, background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontWeight: 600, fontFamily: 'inherit' }}
+                >Leave event</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Calendar Modal */}
+      <AnimatePresence>
+        {showCalendarModal && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setShowCalendarModal(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#111', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '16px', padding: '32px', maxWidth: '440px', width: '100%' }}
+            >
+              <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px' }}>
+                <Calendar size={20} style={{ color: '#fff' }} />
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
+                Add to your calendar?
+              </h3>
+              <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px' }}>
+                Save {ev.title} — {ev.date} at {ev.time}.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                {/* Google Calendar */}
+                {(() => {
+                  const start = ev.rawDate.replace(/-/g, '') + 'T' + (ev.time.replace(':', '') + '00');
+                  const params = new URLSearchParams({
+                    action: 'TEMPLATE',
+                    text: ev.title,
+                    dates: `${start}/${start}`,
+                    details: ev.description,
+                    location: ev.address ?? ev.location,
+                  });
+                  return (
+                    <a href={`https://calendar.google.com/calendar/render?${params}`} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px 16px', color: '#fff', textDecoration: 'none', fontSize: '14px', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.09)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    >
+                      <span style={{ fontSize: '20px' }}>📅</span> Google Calendar
+                    </a>
+                  );
+                })()}
+                {/* Apple / iCal */}
+                {(() => {
+                  const start = ev.rawDate.replace(/-/g, '') + 'T' + (ev.time.replace(':', '') + '00');
+                  const ics = [
+                    'BEGIN:VCALENDAR', 'VERSION:2.0',
+                    'BEGIN:VEVENT',
+                    `DTSTART:${start}`,
+                    `SUMMARY:${ev.title}`,
+                    `DESCRIPTION:${ev.description}`,
+                    `LOCATION:${ev.address ?? ev.location}`,
+                    'END:VEVENT',
+                    'END:VCALENDAR',
+                  ].join('\r\n');
+                  const blob = new Blob([ics], { type: 'text/calendar' });
+                  const url = URL.createObjectURL(blob);
+                  return (
+                    <a href={url} download={`${ev.title.replace(/\s+/g, '_')}.ics`}
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px 16px', color: '#fff', textDecoration: 'none', fontSize: '14px', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.09)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    >
+                      <span style={{ fontSize: '20px' }}>🍎</span> Apple Calendar / iCal
+                    </a>
+                  );
+                })()}
+                {/* Outlook */}
+                {(() => {
+                  const params = new URLSearchParams({
+                    path: '/calendar/action/compose',
+                    rru: 'addevent',
+                    subject: ev.title,
+                    startdt: `${ev.rawDate}T${ev.time}:00`,
+                    body: ev.description,
+                    location: ev.address ?? ev.location,
+                  });
+                  return (
+                    <a href={`https://outlook.live.com/calendar/0/deeplink/compose?${params}`} target="_blank" rel="noopener noreferrer"
+                      style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '14px 16px', color: '#fff', textDecoration: 'none', fontSize: '14px', transition: 'background 0.15s' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.09)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                    >
+                      <span style={{ fontSize: '20px' }}>📧</span> Outlook
+                    </a>
+                  );
+                })()}
+              </div>
+              <button onClick={() => { setShowCalendarModal(false); setShowAddModal(true); }}
+                style={{ width: '100%', background: 'transparent', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '10px', padding: '12px', cursor: 'pointer', fontFamily: 'inherit', fontSize: '13px' }}
+              >Skip — remind me later</button>
             </motion.div>
           </motion.div>
         )}

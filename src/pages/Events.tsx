@@ -1,24 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Calendar, Users, Flame } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { getAllEvents, EmberEvent } from '../data/events';
+import { getAllEvents, getCityCounts, EmberEvent } from '../data/events';
 
 const RANK_COLORS: Record<string, string> = {
-  Legend: '#DAA520', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
+  Legend: '#DAA520', Platinum: '#8B5CF6', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
 };
-
-const TOP_CITIES = [
-  { city: 'New York',  flag: '🇺🇸', count: 5 },
-  { city: 'Amsterdam', flag: '🇳🇱', count: 4 },
-  { city: 'Tokyo',     flag: '🇯🇵', count: 3 },
-  { city: 'Berlin',    flag: '🇩🇪', count: 3 },
-  { city: 'São Paulo', flag: '🇧🇷', count: 3 },
-  { city: 'Lisbon',    flag: '🇵🇹', count: 3 },
-];
 
 function RankBadge({ rank }: { rank: string }) {
   const c = RANK_COLORS[rank] ?? '#555';
@@ -35,31 +26,32 @@ export function Events() {
   const [query, setQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
   const [allEvents, setAllEvents] = useState<EmberEvent[]>([]);
+  const [topCities, setTopCities] = useState<{ city: string; flag: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
-    getAllEvents()
-      .then(evs => { if (active) setAllEvents(evs); })
+    Promise.all([getAllEvents(), getCityCounts()])
+      .then(([evs, cities]) => {
+        if (active) { setAllEvents(evs); setTopCities(cities); }
+      })
       .finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, []);
 
-  const handleJoin = (eventId: string) => {
-    navigate(`/events/${eventId}`);
-  };
+  const handleJoin = (eventId: string) => navigate(`/events/${eventId}`);
   const handleHostNav = () => {
     if (!user) return openAuth('Sign in to host an event.');
     navigate('/hosts/new');
   };
 
   const filters = ['All', 'Nearby', 'This weekend', 'Public', 'Private'];
-  const filtered = allEvents.filter(e => {
+  const filtered = useMemo(() => allEvents.filter(e => {
     if (query && !e.title.toLowerCase().includes(query.toLowerCase()) && !e.city.toLowerCase().includes(query.toLowerCase())) return false;
-    if (activeFilter === 'Public' && !e.isPublic) return false;
-    if (activeFilter === 'Private' && e.isPublic) return false;
+    if (activeFilter === 'Public'  && !e.isPublic) return false;
+    if (activeFilter === 'Private' &&  e.isPublic) return false;
     return true;
-  });
+  }), [allEvents, query, activeFilter]);
 
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
@@ -161,64 +153,74 @@ export function Events() {
             </div>
           ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-            {filtered.map((ev, i) => (
-              <motion.div
-                key={ev.id}
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07 }}
-                onClick={() => handleJoin(ev.id)}
-                className="event-card-v3"
-                style={{ cursor: 'pointer', gap: '14px', display: 'flex', flexDirection: 'column' }}
-              >
-                <span className="heat-bar" aria-hidden />
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <p className="mono" style={{ color: 'var(--bone-500)' }}>{ev.flag} {ev.city}</p>
-                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                    {!ev.isPublic && <span className="rank-badge" style={{ color: 'var(--bone-500)', border: '1px solid rgba(245,237,224,0.12)' }}>Private</span>}
-                    <RankBadge rank={ev.hostRank} />
+            {filtered.map((ev, i) => {
+              const isMyEvent = !!user && user.id === ev.hostUserId;
+              return (
+                <motion.div
+                  key={ev.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  onClick={() => handleJoin(ev.id)}
+                  className="event-card-v3"
+                  style={{ cursor: 'pointer', gap: '14px', display: 'flex', flexDirection: 'column' }}
+                >
+                  <span className="heat-bar" aria-hidden />
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <p className="mono" style={{ color: 'var(--bone-500)' }}>{ev.flag} {ev.city}</p>
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                      {!ev.isPublic && <span className="rank-badge" style={{ color: 'var(--bone-500)', border: '1px solid rgba(245,237,224,0.12)' }}>Private</span>}
+                      <RankBadge rank={ev.hostRank} />
+                    </div>
                   </div>
-                </div>
-                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--bone-100)', lineHeight: 1.3 }}>{ev.title}</h3>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bone-400)', fontSize: '13px' }}>
-                    <Calendar size={12} /> {ev.date} · {ev.time}
-                  </span>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.attendees.length >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)', fontSize: '13px' }}>
-                    <Users size={12} /> {ev.attendees.length}/{ev.max}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  {ev.tags.map(t => (
-                    <span key={t} className="mono" style={{ color: 'var(--bone-500)', background: 'rgba(245,237,224,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
-                  ))}
-                </div>
-                <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,237,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--bone-400)', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleJoin(ev.id); }}
-                    className="btn-v3 primary"
-                    style={{ padding: '8px 16px', height: 'auto', fontSize: '13px' }}
-                  >Join →</button>
-                </div>
-              </motion.div>
-            ))}
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--bone-100)', lineHeight: 1.3 }}>{ev.title}</h3>
+                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bone-400)', fontSize: '13px' }}>
+                      <Calendar size={12} /> {ev.date} · {ev.time}
+                    </span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.guests >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)', fontSize: '13px' }}>
+                      <Users size={12} /> {ev.guests}/{ev.max}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {ev.tags.map(t => (
+                      <span key={t} className="mono" style={{ color: 'var(--bone-500)', background: 'rgba(245,237,224,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
+                    ))}
+                  </div>
+                  <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,237,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--bone-400)', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleJoin(ev.id); }}
+                      className="btn-v3 primary"
+                      style={{ padding: '8px 16px', height: 'auto', fontSize: '13px' }}
+                    >{isMyEvent ? 'Manage →' : 'Join →'}</button>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
           )}
 
-          {/* top cities */}
-          <div>
-            <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '16px' }}>Top cities</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              {TOP_CITIES.map(({ city, flag, count }) => (
-                <div key={city} className="vault-feature-v3" style={{ textAlign: 'center', cursor: 'pointer' }}>
-                  <p style={{ fontSize: '24px', marginBottom: '6px' }}>{flag}</p>
-                  <p style={{ color: 'var(--bone-100)', fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>{city}</p>
-                  <p className="mono" style={{ color: 'var(--burgundy)' }}>{count} events</p>
-                </div>
-              ))}
+          {/* top cities — real data */}
+          {topCities.length > 0 && (
+            <div>
+              <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '16px' }}>Top cities</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {topCities.map(({ city, flag, count }) => (
+                  <button
+                    key={city}
+                    onClick={() => setQuery(city)}
+                    className="vault-feature-v3"
+                    style={{ textAlign: 'center', cursor: 'pointer', background: 'none', border: '1px solid rgba(245,237,224,0.07)', width: '100%' }}
+                  >
+                    <p style={{ fontSize: '24px', marginBottom: '6px' }}>{flag}</p>
+                    <p style={{ color: 'var(--bone-100)', fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 500, marginBottom: '2px' }}>{city}</p>
+                    <p className="mono" style={{ color: 'var(--burgundy)' }}>{count} {count === 1 ? 'event' : 'events'}</p>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 

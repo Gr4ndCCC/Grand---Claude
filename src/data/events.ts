@@ -76,7 +76,7 @@ function friendlyDate(iso: string | null): string {
 /* ── row mappers ─────────────────────────────────────────────── */
 
 interface EventRow {
-  id: string; host_user_id: string; host_display_name: string;
+  id: string; host_user_id: string; host_display_name: string; host_tier?: string | null;
   title: string; description: string | null; city: string | null; flag: string | null;
   location_name: string | null; event_date: string | null; event_time: string | null;
   visibility: 'public' | 'private'; capacity: number; theme: string | null;
@@ -106,7 +106,7 @@ function mapEvent(row: EventRow): EmberEvent {
     flag: row.flag ?? '🔥',
     title: row.title,
     host: row.host_display_name,
-    hostRank: 'Iron',
+    hostRank: (row.host_tier as Rank) ?? 'Ember',
     date: friendlyDate(row.event_date),
     rawDate: row.event_date ?? '',
     time: row.event_time ?? '',
@@ -137,10 +137,37 @@ function mapEvent(row: EventRow): EmberEvent {
 export async function getAllEvents(): Promise<EmberEvent[]> {
   const { data, error } = await supabase
     .from('events')
-    .select('*, event_attendees(count)')
+    .select('*, host_tier, event_attendees(count)')
     .order('event_date', { ascending: true });
   if (error) { console.error('getAllEvents', error); return []; }
   return (data as EventRow[]).map(mapEvent);
+}
+
+export async function getLiveEventCount(): Promise<number> {
+  const { count, error } = await supabase
+    .from('events')
+    .select('*', { count: 'exact', head: true });
+  if (error) return 0;
+  return count ?? 0;
+}
+
+export async function getCityCounts(): Promise<{ city: string; flag: string; count: number }[]> {
+  const { data, error } = await supabase
+    .from('events')
+    .select('city, flag');
+  if (error || !data) return [];
+  const map = new Map<string, { flag: string; count: number }>();
+  for (const row of data as { city: string | null; flag: string | null }[]) {
+    const city = row.city ?? 'Unknown';
+    const flag = row.flag ?? '🔥';
+    const existing = map.get(city);
+    if (existing) existing.count++;
+    else map.set(city, { flag, count: 1 });
+  }
+  return [...map.entries()]
+    .map(([city, v]) => ({ city, flag: v.flag, count: v.count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6);
 }
 
 export async function getEvent(id: string): Promise<EmberEvent | null> {
@@ -193,7 +220,7 @@ export function subscribeToMessages(eventId: string, onInsert: (msg: ChatMsg) =>
 export async function getHostedEvents(userId: string): Promise<EmberEvent[]> {
   const { data, error } = await supabase
     .from('events')
-    .select('*, event_attendees(count)')
+    .select('*, host_tier, event_attendees(count)')
     .eq('host_user_id', userId)
     .order('event_date', { ascending: true });
   if (error) return [];
