@@ -1,18 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Check, Flame, Shield, Lock, CreditCard } from 'lucide-react';
+import { ArrowLeft, Check, Flame, Shield, Lock } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { getCheckoutUrl } from '../config/checkout';
-
-declare global {
-  interface Window {
-    LemonSqueezy?: { Url: { Open: (url: string) => void } };
-    createLemonSqueezy?: () => void;
-  }
-}
+import { loadStripe, STRIPE_PK, PLAN_AMOUNTS, PLAN_CURRENCY, type StripeElements } from '../lib/stripe';
 
 const PERKS: { title: string; desc: string }[] = [
   { title: 'The full recipe vault',          desc: 'Every pitmaster recipe. Unlocked. Forever.' },
@@ -25,24 +18,6 @@ const PERKS: { title: string; desc: string }[] = [
   { title: 'Priority event discovery',       desc: 'See the best gatherings first. Lock your seat.' },
 ];
 
-function buildCheckoutUrl(base: string, name: string, email: string) {
-  const url = new URL(base);
-  url.searchParams.set('embed', '1');
-  url.searchParams.set('checkout[email]', email);
-  url.searchParams.set('checkout[name]', name);
-  const successUrl = `${window.location.origin}/account?vault=success`;
-  url.searchParams.set('checkout[success_url]', successUrl);
-  return url.toString();
-}
-
-function openOverlay(url: string) {
-  if (window.LemonSqueezy?.Url?.Open) {
-    window.LemonSqueezy.Url.Open(url);
-  } else {
-    window.open(url, '_blank', 'noopener');
-  }
-}
-
 function FlameMark() {
   return (
     <svg width="28" height="34" viewBox="0 0 28 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -53,70 +28,78 @@ function FlameMark() {
   );
 }
 
-function formatCardNumber(v: string) {
-  return v.replace(/\D/g, '').slice(0, 16).replace(/(.{4})/g, '$1 ').trim();
-}
-
-function formatExpiry(v: string) {
-  const digits = v.replace(/\D/g, '').slice(0, 4);
-  if (digits.length >= 3) return `${digits.slice(0, 2)} / ${digits.slice(2)}`;
-  return digits;
-}
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'rgba(255,255,255,0.035)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: '10px',
-  padding: '11px 14px',
-  color: '#fff',
-  fontSize: '14px',
-  outline: 'none',
-  transition: 'border-color 0.2s',
-  boxSizing: 'border-box',
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  color: '#4A4A4A',
-  fontSize: '10px',
-  fontFamily: 'JetBrains Mono, monospace',
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  marginBottom: '6px',
+const STRIPE_APPEARANCE = {
+  theme: 'night',
+  labels: 'floating',
+  variables: {
+    colorPrimary: '#800000',
+    colorBackground: '#121011',
+    colorText: '#F5EFE6',
+    colorTextSecondary: '#8A8A8A',
+    colorDanger: '#ef4444',
+    fontFamily: 'system-ui, -apple-system, sans-serif',
+    borderRadius: '10px',
+    spacingUnit: '4px',
+  },
 };
 
 export function VaultCheckout() {
-  const { user, openAuth } = useAuth();
+  const { user, openAuth, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialPlan = (params.get('plan') === 'monthly' ? 'monthly' : 'annual') as 'monthly' | 'annual';
 
   const [selected, setSelected]     = useState<'monthly' | 'annual'>(initialPlan);
-  const [paymentTab, setPaymentTab] = useState<'card' | 'apple' | 'paypal'>('card');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc]       = useState('');
-  const [cardName, setCardName]     = useState('');
-  const [country, setCountry]       = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [overlayOpen, setOverlayOpen]   = useState(false);
+  const [errorMsg, setErrorMsg]     = useState('');
+  const [stripeReady, setStripeReady] = useState(false);
+  const stripeMissing = !STRIPE_PK;
 
-  useEffect(() => {
-    // Initialise the Lemon Squeezy overlay SDK as soon as the page mounts
-    if (typeof window.createLemonSqueezy === 'function') {
-      window.createLemonSqueezy();
-    }
-  }, []);
+  const stripeRef   = useRef<Awaited<ReturnType<typeof loadStripe>>>(null);
+  const elementsRef = useRef<StripeElements | null>(null);
+  const selectedRef = useRef(selected);
 
   useEffect(() => {
     const p = params.get('plan');
     if (p === 'monthly' || p === 'annual') setSelected(p);
   }, [params]);
 
+  // Mount the Stripe Payment Element once the signed-in user is known.
   useEffect(() => {
-    if (user) setCardName(user.name);
-  }, [user]);
+    if (!user || stripeMissing) return;
+    let cancelled = false;
+    let paymentEl: { unmount: () => void } | null = null;
+
+    loadStripe().then(stripe => {
+      if (cancelled || !stripe) return;
+      stripeRef.current = stripe;
+      const elements = stripe.elements({
+        mode: 'subscription',
+        amount: PLAN_AMOUNTS[selectedRef.current],
+        currency: PLAN_CURRENCY,
+        appearance: STRIPE_APPEARANCE,
+      });
+      elementsRef.current = elements;
+      const pe = elements.create('payment', { layout: 'tabs' });
+      const node = document.getElementById('ember-payment-element');
+      if (node) { pe.mount(node); paymentEl = pe; setStripeReady(true); }
+    });
+
+    return () => {
+      cancelled = true;
+      try { paymentEl?.unmount(); } catch { /* noop */ }
+      elementsRef.current = null;
+      stripeRef.current = null;
+    };
+  }, [user, stripeMissing]);
+
+  // Keep the element's amount in sync when the plan toggles.
+  useEffect(() => {
+    selectedRef.current = selected;
+    if (stripeReady && elementsRef.current) {
+      try { elementsRef.current.update({ amount: PLAN_AMOUNTS[selected], currency: PLAN_CURRENCY }); } catch { /* noop */ }
+    }
+  }, [selected, stripeReady]);
 
   if (!user) {
     return (
@@ -144,36 +127,67 @@ export function VaultCheckout() {
     );
   }
 
-  const checkoutBase = getCheckoutUrl(selected);
-  const isConfigured = !!checkoutBase && /^https?:\/\//.test(checkoutBase);
-
   const price        = selected === 'annual' ? '€99' : '€15';
   const priceNum     = selected === 'annual' ? '€99.00' : '€15.00';
   const billingLabel = selected === 'annual' ? 'Billed annually' : 'Billed monthly';
+  const canPay       = stripeReady && !stripeMissing && !isSubmitting;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isConfigured || !checkoutBase) return;
+    const stripe = stripeRef.current;
+    const elements = elementsRef.current;
+    if (!stripe || !elements || isSubmitting) return;
+
     setIsSubmitting(true);
-    sessionStorage.setItem('ember_pending_plan', selected);
-    const url = buildCheckoutUrl(checkoutBase, user.name, user.email);
-    setOverlayOpen(true);
-    openOverlay(url);
-    setTimeout(() => setIsSubmitting(false), 1600);
+    setErrorMsg('');
+
+    // 1. Validate the card / payment details in the element.
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      setErrorMsg(submitError.message || 'Please check your payment details.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      // 2. Create the subscription server-side, get the payment secret.
+      const r = await fetch('/api/stripe/subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: selected, email: user.email, name: user.name, userId: user.id }),
+      });
+      const data = await r.json();
+      if (!r.ok || !data.clientSecret) {
+        setErrorMsg(data.error || 'Could not start checkout. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      sessionStorage.setItem('ember_pending_plan', selected);
+
+      // 3. Confirm the payment inline — no redirect unless the method requires it.
+      const { error } = await stripe.confirmPayment({
+        elements,
+        clientSecret: data.clientSecret,
+        confirmParams: { return_url: `${window.location.origin}/account?vault=success&plan=${selected}` },
+        redirect: 'if_required',
+      });
+      if (error) {
+        setErrorMsg(error.message || 'Payment failed. Please try another card.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 4. Paid. Verify + unlock server-side, refresh the profile, go to account.
+      try { await fetch(`/api/stripe/subscription?subscription_id=${encodeURIComponent(data.subscriptionId)}`); } catch { /* webhook will catch up */ }
+      await refreshProfile();
+      navigate(`/account?vault=success&plan=${selected}`);
+    } catch {
+      setErrorMsg('Network error. Please try again.');
+      setIsSubmitting(false);
+    }
   };
 
-  const retryCheckout = () => {
-    if (!checkoutBase) return;
-    const url = buildCheckoutUrl(checkoutBase, user.name, user.email);
-    openOverlay(url);
-  };
-
-  const initials = user.name
-    .split(' ')
-    .map((p: string) => p[0] ?? '')
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+  const initials = user.name.split(' ').map((p: string) => p[0] ?? '').slice(0, 2).join('').toUpperCase();
 
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh' }}>
@@ -407,232 +421,79 @@ export function VaultCheckout() {
                   </div>
                 </div>
 
-                {/* Payment form */}
+                {/* Payment form — real Stripe Payment Element, inline on this page */}
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px 24px' }}>
                   <p className="mono" style={{ color: '#333', marginBottom: '14px', fontSize: '10px' }}>Payment details</p>
 
-                  {/* Payment method tabs */}
-                  <div style={{ display: 'flex', gap: '4px', marginBottom: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', padding: '3px' }}>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentTab('card')}
-                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'inherit', fontWeight: 500, transition: 'all 0.2s', background: paymentTab === 'card' ? '#1C1C1C' : 'transparent', color: paymentTab === 'card' ? '#fff' : '#4A4A4A', boxShadow: paymentTab === 'card' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}
-                    >
-                      <CreditCard size={12} /> Card
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentTab('apple')}
-                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'inherit', fontWeight: 600, transition: 'all 0.2s', background: paymentTab === 'apple' ? '#1C1C1C' : 'transparent', color: paymentTab === 'apple' ? '#fff' : '#4A4A4A', boxShadow: paymentTab === 'apple' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-                    >
-                      <svg width="11" height="13" viewBox="0 0 13 16" fill="currentColor" aria-hidden="true">
-                        <path d="M10.83 8.5c-.02-2.04 1.66-3.02 1.74-3.07-.95-1.39-2.43-1.58-2.95-1.6-1.25-.13-2.45.74-3.08.74-.65 0-1.62-.72-2.67-.7-1.37.02-2.65.8-3.36 2.03-1.43 2.49-.36 6.16 1.03 8.18.68.99 1.49 2.1 2.55 2.06 1.03-.04 1.42-.66 2.66-.66 1.24 0 1.59.66 2.67.64 1.1-.02 1.8-1.01 2.47-2 .78-1.15 1.1-2.27 1.12-2.32-.02-.01-2.16-.83-2.18-3.3zM8.83 2.55C9.4 1.86 9.78.91 9.68 0c-.78.03-1.74.52-2.32 1.2-.52.6-.97 1.57-.85 2.46.87.07 1.76-.44 2.32-1.11z"/>
-                      </svg>
-                      Pay
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentTab('paypal')}
-                      style={{ flex: 1, padding: '8px 6px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '11.5px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.04em', transition: 'all 0.2s', background: paymentTab === 'paypal' ? '#1C1C1C' : 'transparent', color: paymentTab === 'paypal' ? '#009cde' : '#4A4A4A', boxShadow: paymentTab === 'paypal' ? '0 1px 4px rgba(0,0,0,0.5)' : 'none' }}
-                    >
-                      PayPal
-                    </button>
-                  </div>
-
                   <form onSubmit={handleSubmit}>
-                    <AnimatePresence mode="wait">
-                      {paymentTab === 'card' ? (
-                        <motion.div key="card" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }} transition={{ duration: 0.15 }}>
+                    {/* Stripe mounts card + Apple Pay / Google Pay / Link here */}
+                    <div id="ember-payment-element" style={{ minHeight: stripeMissing ? 0 : '220px' }} />
 
-                          {/* Card number */}
-                          <div style={{ marginBottom: '10px' }}>
-                            <label style={labelStyle}>Card number</label>
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              placeholder="1234 5678 9012 3456"
-                              value={cardNumber}
-                              onChange={e => setCardNumber(formatCardNumber(e.target.value))}
-                              maxLength={19}
-                              style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }}
-                              onFocus={e => { e.target.style.borderColor = 'rgba(128,0,0,0.45)'; }}
-                              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                            />
-                          </div>
+                    {/* Loading skeleton while Stripe.js boots */}
+                    {!stripeReady && !stripeMissing && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '32px 0', color: '#5A5A5A' }}>
+                        <span className="vault-spin" style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.15)', borderTopColor: 'var(--maroon)', borderRadius: '50%' }} />
+                        <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>Loading secure payment…</span>
+                      </div>
+                    )}
 
-                          {/* Name on card */}
-                          <div style={{ marginBottom: '10px' }}>
-                            <label style={labelStyle}>Name on card</label>
-                            <input
-                              type="text"
-                              placeholder="Full name"
-                              value={cardName}
-                              onChange={e => setCardName(e.target.value)}
-                              style={{ ...inputStyle, fontFamily: 'inherit' }}
-                              onFocus={e => { e.target.style.borderColor = 'rgba(128,0,0,0.45)'; }}
-                              onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                            />
-                          </div>
-
-                          {/* Expiry + CVC */}
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
-                            <div>
-                              <label style={labelStyle}>Expiry</label>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="MM / YY"
-                                value={cardExpiry}
-                                onChange={e => setCardExpiry(formatExpiry(e.target.value))}
-                                maxLength={7}
-                                style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }}
-                                onFocus={e => { e.target.style.borderColor = 'rgba(128,0,0,0.45)'; }}
-                                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                              />
-                            </div>
-                            <div>
-                              <label style={labelStyle}>CVC</label>
-                              <input
-                                type="text"
-                                inputMode="numeric"
-                                placeholder="•••"
-                                value={cardCvc}
-                                onChange={e => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                                maxLength={4}
-                                style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }}
-                                onFocus={e => { e.target.style.borderColor = 'rgba(128,0,0,0.45)'; }}
-                                onBlur={e => { e.target.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Country */}
-                          <div style={{ marginBottom: '16px' }}>
-                            <label style={labelStyle}>Country</label>
-                            <select
-                              value={country}
-                              onChange={e => setCountry(e.target.value)}
-                              style={{ ...inputStyle, background: 'rgba(20,20,20,0.96)', color: country ? '#fff' : '#4A4A4A', cursor: 'pointer', appearance: 'none', fontFamily: 'inherit' }}
-                              onFocus={e => { e.currentTarget.style.borderColor = 'rgba(128,0,0,0.45)'; }}
-                              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; }}
-                            >
-                              <option value="" style={{ background: '#141414' }}>Select country…</option>
-                              <option value="US" style={{ background: '#141414' }}>United States</option>
-                              <option value="GB" style={{ background: '#141414' }}>United Kingdom</option>
-                              <option value="DE" style={{ background: '#141414' }}>Germany</option>
-                              <option value="FR" style={{ background: '#141414' }}>France</option>
-                              <option value="IT" style={{ background: '#141414' }}>Italy</option>
-                              <option value="ES" style={{ background: '#141414' }}>Spain</option>
-                              <option value="PT" style={{ background: '#141414' }}>Portugal</option>
-                              <option value="NL" style={{ background: '#141414' }}>Netherlands</option>
-                              <option value="GR" style={{ background: '#141414' }}>Greece</option>
-                              <option value="AU" style={{ background: '#141414' }}>Australia</option>
-                              <option value="CA" style={{ background: '#141414' }}>Canada</option>
-                              <option value="BR" style={{ background: '#141414' }}>Brazil</option>
-                              <option value="AR" style={{ background: '#141414' }}>Argentina</option>
-                              <option value="ZA" style={{ background: '#141414' }}>South Africa</option>
-                              <option value="JP" style={{ background: '#141414' }}>Japan</option>
-                              <option value="SG" style={{ background: '#141414' }}>Singapore</option>
-                              <option value="AE" style={{ background: '#141414' }}>UAE</option>
-                              <option value="OTHER" style={{ background: '#141414' }}>Other</option>
-                            </select>
-                          </div>
-                        </motion.div>
-                      ) : paymentTab === 'apple' ? (
-                        <motion.div key="apple" initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }}
-                          style={{ padding: '24px 20px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '12px', marginBottom: '16px', textAlign: 'center' }}
-                        >
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                            <svg width="22" height="26" viewBox="0 0 13 16" fill="#fff" aria-hidden="true">
-                              <path d="M10.83 8.5c-.02-2.04 1.66-3.02 1.74-3.07-.95-1.39-2.43-1.58-2.95-1.6-1.25-.13-2.45.74-3.08.74-.65 0-1.62-.72-2.67-.7-1.37.02-2.65.8-3.36 2.03-1.43 2.49-.36 6.16 1.03 8.18.68.99 1.49 2.1 2.55 2.06 1.03-.04 1.42-.66 2.66-.66 1.24 0 1.59.66 2.67.64 1.1-.02 1.8-1.01 2.47-2 .78-1.15 1.1-2.27 1.12-2.32-.02-.01-2.16-.83-2.18-3.3zM8.83 2.55C9.4 1.86 9.78.91 9.68 0c-.78.03-1.74.52-2.32 1.2-.52.6-.97 1.57-.85 2.46.87.07 1.76-.44 2.32-1.11z"/>
-                            </svg>
-                            <span style={{ color: '#fff', fontSize: '17px', fontWeight: 600, letterSpacing: '-0.01em' }}>Pay</span>
-                          </div>
-                          <p style={{ color: '#7A7A7A', fontSize: '12px', lineHeight: 1.6 }}>
-                            Confirm with Face ID or Touch ID at checkout. No card details to enter.
-                          </p>
-                        </motion.div>
-                      ) : (
-                        <motion.div key="paypal" initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }}
-                          style={{ padding: '20px', background: 'rgba(0,156,222,0.04)', border: '1px solid rgba(0,156,222,0.14)', borderRadius: '12px', marginBottom: '16px', textAlign: 'center' }}
-                        >
-                          <p style={{ color: '#009cde', fontSize: '13px', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700, letterSpacing: '0.05em', marginBottom: '6px' }}>PayPal</p>
-                          <p style={{ color: '#4A4A4A', fontSize: '12px', lineHeight: 1.6 }}>
-                            You'll be redirected to PayPal to complete your purchase securely.
-                          </p>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Warning: checkout not configured */}
-                    {!isConfigured && (
-                      <div style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px' }}>
-                        <p style={{ color: '#ca9a06', fontSize: '11px', lineHeight: 1.5 }}>
-                          Paste your Lemon Squeezy URL into{' '}
+                    {/* Not configured warning */}
+                    {stripeMissing && (
+                      <div style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', borderRadius: '8px', padding: '12px 14px', marginBottom: '12px' }}>
+                        <p style={{ color: '#ca9a06', fontSize: '11px', lineHeight: 1.6 }}>
+                          Payments aren't live yet. Add your{' '}
                           <code style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '3px', padding: '1px 4px', fontFamily: 'JetBrains Mono, monospace' }}>
-                            src/config/checkout.ts
-                          </code>
+                            VITE_STRIPE_PUBLISHABLE_KEY
+                          </code>{' '}
+                          in Vercel and redeploy.
                         </p>
                       </div>
                     )}
 
+                    {/* Payment error */}
+                    <AnimatePresence>
+                      {errorMsg && (
+                        <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '8px', padding: '10px 12px', marginTop: '12px' }}
+                        >
+                          <p style={{ color: '#f87171', fontSize: '12px', lineHeight: 1.5 }}>{errorMsg}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {/* Submit */}
                     <button
                       type="submit"
-                      disabled={isSubmitting || !isConfigured}
+                      disabled={!canPay}
                       className="vault-submit-btn"
                       style={{
-                        width: '100%', position: 'relative', overflow: 'hidden',
-                        background: isConfigured ? 'var(--maroon)' : '#1E1E1E',
-                        color: isConfigured ? '#fff' : '#3A3A3A',
+                        width: '100%', position: 'relative', overflow: 'hidden', marginTop: '16px',
+                        background: canPay ? 'var(--maroon)' : '#1E1E1E',
+                        color: canPay ? '#fff' : '#3A3A3A',
                         border: 'none', borderRadius: '12px', padding: '15px 20px',
-                        cursor: isSubmitting ? 'wait' : (isConfigured ? 'pointer' : 'not-allowed'),
+                        cursor: isSubmitting ? 'wait' : (canPay ? 'pointer' : 'not-allowed'),
                         fontSize: '14px', fontWeight: 700, fontFamily: 'inherit', letterSpacing: '0.02em',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                         transition: 'background 0.25s, transform 0.15s, box-shadow 0.25s',
-                        boxShadow: isConfigured ? '0 4px 20px rgba(128,0,0,0.30)' : 'none',
+                        boxShadow: canPay ? '0 4px 20px rgba(128,0,0,0.30)' : 'none',
                         transform: isSubmitting ? 'scale(0.99)' : 'scale(1)',
                       }}
-                      onMouseEnter={e => { if (isConfigured && !isSubmitting) { e.currentTarget.style.background = '#990000'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(128,0,0,0.42)'; } }}
-                      onMouseLeave={e => { if (isConfigured) { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(128,0,0,0.30)'; } }}
+                      onMouseEnter={e => { if (canPay) { e.currentTarget.style.background = '#990000'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(128,0,0,0.42)'; } }}
+                      onMouseLeave={e => { if (canPay) { e.currentTarget.style.background = 'var(--maroon)'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(128,0,0,0.30)'; } }}
                     >
                       {isSubmitting && (
                         <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'vault-shimmer 1s linear infinite', borderRadius: '12px' }} />
                       )}
                       {!isSubmitting && <Lock size={13} />}
-                      {isSubmitting
-                        ? 'Opening checkout…'
-                        : paymentTab === 'card'   ? 'Complete Secure Checkout'
-                        : paymentTab === 'apple'  ? 'Pay with  Pay'
-                        : 'Continue with PayPal'}
+                      {isSubmitting ? 'Processing payment…' : `Pay ${priceNum} — Join the Vault`}
                     </button>
                   </form>
-
-                  {/* Overlay open hint */}
-                  <AnimatePresence>
-                    {overlayOpen && (
-                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
-                        style={{ marginTop: '10px', background: 'rgba(128,0,0,0.07)', border: '1px solid rgba(128,0,0,0.22)', borderRadius: '10px', padding: '11px 14px' }}
-                      >
-                        <p style={{ color: '#A08070', fontSize: '11px', lineHeight: 1.6, textAlign: 'center' }}>
-                          Complete your payment in the secure overlay.{' '}
-                          <button
-                            type="button"
-                            onClick={retryCheckout}
-                            style={{ background: 'none', border: 'none', color: 'var(--maroon)', cursor: 'pointer', fontSize: '11px', fontFamily: 'inherit', padding: 0, textDecoration: 'underline' }}
-                          >
-                            Didn't open? Try again.
-                          </button>
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
 
                   {/* Security badge */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '14px' }}>
                     <Shield size={10} style={{ color: '#2E2E2E' }} />
                     <p style={{ color: '#2E2E2E', fontSize: '9px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
-                      256-bit SSL · Powered by Lemon Squeezy
+                      256-bit SSL · Powered by Stripe
                     </p>
                   </div>
                 </div>
@@ -669,6 +530,8 @@ export function VaultCheckout() {
           0%   { background-position: -200% center; }
           100% { background-position:  200% center; }
         }
+        .vault-spin { animation: vault-spin 0.7s linear infinite; }
+        @keyframes vault-spin { to { transform: rotate(360deg); } }
         .vault-submit-btn:focus-visible {
           outline: 2px solid rgba(128,0,0,0.6);
           outline-offset: 2px;

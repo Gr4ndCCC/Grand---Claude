@@ -564,7 +564,7 @@ function TabBtn({ label, icon: Icon, active, onClick }: {
 }
 
 export function Account() {
-  const { user, openAuth, updateUser } = useAuth();
+  const { user, openAuth, refreshProfile } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>('profile');
@@ -572,21 +572,23 @@ export function Account() {
   useEffect(() => {
     if (!user) return;
     const params = new URLSearchParams(location.search);
-    if (params.get('checkout') !== 'success') return;
+    const paid = params.get('vault') === 'success' || params.get('checkout') === 'success';
+    if (!paid) return;
 
-    const planParam = params.get('plan');
-    const pendingPlan = sessionStorage.getItem('ember_pending_plan');
-    const plan = planParam === 'monthly' || planParam === 'annual'
-      ? planParam
-      : pendingPlan === 'monthly' || pendingPlan === 'annual'
-        ? pendingPlan
-        : 'annual';
-
-    updateUser({ subPlan: plan, subActive: true, subSince: Date.now() });
+    // Membership is unlocked server-side (Stripe sync + webhook). Pull the fresh
+    // profile, retrying briefly in case the webhook is still in flight.
     sessionStorage.removeItem('ember_pending_plan');
     setTab('billing');
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const tick = () => {
+      refreshProfile();
+      if (++tries < 4) timer = setTimeout(tick, 1500);
+    };
+    tick();
     navigate('/account', { replace: true });
-  }, [location.search, navigate, updateUser, user]);
+    return () => clearTimeout(timer);
+  }, [location.search, navigate, refreshProfile, user]);
 
   if (!user) {
     return (
