@@ -96,8 +96,9 @@
   --container: 1480px;
 
   /* rank colors */
-  --rank-ember:  #800000;
-  --rank-iron:   #6B7280;
-  --rank-gold:   #B8860B;
-  --rank-legend: #DAA520;
+  --rank-ember:    #800000;
+  --rank-iron:     #6B7280;
+  --rank-gold:     #B8860B;
+  --rank-platinum: #8B5CF6;
+  --rank-legend:   #DAA520;
 }

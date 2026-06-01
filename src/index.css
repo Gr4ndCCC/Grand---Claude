@@ -1,5 +1,6 @@
 @import './styles/tokens.css';
 @import './styles/ember.css';
+@import './styles/settings.css';
 
 @tailwind base;
 @tailwind components;

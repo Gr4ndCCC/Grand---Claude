@@ -1,0 +1,39 @@
+/* ── Theme: light mode (invert + hue-rotate trick) ─────────── */
+[data-ember-theme="light"] {
+  filter: invert(1) hue-rotate(180deg);
+}
+/* keep images / videos natural */
+[data-ember-theme="light"] img,
+[data-ember-theme="light"] video,
+[data-ember-theme="light"] canvas,
+[data-ember-theme="light"] .firegraph-container {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+/* ── Font size ───────────────────────────────────────────── */
+[data-ember-font="small"] body  { font-size: 13px; }
+[data-ember-font="medium"] body { font-size: 16px; }
+[data-ember-font="large"] body  { font-size: 19px; }
+
+[data-ember-font="small"]  h1, [data-ember-font="small"]  h2,
+[data-ember-font="small"]  h3, [data-ember-font="small"]  h4  { letter-spacing: -0.02em; }
+[data-ember-font="large"]  h1, [data-ember-font="large"]  h2,
+[data-ember-font="large"]  h3, [data-ember-font="large"]  h4  { letter-spacing: -0.03em; }
+
+/* ── Reduce motion ────────────────────────────────────────── */
+[data-ember-reduce-motion="true"] *,
+[data-ember-reduce-motion="true"] *::before,
+[data-ember-reduce-motion="true"] *::after {
+  animation-duration:   0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration:  0.01ms !important;
+  scroll-behavior:      auto  !important;
+}
+
+/* ── Compact mode ─────────────────────────────────────────── */
+[data-ember-compact="true"] .v3-section { padding-block: 60px !important; }
+[data-ember-compact="true"] .page-container { padding-inline: 16px !important; }
+[data-ember-compact="true"] .event-card-v3 { padding: 18px !important; }
+[data-ember-compact="true"] .vault-feature-v3 { padding: 14px !important; }
+[data-ember-compact="true"] .rank-card-v3 { padding: 18px !important; }
+[data-ember-compact="true"] .quote-card-v3 { padding: 20px !important; }

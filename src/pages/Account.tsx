@@ -10,6 +10,7 @@ import {
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
+import { useSettings } from '../lib/settings';
 import { getHostedEvents, getAttendingEvents, EmberEvent } from '../data/events';
 
 type Tab =
@@ -484,10 +485,7 @@ function SpeechTab() {
 }
 
 function AppearanceTab() {
-  const [theme,        setTheme]        = useState<'dark' | 'light' | 'system'>('dark');
-  const [fontSize,     setFontSize]     = useState<'small' | 'medium' | 'large'>('medium');
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [compact,      setCompact]      = useState(false);
+  const { theme, fontSize, reduceMotion, compact, setTheme, setFontSize, setReduceMotion, setCompact } = useSettings();
   return (
     <SCard title="Appearance" subtitle="Customise how Ember looks">
       <Row label="Theme">

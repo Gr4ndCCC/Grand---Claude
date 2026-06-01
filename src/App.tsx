@@ -18,9 +18,10 @@ import { EventDetail }    from './pages/EventDetail';
 import { HostNew }        from './pages/HostNew';
 import { Account }        from './pages/Account';
 import { VaultCheckout }  from './pages/VaultCheckout';
-import { AuthProvider }   from './lib/auth';
-import { AuthModal }      from './components/AuthModal';
-import { EmberAssistant } from './components/EmberAssistant';
+import { AuthProvider }      from './lib/auth';
+import { SettingsProvider }  from './lib/settings';
+import { AuthModal }         from './components/AuthModal';
+import { EmberAssistant }    from './components/EmberAssistant';
 
 function GlobalEmbers() {
   const embers = useMemo(
@@ -73,6 +74,7 @@ function ScrollToTop() {
 
 export default function App() {
   return (
+    <SettingsProvider>
     <AuthProvider>
       <BrowserRouter>
         <GlobalAtmosphere />
@@ -103,5 +105,6 @@ export default function App() {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+    </SettingsProvider>
   );
 }
