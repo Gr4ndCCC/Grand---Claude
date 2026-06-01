@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { getAllEvents, getCityCounts, EmberEvent } from '../data/events';
+import { getAllEvents, getCityCounts, getHostedEvents, getAttendingEvents, EmberEvent } from '../data/events';
 
 const RANK_COLORS: Record<string, string> = {
   Legend: '#DAA520', Platinum: '#8B5CF6', Gold: '#B8860B', Iron: '#6B7280', Ember: '#800000',
@@ -20,6 +20,50 @@ function RankBadge({ rank }: { rank: string }) {
   );
 }
 
+function EventCard({ ev, i, isMyEvent, onNavigate }: { ev: EmberEvent; i: number; isMyEvent: boolean; onNavigate: (id: string) => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.07 }}
+      onClick={() => onNavigate(ev.id)}
+      className="event-card-v3"
+      style={{ cursor: 'pointer', gap: '14px', display: 'flex', flexDirection: 'column' }}
+    >
+      <span className="heat-bar" aria-hidden />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <p className="mono" style={{ color: 'var(--bone-500)' }}>{ev.flag} {ev.city}</p>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {!ev.isPublic && <span className="rank-badge" style={{ color: 'var(--bone-500)', border: '1px solid rgba(245,237,224,0.12)' }}>Private</span>}
+          <RankBadge rank={ev.hostRank} />
+        </div>
+      </div>
+      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--bone-100)', lineHeight: 1.3 }}>{ev.title}</h3>
+      <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bone-400)', fontSize: '13px' }}>
+          <Calendar size={12} /> {ev.date} · {ev.time}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.guests >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)', fontSize: '13px' }}>
+          <Users size={12} /> {ev.guests}/{ev.max}
+        </span>
+      </div>
+      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+        {ev.tags.map(t => (
+          <span key={t} className="mono" style={{ color: 'var(--bone-500)', background: 'rgba(245,237,224,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
+        ))}
+      </div>
+      <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,237,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ color: 'var(--bone-400)', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
+        <button
+          onClick={(e) => { e.stopPropagation(); onNavigate(ev.id); }}
+          className="btn-v3 primary"
+          style={{ padding: '8px 16px', height: 'auto', fontSize: '13px' }}
+        >{isMyEvent ? 'Manage →' : 'Join →'}</button>
+      </div>
+    </motion.div>
+  );
+}
+
 export function Events() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
@@ -28,6 +72,9 @@ export function Events() {
   const [allEvents, setAllEvents] = useState<EmberEvent[]>([]);
   const [topCities, setTopCities] = useState<{ city: string; flag: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [myHosted, setMyHosted] = useState<EmberEvent[]>([]);
+  const [myAttending, setMyAttending] = useState<EmberEvent[]>([]);
+  const [myEventsLoading, setMyEventsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -39,13 +86,25 @@ export function Events() {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    if (activeFilter !== 'My Events' || !user) return;
+    let active = true;
+    setMyEventsLoading(true);
+    Promise.all([getHostedEvents(user.id), getAttendingEvents(user.id)])
+      .then(([hosted, attending]) => {
+        if (active) { setMyHosted(hosted); setMyAttending(attending); }
+      })
+      .finally(() => { if (active) setMyEventsLoading(false); });
+    return () => { active = false; };
+  }, [activeFilter, user]);
+
   const handleJoin = (eventId: string) => navigate(`/events/${eventId}`);
   const handleHostNav = () => {
     if (!user) return openAuth('Sign in to host an event.');
     navigate('/hosts/new');
   };
 
-  const filters = ['All', 'Nearby', 'This weekend', 'Public', 'Private'];
+  const filters = ['All', 'Nearby', 'This weekend', 'Public', 'Private', 'My Events'];
   const filtered = useMemo(() => allEvents.filter(e => {
     if (query && !e.title.toLowerCase().includes(query.toLowerCase()) && !e.city.toLowerCase().includes(query.toLowerCase())) return false;
     if (activeFilter === 'Public'  && !e.isPublic) return false;
@@ -118,11 +177,15 @@ export function Events() {
           {/* filters */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             {filters.map(f => (
-              <button key={f} onClick={() => setActiveFilter(f)}
+              <button key={f}
+                onClick={() => {
+                  if (f === 'My Events' && !user) return openAuth('Sign in to see your events.');
+                  setActiveFilter(f);
+                }}
                 style={{
-                  background: activeFilter === f ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : 'rgba(245,237,224,0.04)',
-                  color: activeFilter === f ? 'var(--bone-100)' : 'var(--bone-400)',
-                  border: activeFilter === f ? '1px solid rgba(184,83,50,0.45)' : '1px solid rgba(245,237,224,0.08)',
+                  background: activeFilter === f ? 'linear-gradient(135deg, var(--burgundy), var(--burgundy-d))' : f === 'My Events' ? 'rgba(128,0,0,0.12)' : 'rgba(245,237,224,0.04)',
+                  color: activeFilter === f ? 'var(--bone-100)' : f === 'My Events' ? 'var(--bone-300)' : 'var(--bone-400)',
+                  border: activeFilter === f ? '1px solid rgba(184,83,50,0.45)' : f === 'My Events' ? '1px solid rgba(128,0,0,0.3)' : '1px solid rgba(245,237,224,0.08)',
                   borderRadius: '8px', padding: '8px 16px', cursor: 'pointer',
                   fontSize: '13px', fontFamily: 'var(--font-display)', transition: 'all 0.25s var(--ease-coal)',
                 }}
@@ -135,7 +198,43 @@ export function Events() {
       {/* events grid */}
       <section style={{ padding: '0 0 80px' }}>
         <div className="page-container">
-          {loading ? (
+          {activeFilter === 'My Events' ? (
+            myEventsLoading ? (
+              <div style={{ textAlign: 'center', padding: '80px 24px' }}>
+                <p className="mono" style={{ color: 'var(--bone-500)' }}>Loading your events…</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '48px', marginBottom: '48px' }}>
+                {/* Hosting */}
+                <div>
+                  <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '16px', fontSize: '12px' }}>Events you're hosting</p>
+                  {myHosted.length === 0 ? (
+                    <div style={{ background: 'rgba(245,237,224,0.02)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+                      <p style={{ color: 'var(--bone-400)', fontSize: '15px', marginBottom: '16px' }}>You haven't hosted any events yet.</p>
+                      <button onClick={() => navigate('/hosts/new')} className="btn-v3 primary">Host an Event →</button>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {myHosted.map((ev, i) => <EventCard key={ev.id} ev={ev} i={i} isMyEvent onNavigate={handleJoin} />)}
+                    </div>
+                  )}
+                </div>
+                {/* Attending */}
+                <div>
+                  <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '16px', fontSize: '12px' }}>Events you're attending</p>
+                  {myAttending.length === 0 ? (
+                    <div style={{ background: 'rgba(245,237,224,0.02)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
+                      <p style={{ color: 'var(--bone-400)', fontSize: '15px' }}>You haven't joined any events yet.</p>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {myAttending.map((ev, i) => <EventCard key={ev.id} ev={ev} i={i} isMyEvent={false} onNavigate={handleJoin} />)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )
+          ) : loading ? (
             <div style={{ textAlign: 'center', padding: '80px 24px' }}>
               <p className="mono" style={{ color: 'var(--bone-500)' }}>Stoking the coals…</p>
             </div>
@@ -155,48 +254,7 @@ export function Events() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
             {filtered.map((ev, i) => {
               const isMyEvent = !!user && user.id === ev.hostUserId;
-              return (
-                <motion.div
-                  key={ev.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.07 }}
-                  onClick={() => handleJoin(ev.id)}
-                  className="event-card-v3"
-                  style={{ cursor: 'pointer', gap: '14px', display: 'flex', flexDirection: 'column' }}
-                >
-                  <span className="heat-bar" aria-hidden />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <p className="mono" style={{ color: 'var(--bone-500)' }}>{ev.flag} {ev.city}</p>
-                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                      {!ev.isPublic && <span className="rank-badge" style={{ color: 'var(--bone-500)', border: '1px solid rgba(245,237,224,0.12)' }}>Private</span>}
-                      <RankBadge rank={ev.hostRank} />
-                    </div>
-                  </div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', color: 'var(--bone-100)', lineHeight: 1.3 }}>{ev.title}</h3>
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--bone-400)', fontSize: '13px' }}>
-                      <Calendar size={12} /> {ev.date} · {ev.time}
-                    </span>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: ev.guests >= ev.max - 2 ? 'var(--gold-v3)' : 'var(--bone-500)', fontSize: '13px' }}>
-                      <Users size={12} /> {ev.guests}/{ev.max}
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {ev.tags.map(t => (
-                      <span key={t} className="mono" style={{ color: 'var(--bone-500)', background: 'rgba(245,237,224,0.04)', borderRadius: '4px', padding: '3px 8px', fontSize: '10px' }}>{t}</span>
-                    ))}
-                  </div>
-                  <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(245,237,224,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--bone-400)', fontSize: '13px' }}>Hosted by <span style={{ color: 'var(--beige)' }}>{ev.host}</span></span>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleJoin(ev.id); }}
-                      className="btn-v3 primary"
-                      style={{ padding: '8px 16px', height: 'auto', fontSize: '13px' }}
-                    >{isMyEvent ? 'Manage →' : 'Join →'}</button>
-                  </div>
-                </motion.div>
-              );
+              return <EventCard key={ev.id} ev={ev} i={i} isMyEvent={isMyEvent} onNavigate={handleJoin} />;
             })}
           </div>
           )}

@@ -381,7 +381,7 @@ export function HostNew() {
                 <FormLabel label="Max participants *">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <input
-                      type="range" min={2} max={50}
+                      type="range" min={2} max={100}
                       value={maxGuests}
                       onChange={e => setMaxGuests(parseInt(e.target.value))}
                       style={{ flex: 1, accentColor: 'var(--maroon)' }}
