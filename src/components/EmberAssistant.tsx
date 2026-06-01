@@ -144,7 +144,7 @@ export function EmberAssistant() {
       <button
         aria-label="Open Ember assistant"
         onClick={() => setOpen(o => !o)}
-        style={{ position: 'fixed', left: '22px', bottom: '22px', zIndex: 9998, width: '54px', height: '54px', borderRadius: '50%', border: '1px solid rgba(228,207,179,0.18)', background: 'linear-gradient(160deg, #8a0f0f 0%, #5a0000 100%)', color: '#F5EDE0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 30px rgba(128,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08)', transition: 'transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s' }}
+        style={{ position: 'fixed', right: '22px', bottom: '22px', zIndex: 9998, width: '54px', height: '54px', borderRadius: '50%', border: '1px solid rgba(228,207,179,0.18)', background: 'linear-gradient(160deg, #8a0f0f 0%, #5a0000 100%)', color: '#F5EDE0', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 30px rgba(128,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08)', transition: 'transform 0.25s cubic-bezier(0.4,0,0.2,1), box-shadow 0.25s' }}
         onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.06)'; e.currentTarget.style.boxShadow = '0 10px 38px rgba(128,0,0,0.6)'; }}
         onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(128,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08)'; }}
       >
@@ -170,7 +170,7 @@ export function EmberAssistant() {
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             role="dialog" aria-label="Ember assistant"
-            style={{ position: 'fixed', left: '22px', bottom: '88px', zIndex: 9998, width: 'min(360px, calc(100vw - 44px))', height: 'min(520px, calc(100vh - 130px))', display: 'flex', flexDirection: 'column', background: 'rgba(14,11,12,0.92)', backdropFilter: 'blur(24px) saturate(1.4)', WebkitBackdropFilter: 'blur(24px) saturate(1.4)', border: '1px solid rgba(245,237,224,0.09)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.55)' }}
+            style={{ position: 'fixed', right: '22px', bottom: '88px', zIndex: 9998, width: 'min(360px, calc(100vw - 44px))', height: 'min(520px, calc(100vh - 130px))', display: 'flex', flexDirection: 'column', background: 'rgba(14,11,12,0.92)', backdropFilter: 'blur(24px) saturate(1.4)', WebkitBackdropFilter: 'blur(24px) saturate(1.4)', border: '1px solid rgba(245,237,224,0.09)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 24px 70px rgba(0,0,0,0.55)' }}
           >
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px 18px', borderBottom: '1px solid rgba(245,237,224,0.07)' }}>

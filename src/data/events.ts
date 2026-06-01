@@ -287,11 +287,18 @@ export async function joinEvent(eventId: string, user: User): Promise<{ error: s
 }
 
 export async function leaveEvent(eventId: string, userId: string): Promise<{ error: string | null }> {
-  const { error } = await supabase
+  // Remove attendee record
+  const { error: e1 } = await supabase
     .from('event_attendees')
     .delete()
     .eq('event_id', eventId).eq('user_id', userId);
-  return { error: error ? error.message : null };
+  if (e1) return { error: e1.message };
+  // Remove their contributions so the menu stays clean
+  await supabase
+    .from('contributions')
+    .delete()
+    .eq('event_id', eventId).eq('user_id', userId);
+  return { error: null };
 }
 
 export async function addContribution(

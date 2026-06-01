@@ -34,6 +34,7 @@ interface AuthCtx {
   signOut: () => Promise<void>;
   updateUser: (patch: Partial<Omit<User, 'id'>>) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<{ error: string | null }>;
 }
 
 const Ctx = createContext<AuthCtx | null>(null);
@@ -178,10 +179,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadProfile(user.id, user.email);
   };
 
+  // Sends a Supabase password-reset email. The link returns the user to
+  // /account with a recovery session so they can set a new password. We never
+  // reveal whether the address is registered — the caller shows a neutral
+  // "if this email exists…" message regardless of the result.
+  const requestPasswordReset = async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/account?recovery=1`,
+    });
+    return { error: error ? error.message : null };
+  };
+
   return (
     <Ctx.Provider value={{
       user, loading, openAuth, closeAuth, isOpen, pendingReason,
       signUp, signInWithPassword, signInWithGoogle, signOut, updateUser, refreshProfile,
+      requestPasswordReset,
     }}>
       {children}
     </Ctx.Provider>

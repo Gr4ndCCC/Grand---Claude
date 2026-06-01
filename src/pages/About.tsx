@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { Flame, Users, Globe, Award } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
+import { supabase } from '../lib/supabase';
 
 const PILLARS = [
   { icon: Flame,  title: 'Fire',         body: 'Real charcoal. Real wood. Real heat. Anyone can grill — only some understand fire.' },
@@ -25,6 +27,18 @@ function FadeUp({ children, delay = 0, style }: { children: React.ReactNode; del
 
 export function About() {
   const navigate = useNavigate();
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [eventCount, setEventCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('events').select('*', { count: 'exact', head: true }),
+    ]).then(([membersRes, eventsRes]) => {
+      setMemberCount(membersRes.count ?? null);
+      setEventCount(eventsRes.count ?? null);
+    });
+  }, []);
 
   return (
     <div style={{ color: 'var(--bone-100)', minHeight: '100vh', overflowX: 'hidden' }}>
@@ -92,11 +106,10 @@ export function About() {
         <div className="page-container">
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '32px' }}>
             {[
-              { value: '40+',     label: 'Countries' },
-              { value: '3,200+',  label: 'Verified members' },
-              { value: '12,000+', label: 'Events hosted' },
-              { value: '4',       label: 'Board tiers' },
-              { value: '1',       label: 'Annual Summit' },
+              { value: memberCount === null ? '—' : String(memberCount), label: 'Verified members' },
+              { value: eventCount === null ? '—' : String(eventCount),   label: 'Events hosted' },
+              { value: '4',                                               label: 'Board tiers' },
+              { value: '1',                                               label: 'Annual Summit' },
             ].map(({ value, label }, i) => (
               <FadeUp key={label} delay={i * 0.07} style={{ textAlign: 'center' }}>
                 <p style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 6vw, 80px)', color: 'var(--beige)', lineHeight: 1 }}>{value}</p>
