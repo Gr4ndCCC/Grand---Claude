@@ -122,6 +122,8 @@ export default async function handler(req, res) {
           email,
           name,
           custom: {
+            // user_id lets the webhook unlock the right Supabase account.
+            user_id: String(body.userId || '').trim() || undefined,
             email,
             name,
             plan,

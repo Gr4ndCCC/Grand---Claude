@@ -575,8 +575,8 @@ export function Account() {
     const paid = params.get('vault') === 'success' || params.get('checkout') === 'success';
     if (!paid) return;
 
-    // Membership is unlocked server-side (Stripe sync + webhook). Pull the fresh
-    // profile, retrying briefly in case the webhook is still in flight.
+    // Membership is unlocked server-side by the Lemon Squeezy webhook. Pull the
+    // fresh profile, retrying briefly in case the webhook is still in flight.
     sessionStorage.removeItem('ember_pending_plan');
     setTab('billing');
     let tries = 0;

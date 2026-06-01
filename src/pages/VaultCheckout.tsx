@@ -1,11 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Check, Flame, Shield, Lock } from 'lucide-react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
-import { loadStripe, STRIPE_PK, PLAN_AMOUNTS, PLAN_CURRENCY, type StripeElements } from '../lib/stripe';
+import { getCheckoutUrl } from '../config/checkout';
+
+declare global {
+  interface Window {
+    LemonSqueezy?: { Url: { Open: (url: string) => void }; Setup?: (opts: Record<string, unknown>) => void };
+    createLemonSqueezy?: () => void;
+  }
+}
 
 const PERKS: { title: string; desc: string }[] = [
   { title: 'The full recipe vault',          desc: 'Every pitmaster recipe. Unlocked. Forever.' },
@@ -28,23 +35,8 @@ function FlameMark() {
   );
 }
 
-const STRIPE_APPEARANCE = {
-  theme: 'night',
-  labels: 'floating',
-  variables: {
-    colorPrimary: '#800000',
-    colorBackground: '#121011',
-    colorText: '#F5EFE6',
-    colorTextSecondary: '#8A8A8A',
-    colorDanger: '#ef4444',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    borderRadius: '10px',
-    spacingUnit: '4px',
-  },
-};
-
 export function VaultCheckout() {
-  const { user, openAuth, refreshProfile } = useAuth();
+  const { user, openAuth } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialPlan = (params.get('plan') === 'monthly' ? 'monthly' : 'annual') as 'monthly' | 'annual';
@@ -52,54 +44,20 @@ export function VaultCheckout() {
   const [selected, setSelected]     = useState<'monthly' | 'annual'>(initialPlan);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg]     = useState('');
-  const [stripeReady, setStripeReady] = useState(false);
-  const stripeMissing = !STRIPE_PK;
 
-  const stripeRef   = useRef<Awaited<ReturnType<typeof loadStripe>>>(null);
-  const elementsRef = useRef<StripeElements | null>(null);
-  const selectedRef = useRef(selected);
+  const checkoutUrl   = getCheckoutUrl(selected);
+  const checkoutReady = !!checkoutUrl;
+
+  // Boot the Lemon Squeezy overlay SDK (loaded from index.html) on mount so the
+  // checkout opens as a modal over this page instead of navigating away.
+  useEffect(() => {
+    if (typeof window.createLemonSqueezy === 'function') window.createLemonSqueezy();
+  }, []);
 
   useEffect(() => {
     const p = params.get('plan');
     if (p === 'monthly' || p === 'annual') setSelected(p);
   }, [params]);
-
-  // Mount the Stripe Payment Element once the signed-in user is known.
-  useEffect(() => {
-    if (!user || stripeMissing) return;
-    let cancelled = false;
-    let paymentEl: { unmount: () => void } | null = null;
-
-    loadStripe().then(stripe => {
-      if (cancelled || !stripe) return;
-      stripeRef.current = stripe;
-      const elements = stripe.elements({
-        mode: 'subscription',
-        amount: PLAN_AMOUNTS[selectedRef.current],
-        currency: PLAN_CURRENCY,
-        appearance: STRIPE_APPEARANCE,
-      });
-      elementsRef.current = elements;
-      const pe = elements.create('payment', { layout: 'tabs' });
-      const node = document.getElementById('ember-payment-element');
-      if (node) { pe.mount(node); paymentEl = pe; setStripeReady(true); }
-    });
-
-    return () => {
-      cancelled = true;
-      try { paymentEl?.unmount(); } catch { /* noop */ }
-      elementsRef.current = null;
-      stripeRef.current = null;
-    };
-  }, [user, stripeMissing]);
-
-  // Keep the element's amount in sync when the plan toggles.
-  useEffect(() => {
-    selectedRef.current = selected;
-    if (stripeReady && elementsRef.current) {
-      try { elementsRef.current.update({ amount: PLAN_AMOUNTS[selected], currency: PLAN_CURRENCY }); } catch { /* noop */ }
-    }
-  }, [selected, stripeReady]);
 
   if (!user) {
     return (
@@ -130,59 +88,38 @@ export function VaultCheckout() {
   const price        = selected === 'annual' ? '€99' : '€15';
   const priceNum     = selected === 'annual' ? '€99.00' : '€15.00';
   const billingLabel = selected === 'annual' ? 'Billed annually' : 'Billed monthly';
-  const canPay       = stripeReady && !stripeMissing && !isSubmitting;
+  const canPay       = checkoutReady && !isSubmitting;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleCheckout = (e: React.FormEvent) => {
     e.preventDefault();
-    const stripe = stripeRef.current;
-    const elements = elementsRef.current;
-    if (!stripe || !elements || isSubmitting) return;
-
+    if (!checkoutUrl || isSubmitting) return;
     setIsSubmitting(true);
     setErrorMsg('');
 
-    // 1. Validate the card / payment details in the element.
-    const { error: submitError } = await elements.submit();
-    if (submitError) {
-      setErrorMsg(submitError.message || 'Please check your payment details.');
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      // 2. Create the subscription server-side, get the payment secret.
-      const r = await fetch('/api/stripe/subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: selected, email: user.email, name: user.name, userId: user.id }),
-      });
-      const data = await r.json();
-      if (!r.ok || !data.clientSecret) {
-        setErrorMsg(data.error || 'Could not start checkout. Please try again.');
-        setIsSubmitting(false);
-        return;
-      }
-      sessionStorage.setItem('ember_pending_plan', selected);
+      // Pre-fill the buyer and attach the Supabase user id so the webhook can
+      // unlock the right account server-side. success_url returns the buyer to
+      // their account, where membership (set by the webhook) is picked up.
+      const url = new URL(checkoutUrl);
+      url.searchParams.set('embed', '1');
+      url.searchParams.set('checkout[email]', user.email);
+      url.searchParams.set('checkout[name]', user.name);
+      url.searchParams.set('checkout[custom][user_id]', user.id);
+      url.searchParams.set('checkout[custom][plan]', selected);
+      url.searchParams.set('checkout[success_url]', `${window.location.origin}/account?checkout=success&plan=${selected}`);
+      const finalUrl = url.toString();
 
-      // 3. Confirm the payment inline — no redirect unless the method requires it.
-      const { error } = await stripe.confirmPayment({
-        elements,
-        clientSecret: data.clientSecret,
-        confirmParams: { return_url: `${window.location.origin}/account?vault=success&plan=${selected}` },
-        redirect: 'if_required',
-      });
-      if (error) {
-        setErrorMsg(error.message || 'Payment failed. Please try another card.');
+      if (window.LemonSqueezy?.Url?.Open) {
+        window.LemonSqueezy.Url.Open(finalUrl);
+        // The overlay stays open; reset the button so they can retry if they close it.
+        setTimeout(() => setIsSubmitting(false), 1200);
+      } else {
+        // SDK not ready yet — open the hosted checkout as a graceful fallback.
+        window.open(finalUrl, '_blank', 'noopener');
         setIsSubmitting(false);
-        return;
       }
-
-      // 4. Paid. Verify + unlock server-side, refresh the profile, go to account.
-      try { await fetch(`/api/stripe/subscription?subscription_id=${encodeURIComponent(data.subscriptionId)}`); } catch { /* webhook will catch up */ }
-      await refreshProfile();
-      navigate(`/account?vault=success&plan=${selected}`);
     } catch {
-      setErrorMsg('Network error. Please try again.');
+      setErrorMsg('Could not open checkout. Please try again.');
       setIsSubmitting(false);
     }
   };
@@ -421,40 +358,30 @@ export function VaultCheckout() {
                   </div>
                 </div>
 
-                {/* Payment form — real Stripe Payment Element, inline on this page */}
+                {/* Checkout — opens the secure Lemon Squeezy modal on this page */}
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 24px 24px' }}>
-                  <p className="mono" style={{ color: '#333', marginBottom: '14px', fontSize: '10px' }}>Payment details</p>
+                  <form onSubmit={handleCheckout}>
+                    <p style={{ color: '#8A8A8A', fontSize: '12.5px', lineHeight: 1.55, marginBottom: '14px' }}>
+                      You'll complete payment in a secure window right here — card, Apple&nbsp;Pay, Google&nbsp;Pay and PayPal supported. No account leaves Ember.
+                    </p>
 
-                  <form onSubmit={handleSubmit}>
-                    {/* Stripe mounts card + Apple Pay / Google Pay / Link here */}
-                    <div id="ember-payment-element" style={{ minHeight: stripeMissing ? 0 : '220px' }} />
-
-                    {/* Loading skeleton while Stripe.js boots */}
-                    {!stripeReady && !stripeMissing && (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '32px 0', color: '#5A5A5A' }}>
-                        <span className="vault-spin" style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.15)', borderTopColor: 'var(--maroon)', borderRadius: '50%' }} />
-                        <span style={{ fontSize: '12px', fontFamily: 'JetBrains Mono, monospace' }}>Loading secure payment…</span>
-                      </div>
-                    )}
-
-                    {/* Not configured warning */}
-                    {stripeMissing && (
+                    {/* Not configured warning (only if no checkout URL is set) */}
+                    {!checkoutReady && (
                       <div style={{ background: 'rgba(234,179,8,0.07)', border: '1px solid rgba(234,179,8,0.22)', borderRadius: '8px', padding: '12px 14px', marginBottom: '12px' }}>
                         <p style={{ color: '#ca9a06', fontSize: '11px', lineHeight: 1.6 }}>
-                          Payments aren't live yet. Add your{' '}
-                          <code style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '3px', padding: '1px 4px', fontFamily: 'JetBrains Mono, monospace' }}>
-                            VITE_STRIPE_PUBLISHABLE_KEY
-                          </code>{' '}
-                          in Vercel and redeploy.
+                          Checkout isn't configured yet. Add your Lemon Squeezy checkout URL in
+                          <code style={{ background: 'rgba(255,255,255,0.07)', borderRadius: '3px', padding: '1px 4px', fontFamily: 'JetBrains Mono, monospace', margin: '0 3px' }}>
+                            src/config/checkout.ts
+                          </code>.
                         </p>
                       </div>
                     )}
 
-                    {/* Payment error */}
+                    {/* Error */}
                     <AnimatePresence>
                       {errorMsg && (
                         <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '8px', padding: '10px 12px', marginTop: '12px' }}
+                          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.28)', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px' }}
                         >
                           <p style={{ color: '#f87171', fontSize: '12px', lineHeight: 1.5 }}>{errorMsg}</p>
                         </motion.div>
@@ -467,7 +394,7 @@ export function VaultCheckout() {
                       disabled={!canPay}
                       className="vault-submit-btn"
                       style={{
-                        width: '100%', position: 'relative', overflow: 'hidden', marginTop: '16px',
+                        width: '100%', position: 'relative', overflow: 'hidden',
                         background: canPay ? 'var(--maroon)' : '#1E1E1E',
                         color: canPay ? '#fff' : '#3A3A3A',
                         border: 'none', borderRadius: '12px', padding: '15px 20px',
@@ -485,7 +412,7 @@ export function VaultCheckout() {
                         <span style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'vault-shimmer 1s linear infinite', borderRadius: '12px' }} />
                       )}
                       {!isSubmitting && <Lock size={13} />}
-                      {isSubmitting ? 'Processing payment…' : `Pay ${priceNum} — Join the Vault`}
+                      {isSubmitting ? 'Opening secure checkout…' : `Pay ${priceNum} — Join the Vault`}
                     </button>
                   </form>
 
@@ -493,7 +420,7 @@ export function VaultCheckout() {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '14px' }}>
                     <Shield size={10} style={{ color: '#2E2E2E' }} />
                     <p style={{ color: '#2E2E2E', fontSize: '9px', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.10em', textTransform: 'uppercase' }}>
-                      256-bit SSL · Powered by Stripe
+                      256-bit SSL · Powered by Lemon Squeezy
                     </p>
                   </div>
                 </div>
@@ -530,8 +457,6 @@ export function VaultCheckout() {
           0%   { background-position: -200% center; }
           100% { background-position:  200% center; }
         }
-        .vault-spin { animation: vault-spin 0.7s linear infinite; }
-        @keyframes vault-spin { to { transform: rotate(360deg); } }
         .vault-submit-btn:focus-visible {
           outline: 2px solid rgba(128,0,0,0.6);
           outline-offset: 2px;
