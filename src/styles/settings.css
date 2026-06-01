@@ -1,13 +1,18 @@
-/* ── Theme: light mode (invert + hue-rotate trick) ─────────── */
+/* ── Theme: light mode ─────────────────────────────────────
+   The app is authored in dark tones, so light mode re-tones the page with a
+   filter rather than a full token rewrite. Plain invert turns the page stark
+   white and the burgundy into pink; the added sepia/brightness/contrast warms
+   the whites toward Ember beige and pulls accents back toward burgundy so it
+   reads warm and editorial, not a generic white SaaS theme. */
 [data-ember-theme="light"] {
-  filter: invert(1) hue-rotate(180deg);
+  filter: invert(0.92) hue-rotate(180deg) sepia(0.28) saturate(1.05) brightness(1.02) contrast(0.96);
 }
 /* keep images / videos natural */
 [data-ember-theme="light"] img,
 [data-ember-theme="light"] video,
 [data-ember-theme="light"] canvas,
 [data-ember-theme="light"] .firegraph-container {
-  filter: invert(1) hue-rotate(180deg);
+  filter: invert(1) hue-rotate(180deg) sepia(0.28) saturate(1.05) brightness(0.98) contrast(1.04);
 }
 
 /* ── Font size ───────────────────────────────────────────── */

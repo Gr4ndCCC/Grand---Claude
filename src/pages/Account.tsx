@@ -37,14 +37,16 @@ function initials(name: string) {
   return name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
 }
 
-function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <button
-      onClick={() => onChange(!checked)}
+      onClick={() => !disabled && onChange(!checked)}
+      disabled={disabled}
       style={{
         width: '44px', height: '24px', borderRadius: '12px', padding: '2px',
         background: checked ? 'var(--maroon)' : 'rgba(255,255,255,0.12)',
-        border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+        border: 'none', cursor: disabled ? 'wait' : 'pointer', transition: 'background 0.2s',
+        opacity: disabled ? 0.6 : 1,
         display: 'inline-flex', alignItems: 'center', flexShrink: 0,
       }}
     >
@@ -357,31 +359,28 @@ function SettingsTab() {
 }
 
 function GeneralTab() {
-  const [language,   setLanguage]   = useState('English');
-  const [timezone,   setTimezone]   = useState('UTC+0 London');
-  const [tempUnit,   setTempUnit]   = useState<'C' | 'F'>('C');
-  const [dateFormat, setDateFormat] = useState('DD/MM/YYYY');
+  const { language, timezone, tempUnit, dateFormat, set } = useSettings();
   return (
     <SCard title="General" subtitle="Regional and display preferences">
       <Row label="Language" desc="Interface language across the platform">
-        <select value={language} onChange={e => setLanguage(e.target.value)} style={selectStyle}>
+        <select value={language} onChange={e => set({ language: e.target.value })} style={selectStyle}>
           {['English', 'French', 'Spanish', 'German', 'Portuguese', 'Italian', 'Dutch'].map(l => (
             <option key={l}>{l}</option>
           ))}
         </select>
       </Row>
       <Row label="Timezone" desc="Used for event times and reminders">
-        <select value={timezone} onChange={e => setTimezone(e.target.value)} style={selectStyle}>
+        <select value={timezone} onChange={e => set({ timezone: e.target.value })} style={selectStyle}>
           {['UTC-5 New York', 'UTC+0 London', 'UTC+1 Amsterdam', 'UTC+3 Istanbul', 'UTC+9 Tokyo', 'UTC+10 Sydney', 'UTC-3 São Paulo'].map(tz => (
             <option key={tz}>{tz}</option>
           ))}
         </select>
       </Row>
       <Row label="Temperature unit" desc="Shown on event weather cards">
-        <SegBtn options={['C', 'F'] as const} value={tempUnit} onChange={setTempUnit} />
+        <SegBtn options={['C', 'F'] as const} value={tempUnit} onChange={v => set({ tempUnit: v })} />
       </Row>
       <Row label="Date format">
-        <select value={dateFormat} onChange={e => setDateFormat(e.target.value)} style={selectStyle}>
+        <select value={dateFormat} onChange={e => set({ dateFormat: e.target.value })} style={selectStyle}>
           {['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD'].map(f => <option key={f}>{f}</option>)}
         </select>
       </Row>
@@ -390,31 +389,36 @@ function GeneralTab() {
 }
 
 function PersonalizationTab() {
-  const [accent,          setAccent]          = useState('#800000');
-  const [defaultView,     setDefaultView]     = useState<'grid' | 'list'>('grid');
-  const [emojiReactions,  setEmojiReactions]  = useState(true);
-  const [recommendations, setRecommendations] = useState(true);
+  const { accent, defaultView, emojiReactions, recommendations, set } = useSettings();
 
-  const ACCENTS = ['#800000', '#1e3a5f', '#1a4a2e', '#3d2a4a', '#4a3a1a', '#2e2e2e'];
+  // label → swatch. Burgundy is the Ember default and leads the row.
+  const ACCENTS: { value: string; label: string }[] = [
+    { value: '#800000', label: 'Burgundy' },
+    { value: '#1e3a5f', label: 'Midnight' },
+    { value: '#1a4a2e', label: 'Pine' },
+    { value: '#3d2a4a', label: 'Plum' },
+    { value: '#4a3a1a', label: 'Bronze' },
+    { value: '#2e2e2e', label: 'Charcoal' },
+  ];
   return (
     <SCard title="Personalization" subtitle="Tailor the Ember experience to you">
       <Row label="Accent colour" desc="Highlights throughout the interface">
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           {ACCENTS.map(c => (
-            <button key={c} onClick={() => setAccent(c)}
-              style={{ width: '26px', height: '26px', borderRadius: '50%', background: c, border: accent === c ? '2px solid #fff' : '2px solid transparent', cursor: 'pointer', outline: 'none', flexShrink: 0 }}
+            <button key={c.value} onClick={() => set({ accent: c.value })} title={c.label} aria-label={c.label}
+              style={{ width: '26px', height: '26px', borderRadius: '50%', background: c.value, border: accent.toLowerCase() === c.value.toLowerCase() ? '2px solid #fff' : '2px solid transparent', boxShadow: accent.toLowerCase() === c.value.toLowerCase() ? '0 0 0 2px var(--maroon)' : 'none', cursor: 'pointer', outline: 'none', flexShrink: 0, transition: 'box-shadow 0.2s, border-color 0.2s' }}
             />
           ))}
         </div>
       </Row>
       <Row label="Default events view" desc="How events are displayed when you first visit">
-        <SegBtn options={['grid', 'list'] as const} value={defaultView} onChange={setDefaultView} />
+        <SegBtn options={['grid', 'list'] as const} value={defaultView} onChange={v => set({ defaultView: v })} />
       </Row>
       <Row label="Emoji reactions" desc="React to menu items and chat messages with emoji">
-        <Toggle checked={emojiReactions} onChange={setEmojiReactions} />
+        <Toggle checked={emojiReactions} onChange={v => set({ emojiReactions: v })} />
       </Row>
       <Row label="Event recommendations" desc="Suggested events based on your history and location">
-        <Toggle checked={recommendations} onChange={setRecommendations} />
+        <Toggle checked={recommendations} onChange={v => set({ recommendations: v })} />
       </Row>
     </SCard>
   );
@@ -460,17 +464,55 @@ function NotificationsTab() {
 }
 
 function SpeechTab() {
-  const [voiceCommands, setVoiceCommands] = useState(false);
-  const [speechLang,    setSpeechLang]    = useState('English');
-  const [speechToText,  setSpeechToText]  = useState(false);
+  const { voiceCommands, speechLang, speechToText, set } = useSettings();
+  const [micError, setMicError] = useState('');
+  const [busy, setBusy] = useState<'voice' | 'stt' | null>(null);
+
+  // Enabling either voice feature needs real microphone permission. Disabling
+  // never prompts. Speech recognition itself isn't available in every browser.
+  const requestMic = async (): Promise<boolean> => {
+    setMicError('');
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMicError('Your browser does not support microphone access.');
+      return false;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop()); // we only needed the permission grant
+      return true;
+    } catch {
+      setMicError('Microphone permission was denied. Enable it in your browser settings to use voice features.');
+      return false;
+    }
+  };
+
+  const toggleVoice = async (next: boolean) => {
+    if (!next) { set({ voiceCommands: false }); return; }
+    setBusy('voice');
+    const ok = await requestMic();
+    setBusy(null);
+    if (ok) set({ voiceCommands: true });
+  };
+
+  const toggleStt = async (next: boolean) => {
+    if (!next) { set({ speechToText: false }); return; }
+    setBusy('stt');
+    const ok = await requestMic();
+    setBusy(null);
+    if (ok) set({ speechToText: true });
+  };
+
+  const sttSupported = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
   return (
     <SCard title="Speech" subtitle="Voice and audio input preferences">
       <Row label="Voice commands" desc="Navigate and RSVP using voice (requires microphone permission)">
-        <Toggle checked={voiceCommands} onChange={setVoiceCommands} />
+        <Toggle checked={voiceCommands} onChange={toggleVoice} disabled={busy === 'voice'} />
       </Row>
       <Row label="Speech language" desc="Language used for voice recognition">
-        <select value={speechLang} onChange={e => setSpeechLang(e.target.value)}
-          style={{ ...selectStyle, opacity: voiceCommands ? 1 : 0.4 }} disabled={!voiceCommands}
+        <select value={speechLang} onChange={e => set({ speechLang: e.target.value })}
+          style={{ ...selectStyle, opacity: voiceCommands || speechToText ? 1 : 0.4 }} disabled={!voiceCommands && !speechToText}
         >
           {['English', 'French', 'Spanish', 'German', 'Portuguese', 'Japanese', 'Arabic'].map(l => (
             <option key={l}>{l}</option>
@@ -478,8 +520,16 @@ function SpeechTab() {
         </select>
       </Row>
       <Row label="Speech-to-text in chat" desc="Dictate chat messages using your microphone">
-        <Toggle checked={speechToText} onChange={setSpeechToText} />
+        <Toggle checked={speechToText} onChange={toggleStt} disabled={busy === 'stt'} />
       </Row>
+      {micError && (
+        <p style={{ color: '#f87171', fontSize: '12px', lineHeight: 1.5, marginTop: '6px' }}>{micError}</p>
+      )}
+      {(voiceCommands || speechToText) && !sttSupported && (
+        <p style={{ color: '#A09070', fontSize: '12px', lineHeight: 1.5, marginTop: '6px' }}>
+          Heads up: this browser has limited speech-recognition support, so dictation may not work everywhere.
+        </p>
+      )}
     </SCard>
   );
 }
