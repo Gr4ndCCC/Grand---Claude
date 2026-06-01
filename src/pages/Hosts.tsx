@@ -1,8 +1,16 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Nav } from '../components/Nav';
 import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
+import { supabase } from '../lib/supabase';
+
+interface HostStats {
+  totalEvents: number | null;
+  uniqueCities: number | null;
+  totalHosts: number | null;
+}
 
 const HOST_BENEFITS = [
   { title: 'Global discovery',         body: 'Your event appears on the live map. Members nearby find you automatically.' },
@@ -32,6 +40,29 @@ function FadeUp({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 export function Hosts() {
   const navigate = useNavigate();
   const { user, openAuth } = useAuth();
+  const [stats, setStats] = useState<HostStats>({ totalEvents: null, uniqueCities: null, totalHosts: null });
+
+  useEffect(() => {
+    async function loadStats() {
+      const [eventsRes, citiesRes, hostsRes] = await Promise.all([
+        supabase.from('events').select('*', { count: 'exact', head: true }),
+        supabase.from('events').select('city'),
+        supabase.from('events').select('host_user_id'),
+      ]);
+      const uniqueCities = citiesRes.data
+        ? new Set((citiesRes.data as { city: string | null }[]).map(r => r.city).filter(Boolean)).size
+        : null;
+      const uniqueHosts = hostsRes.data
+        ? new Set((hostsRes.data as { host_user_id: string | null }[]).map(r => r.host_user_id).filter(Boolean)).size
+        : null;
+      setStats({
+        totalEvents: eventsRes.count ?? null,
+        uniqueCities,
+        totalHosts: uniqueHosts,
+      });
+    }
+    loadStats();
+  }, []);
 
   const handleCreate = () => {
     if (!user) return openAuth('Sign in to host an event.');
@@ -77,9 +108,9 @@ export function Hosts() {
               <div className="rank-card-v3" style={{ padding: '36px' }}>
                 <p className="mono" style={{ color: 'var(--bone-500)', marginBottom: '24px' }}>Host stats</p>
                 {[
-                  { v: '15',   l: 'Active events this week' },
-                  { v: '40+',  l: 'Countries with Ember hosts' },
-                  { v: '94%',  l: 'Events with full menus claimed' },
+                  { v: stats.totalEvents === null ? '—' : String(stats.totalEvents), l: 'Total events on Ember' },
+                  { v: stats.uniqueCities === null ? '—' : String(stats.uniqueCities), l: 'Cities with Ember events' },
+                  { v: stats.totalHosts === null ? '—' : String(stats.totalHosts), l: 'Unique hosts on the platform' },
                   { v: 'Free', l: 'To create and host any event' },
                 ].map(({ v, l }) => (
                   <div key={l} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid rgba(245,237,224,0.06)' }}>
