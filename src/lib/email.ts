@@ -1,10 +1,21 @@
+import { supabase } from './supabase';
+
 const API = (import.meta.env.VITE_EMAIL_API_URL ?? '/api').replace(/\/$/, '');
+
+async function getToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
 
 async function post(path: string, body: Record<string, unknown>) {
   if (!API) return;
+  const token = await getToken();
   fetch(`${API}${path}`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify(body),
   }).catch(() => {});
 }
