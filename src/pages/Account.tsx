@@ -326,15 +326,39 @@ function EventsTab() {
 }
 
 function SettingsTab() {
-  const { signOut } = useAuth();
+  const { signOut, user, requestPasswordReset } = useAuth();
   const navigate = useNavigate();
+  const [resetState, setResetState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+
+  const sendReset = async () => {
+    if (!user?.email || resetState === 'sending') return;
+    setResetState('sending');
+    const { error } = await requestPasswordReset(user.email);
+    // Neutral outcome on success — don't reveal account existence. Only surface
+    // a hard failure (e.g. network/provider error) so the user can retry.
+    setResetState(error ? 'error' : 'sent');
+  };
+
   return (
     <>
       <SCard title="Security">
         <Row label="Change password" desc="You'll receive a reset link by email">
-          <button style={{ background: 'rgba(255,255,255,0.06)', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}>
-            Send reset link
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+            <button onClick={sendReset} disabled={resetState === 'sending' || resetState === 'sent'}
+              style={{ background: 'rgba(255,255,255,0.06)', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '7px 14px', cursor: resetState === 'sending' ? 'wait' : (resetState === 'sent' ? 'default' : 'pointer'), fontSize: '12px', fontFamily: 'inherit', opacity: resetState === 'sending' ? 0.6 : 1 }}>
+              {resetState === 'sending' ? 'Sending…' : resetState === 'sent' ? 'Link sent ✓' : 'Send reset link'}
+            </button>
+            {resetState === 'sent' && (
+              <p style={{ color: '#8A9A6A', fontSize: '11px', maxWidth: '220px', textAlign: 'right', lineHeight: 1.5 }}>
+                If this email is registered, a reset link has been sent. Check your inbox.
+              </p>
+            )}
+            {resetState === 'error' && (
+              <p style={{ color: '#f87171', fontSize: '11px', maxWidth: '220px', textAlign: 'right', lineHeight: 1.5 }}>
+                Couldn't send the link right now. Please try again in a moment.
+              </p>
+            )}
+          </div>
         </Row>
         <Row label="Two-factor authentication" desc="Add an extra layer of security to your account">
           <button style={{ background: 'rgba(255,255,255,0.06)', color: '#A0A0A0', border: '1px solid rgba(255,255,255,0.10)', borderRadius: '8px', padding: '7px 14px', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }}>
