@@ -9,7 +9,7 @@ const TIERS = [
     body: "Where every host begins. The fire is lit. The reputation is yours to build." },
   { tier: 'Iron',   color: '#6B7280', sub: 'Reliable. Repeatable.',
     req: ['5+ events hosted', '4.5★ average rating', 'No event cancelled'],
-    body: "Iron means the brotherhood can count on you. Hosts here run consistent events." },
+    body: "Iron means the community can count on you. Hosts here run consistent events." },
   { tier: 'Gold',   color: '#B8924A', sub: 'Sought after.',
     req: ['20+ events hosted', '4.8★ average rating', 'Vault contributor', 'Mentor an Ember'],
     body: "Gold hosts attract a regional crowd. Their events fill in hours, not days." },

@@ -93,11 +93,11 @@ async function liveReply(input: string, userId: string | null): Promise<string> 
   if (/(host|create|start).*(event|bbq|grill)|how do i host/.test(q))
     return 'To host: go to the Events page → Create Event, set a location, date, theme and capacity, then publish. Hosting is always free.';
   if (/(vault|membership|subscribe|join vault)/.test(q))
-    return 'The Vault unlocks exclusive recipes, live masterclasses, the Brotherhood Network, The Board, partner deals, Council voting, and Annual Summit access. €15/mo or €99/yr.';
+    return 'The Vault unlocks exclusive recipes, live masterclasses, the Ember Network, The Board, partner deals, Council voting, and Annual Summit access. €15/mo or €99/yr.';
   if (/(private|request|invite|approve)/.test(q))
     return "Private events require host approval. Tap 'Request to Join' — once accepted, the full address is revealed.";
   if (/(summit|annual summit)/.test(q))
-    return 'The Annual Summit is one city, one weekend — the whole brotherhood. Location revealed exclusively to Vault members.';
+    return 'The Annual Summit is one city, one weekend — the whole community. Location revealed exclusively to Vault members.';
   if (/(rank|tier|board|iron|gold|legend|platinum|ember rank)/.test(q))
     return 'The Board has 5 tiers — Ember (0-4 events), Iron (5-14), Gold (15-29), Platinum (30-49), Legend (50+). Rank is based on events you\'ve hosted.';
   if (/(contact|support|help|email|problem|issue)/.test(q))

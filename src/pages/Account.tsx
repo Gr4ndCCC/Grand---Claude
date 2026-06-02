@@ -125,7 +125,7 @@ function ProfileTab() {
   };
   return (
     <>
-      <SCard title="Your identity" subtitle="How the brotherhood sees you">
+      <SCard title="Your identity" subtitle="How the community sees you">
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px', marginBottom: '20px' }}>
           <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--maroon)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '18px', color: '#fff', flexShrink: 0 }}>
             {initials(user.name)}
@@ -157,7 +157,7 @@ function ProfileTab() {
               <Shield size={18} style={{ color: 'var(--maroon)', flexShrink: 0 }} />
               <div>
                 <p style={{ color: '#fff', fontSize: '14px', marginBottom: '3px' }}>Verify your identity</p>
-                <p style={{ color: '#666', fontSize: '12px' }}>Required for Vault access and Brotherhood Network features.</p>
+                <p style={{ color: '#666', fontSize: '12px' }}>Required for Vault access and Ember Network features.</p>
               </div>
             </div>
             <button onClick={() => navigate('/verify')}

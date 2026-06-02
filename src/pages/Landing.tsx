@@ -72,7 +72,7 @@ const TESTIMONIALS = [
 const VAULT_FEATURES = [
   { title: 'Recipes',             body: 'Member-only. Not on any food blog.' },
   { title: 'Knowledge',            body: 'Live masterclasses from real gatherings.' },
-  { title: 'Brotherhood Network',  body: 'Verified members worldwide.' },
+  { title: 'Ember Network',  body: 'Verified members worldwide.' },
   { title: 'The Board',            body: 'Four tiers. Earned through craft.' },
   { title: 'Partners',             body: 'Premium suppliers, exclusive deals.' },
   { title: 'The Council',          body: 'Vote on platform direction.' },
@@ -428,7 +428,7 @@ export function Landing() {
                 transition={{ duration: 0.8 }}
               >
                 <span className="section-label" style={{ color: 'var(--burgundy)', borderBottomColor: 'rgba(128,0,0,0.4)' }}>
-                  The global BBQ brotherhood
+                  The global BBQ hub
                 </span>
               </motion.div>
 
@@ -444,6 +444,7 @@ export function Landing() {
                   letterSpacing: '-0.04em',
                   color: 'var(--bone-100)',
                   textShadow: '0 0 40px rgba(184,83,50,0.18)',
+                  paddingBottom: '0.18em',
                 }}
               >
                 The world<br />grills.<br />
@@ -466,10 +467,10 @@ export function Landing() {
                 transition={{ delay: 0.35, duration: 0.7 }}
                 style={{ marginTop: '40px', display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}
               >
-                <button className="btn-v3 primary lg" onClick={handleJoinEvent}>
+                <button className="btn-v3 ghost lg" onClick={handleJoinEvent}>
                   Find events near you
                 </button>
-                <button className="btn-v3 ghost lg" onClick={handleJoinVault}>
+                <button className="btn-v3 primary lg" onClick={handleJoinVault}>
                   Join the Vault
                 </button>
               </motion.div>
@@ -729,7 +730,7 @@ export function Landing() {
               </h2>
               <p style={{ color: 'var(--bone-400)', lineHeight: 1.7, fontSize: '18px', maxWidth: '540px' }}>
                 Exclusive recipes, live masterclasses, The Board certification,
-                Brotherhood Network, vetted partner deals, The Council, and Annual
+                Ember Network, vetted partner deals, The Council, and Annual
                 Summit access. Everything the grill deserves.
               </p>
 
@@ -772,13 +773,13 @@ export function Landing() {
         </div>
       </section>
 
-      {/* ── FROM THE BROTHERHOOD ──────────────────────────────── */}
+      {/* ── FROM THE COMMUNITY ──────────────────────────────── */}
       <section className="v3-section" style={{ position: 'relative', padding: '120px 0' }}>
         <div className="page-container">
           <FadeUp>
-            <div className="section-label">From the Brotherhood</div>
+            <div className="section-label">From the community</div>
             <h2 style={{ fontSize: 'clamp(42px, 5.5vw, 80px)', color: 'var(--bone-100)', marginBottom: '0' }}>
-              Show up a stranger. <span className="accent-italic">Leave a brother.</span>
+              Show up a stranger. <span className="accent-italic">Leave as one.</span>
             </h2>
           </FadeUp>
 
@@ -841,7 +842,7 @@ export function Landing() {
               maxWidth: '1100px',
             }}>
               One city. One weekend.<br />
-              <span className="accent-italic">The whole brotherhood.</span>
+              <span className="accent-italic">The whole community.</span>
             </h2>
             <p style={{
               margin: '36px auto 0',

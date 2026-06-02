@@ -124,7 +124,7 @@ export function AuthModal() {
                 <div style={{ marginBottom: '28px' }}>
                   <p style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '12px', color: 'var(--maroon)', letterSpacing: '0.14em', marginBottom: '8px', textTransform: 'uppercase' }}>EMBER</p>
                   <h2 style={{ fontFamily: 'Playfair Display, Georgia, serif', fontSize: '28px', color: '#fff', lineHeight: 1.2, marginBottom: '8px' }}>
-                    {mode === 'join' ? 'Join the brotherhood.' : 'Welcome back.'}
+                    {mode === 'join' ? 'Join the community.' : 'Welcome back.'}
                   </h2>
                   {pendingReason && <p style={{ color: '#A0A0A0', fontSize: '14px', lineHeight: '1.5' }}>{pendingReason}</p>}
                 </div>

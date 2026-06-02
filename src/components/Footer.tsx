@@ -18,12 +18,12 @@ const PLATFORM_BASE = [
   { label: 'Contact', to: '/contact' },
 ];
 
-const BROTHERHOOD = [
-  { label: 'The Board',           to: '/board'    },
-  { label: 'Annual Summit',       to: '/summit'   },
-  { label: 'The Council',         to: '/council'  },
-  { label: 'Partners',            to: '/partners' },
-  { label: 'Brotherhood Network', to: '/network'  },
+const COMMUNITY = [
+  { label: 'The Board',    to: '/board'    },
+  { label: 'Annual Summit',to: '/summit'   },
+  { label: 'The Council',  to: '/council'  },
+  { label: 'Partners',     to: '/partners' },
+  { label: 'Ember Network',to: '/network'  },
 ];
 
 export function Footer() {
@@ -67,7 +67,7 @@ export function Footer() {
               The world grills.
             </p>
             <p style={{ color: '#4A4A4A', fontSize: '13px', lineHeight: '1.7', maxWidth: '260px', marginBottom: '20px' }}>
-              The global social BBQ brotherhood. 40+ countries. One fire.
+              The global social BBQ hub. 40+ countries. One fire.
             </p>
 
             {/* Newsletter */}
@@ -130,12 +130,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Brotherhood column */}
+          {/* Community column */}
           <div>
-            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '10px', letterSpacing: '0.15em' }}>The Brotherhood</p>
+            <p className="mono" style={{ color: 'var(--maroon)', marginBottom: '6px', fontSize: '10px', letterSpacing: '0.15em' }}>The Community</p>
             <div style={{ width: '16px', height: '1px', background: 'linear-gradient(90deg, var(--maroon), transparent)', marginBottom: '16px' }} />
             <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {BROTHERHOOD.map(({ label, to }) => (
+              {COMMUNITY.map(({ label, to }) => (
                 <li key={label}>
                   <button
                     onClick={() => navigate(to)}

@@ -332,7 +332,7 @@ export function Council() {
           {[
             { n: '01', t: 'Proposals come from anywhere',  b: 'Vault members, the Ember team, or the Council itself can put a question forward.' },
             { n: '02', t: '30-day window',                  b: 'Every vote runs for 30 days. Open and transparent. Real-time tally visible to all members.' },
-            { n: '03', t: 'Result is binding',              b: 'If it passes, it ships. If it fails, it stays the way it was. The brotherhood decides.' },
+            { n: '03', t: 'Result is binding',              b: 'If it passes, it ships. If it fails, it stays the way it was. The community decides.' },
           ].map(({ n, t, b }) => (
             <div key={n} style={{ paddingBottom: '24px', marginBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ display: 'flex', gap: '16px', alignItems: 'baseline' }}>

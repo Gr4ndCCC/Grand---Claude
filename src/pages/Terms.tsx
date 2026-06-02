@@ -25,7 +25,7 @@ const SECTIONS = [
   },
   {
     title: '6. Code of Conduct',
-    body: `Ember is a brotherhood built on respect. Harassment, discrimination, hate speech, or behaviour that demeans others will result in immediate removal. The Board ranking system reflects genuine contribution — any attempt to game, buy, or fraudulently acquire rank will result in permanent account removal.`,
+    body: `Ember is a community built on respect. Harassment, discrimination, hate speech, or behaviour that demeans others will result in immediate removal. The Board ranking system reflects genuine contribution — any attempt to game, buy, or fraudulently acquire rank will result in permanent account removal.`,
   },
   {
     title: '7. Content',

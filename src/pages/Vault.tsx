@@ -7,9 +7,9 @@ import { Footer } from '../components/Footer';
 import { useAuth } from '../lib/auth';
 
 const VAULT_FEATURES = [
-  { title: 'Recipes',            body: "Member-only. Not on any food blog. Submitted by the brotherhood — pitmasters from 40 countries who've earned their stripes." },
+  { title: 'Recipes',            body: "Member-only. Not on any food blog. Submitted by the community — pitmasters from 40 countries who've earned their stripes." },
   { title: 'Knowledge',          body: 'Live masterclasses filmed at real gatherings. Fire science. Wood & smoke theory. Dry-aging at home. Knowledge that has no Wikipedia page.' },
-  { title: 'Brotherhood Network',body: 'Verified members worldwide. Show up as a stranger in any city. Leave as a brother. The network is the feature.' },
+  { title: 'Ember Network',body: 'Verified members worldwide. Show up as a stranger in any city. Leave as one. The network is the feature.' },
   { title: 'The Board',          body: 'Four tiers — Ember, Iron, Gold, Legend — each earned through real events and real ratings. Your rank means something.' },
   { title: 'Partners',           body: 'Premium butchers, charcoal suppliers, and knife makers vetted by the community. No ads. Only the best. Members get exclusive deals.' },
   { title: 'The Council',        body: "Vote on platform direction. New features. Event formats. Annual Summit location. Your membership shapes Ember." },
@@ -18,7 +18,7 @@ const VAULT_FEATURES = [
 const INCLUDED = [
   'Unlimited recipe access',
   'Live & recorded masterclasses',
-  'Brotherhood Network badge',
+  'Ember Network badge',
   'Board certification eligibility',
   'Partner discounts & early access',
   'Council voting rights',
@@ -128,7 +128,7 @@ export function Vault() {
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
             style={{ color: 'var(--bone-400)', fontSize: '18px', maxWidth: '540px', margin: '0 auto 48px', lineHeight: 1.7 }}
           >
-            Exclusive recipes. Live masterclasses. The Board. Brotherhood Network.
+            Exclusive recipes. Live masterclasses. The Board. Ember Network.
             The Council. Annual Summit. One membership. Everything.
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }}

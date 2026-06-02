@@ -86,7 +86,7 @@ export function Partners() {
             Ember is building a curated network of butchers, grill suppliers, drink
             brands, chefs, DJs, venues, and local food-culture partners. Selected
             partners are featured inside the Vault and connected directly to the
-            brotherhood. No fees. No paid placement. We review every application personally.
+            community. No fees. No paid placement. We review every application personally.
           </motion.p>
           <div style={{ marginTop: '32px' }}>
             <FireButton variant="primary" size="md" onClick={() => setOpen(true)}>

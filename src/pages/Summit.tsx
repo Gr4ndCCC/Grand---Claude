@@ -7,7 +7,7 @@ import { FireButton } from '../components/FireButton';
 const MILESTONES = [
   {
     n: '01',
-    t: 'Forge the brotherhood',
+    t: 'Forge the community',
     b: 'Verified members in 40+ countries. Every host earns a rank on The Board. The first Vault founders are being onboarded now.',
   },
   {
@@ -28,12 +28,12 @@ const MILESTONES = [
   {
     n: '05',
     t: 'The first fire',
-    b: 'One city. One weekend. The whole brotherhood. The first ever Ember Summit is born. You were there from the start.',
+    b: 'One city. One weekend. The whole community. The first ever Ember Summit is born. You were there from the start.',
   },
 ];
 
 const PROGRAM = [
-  { d: 'Day 1 · Friday',  t: 'Arrival & opening fire', b: 'Welcome dinner. 40 fires lit at sundown. Brotherhood roll-call.' },
+  { d: 'Day 1 · Friday',  t: 'Arrival & opening fire', b: 'Welcome dinner. 40 fires lit at sundown. Community roll-call.' },
   { d: 'Day 2 · Saturday',t: 'Masterclasses & council', b: 'Six tracks: fire, smoke, blade, salt, time, fermentation. Council vote at noon.' },
   { d: 'Day 3 · Sunday',  t: 'The grand grill',         b: 'One field. 40 grills. Every Legend cooks. Every member eats.' },
 ];
@@ -55,7 +55,7 @@ export function Summit() {
           >
             One city.<br />
             One weekend.<br />
-            <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>The whole brotherhood.</span>
+            <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>The whole community.</span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}

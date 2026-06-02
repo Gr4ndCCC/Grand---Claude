@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 
 const PILLARS = [
   { icon: Flame,  title: 'Fire',         body: 'Real charcoal. Real wood. Real heat. Anyone can grill — only some understand fire.' },
-  { icon: Users,  title: 'Brotherhood',  body: 'Verified members across 40+ countries. Show up a stranger. Leave a brother.' },
+  { icon: Users,  title: 'Community',    body: 'Verified members across 40+ countries. Show up a stranger. Leave as one.' },
   { icon: Globe,  title: 'Global',       body: 'From Amsterdam to Tokyo to São Paulo. One platform. One standard. No shortcuts.' },
   { icon: Award,  title: 'Earned rank',  body: 'Four tiers — Ember, Iron, Gold, Legend. Each earned. None bought. Reputation that follows you everywhere.' },
 ];
@@ -76,7 +76,7 @@ export function About() {
             style={{ marginTop: '60px', maxWidth: '520px', marginLeft: 'auto' }}
           >
             <p style={{ color: 'var(--bone-400)', fontSize: '20px', lineHeight: 1.65 }}>
-              A global brotherhood built around fire, craft, and the people who take both seriously.
+              A global community built around fire, craft, and the people who take both seriously.
               <br /><br />
               <span style={{ color: 'var(--beige)' }}>40+ countries. One standard. No shortcuts.</span>
             </p>
@@ -161,9 +161,9 @@ export function About() {
         <div className="page-container">
           {[
             { label: 'WHERE IT STARTED', title: 'A gathering that should have existed.', body: 'It started with a single question: why is there no place to find people who grill the way you do? Not the casual weekend crowd. The ones who know the difference between binchotan and briquettes. Who talk about the Maillard reaction. Who treat a brisket like a project. Ember is the answer.', align: 'left' },
-            { label: 'THE PLATFORM',     title: 'Three things merged into one.',         body: "Ember is Eventbrite for BBQ events, Instagram for the culture, and a brotherhood that holds you to a standard. The map is live. Events appear as pins. You discover, join, contribute, and leave with people you'll grill with for years. The Vault deepens everything.", align: 'right' },
+            { label: 'THE PLATFORM',     title: 'Three things merged into one.',         body: "Ember is Eventbrite for BBQ events, Instagram for the culture, and a community that holds you to a standard. The map is live. Events appear as pins. You discover, join, contribute, and leave with people you'll grill with for years. The Vault deepens everything.", align: 'right' },
             { label: 'THE STANDARD',     title: "A rank means something because it can't be faked.", body: "The Board exists because hosting matters. Not all events are equal. Not all hosts are equal. Ember, Iron, Gold, Legend. Four tiers earned through hosting, getting rated, contributing. No shortcuts. No buying your way up. Your rank follows you across 40+ countries.", align: 'left' },
-            { label: 'WHO EMBER IS FOR', title: 'Show up a stranger. Leave a brother.', body: "Ember is for people who take the grill seriously. Not exclusionary — welcoming. But specific. The host who spends more time on wood selection than a sommelier spends on wine. The traveller who finds a grill in every city. That's not a tagline. That's what happens at every Ember gathering.", align: 'right' },
+            { label: 'WHO EMBER IS FOR', title: 'Show up a stranger. Leave as one.', body: "Ember is for people who take the grill seriously. Not exclusionary — welcoming. But specific. The host who spends more time on wood selection than a sommelier spends on wine. The traveller who finds a grill in every city. That's not a tagline. That's what happens at every Ember gathering.", align: 'right' },
           ].map(({ label, title, body, align }, i) => (
             <FadeUp key={label} delay={0.05} style={{ marginBottom: i < 3 ? '120px' : 0 }}>
               <div style={{
@@ -196,7 +196,7 @@ export function About() {
               <span className="accent-italic">already lit.</span>
             </h2>
             <p style={{ color: 'var(--bone-400)', fontSize: '19px', lineHeight: 1.7, marginBottom: '48px', maxWidth: '560px', margin: '0 auto 48px' }}>
-              Join the Vault. Find events. Earn your rank. Be part of the only BBQ brotherhood that exists at this scale.
+              Join the Vault. Find events. Earn your rank. Be part of the only BBQ hub that exists at this scale.
             </p>
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button className="btn-v3 primary lg" onClick={() => navigate('/vault')}>Join the Vault</button>

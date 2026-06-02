@@ -93,7 +93,7 @@ export function Verify() {
             </h1>
             <p style={{ color: '#A0A0A0', fontSize: '16px', lineHeight: 1.7, maxWidth: '480px', margin: '0 auto 32px' }}>
               {status === 'verified'
-                ? 'Your identity has been confirmed. You have full access to the Vault, the Brotherhood Network, and all Ember features.'
+                ? 'Your identity has been confirmed. You have full access to the Vault, the Ember Network, and all Ember features.'
                 : 'We\'re reviewing your documents. This usually takes 1–3 business days. We\'ll email you the moment your verification is complete.'}
             </p>
             <button
@@ -143,7 +143,7 @@ export function Verify() {
                 <span style={{ color: 'var(--beige)', fontStyle: 'italic' }}>Earn the badge.</span>
               </h1>
               <p style={{ color: '#A0A0A0', fontSize: '16px', lineHeight: 1.7, marginBottom: '40px', maxWidth: '560px' }}>
-                The Vault is real members only. We verify every account so the Brotherhood Network stays trustworthy. It takes 2 minutes. We&apos;ll never share your documents.
+                The Vault is real members only. We verify every account so the Ember Network stays trustworthy. It takes 2 minutes. We&apos;ll never share your documents.
               </p>
 
               <div style={{ background: 'rgba(26,23,20,0.7)', border: '1px solid rgba(245,237,224,0.07)', borderRadius: '14px', padding: '28px', marginBottom: '24px' }}>

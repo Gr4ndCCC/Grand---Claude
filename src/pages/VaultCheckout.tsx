@@ -17,11 +17,11 @@ declare global {
 const PERKS: { title: string; desc: string }[] = [
   { title: 'The full recipe vault',          desc: 'Every pitmaster recipe. Unlocked. Forever.' },
   { title: 'Live masterclasses, on demand',  desc: 'Train with world-class pitmasters in real time.' },
-  { title: 'The Brotherhood Network',        desc: 'Verified badge. Direct line to 40+ countries of grillers.' },
+  { title: 'The Ember Network',        desc: 'Verified badge. Direct line to 40+ countries of grillers.' },
   { title: 'Board certification path',       desc: 'Earn the title. Become a certified Ember pitmaster.' },
   { title: 'Partner discounts & early drops',desc: 'Exclusive gear, rubs, and tools — before anyone else.' },
   { title: 'Council voting rights',          desc: 'Shape the future of Ember. Your voice. Your fire.' },
-  { title: 'Annual Summit access',           desc: 'The yearly gathering. Smoke, steel, brotherhood.' },
+  { title: 'Annual Summit access',           desc: 'The yearly gathering. Smoke, steel, fire.' },
   { title: 'Priority event discovery',       desc: 'See the best gatherings first. Lock your seat.' },
 ];
 
@@ -161,7 +161,7 @@ export function VaultCheckout() {
                   Join the Vault.
                 </h1>
                 <p style={{ color: '#6A6A6A', fontStyle: 'italic', fontFamily: 'var(--font-display)', fontSize: '15px' }}>
-                  Full access. Lifetime brotherhood.
+                  Full access. For life.
                 </p>
               </motion.div>
 
@@ -275,7 +275,7 @@ export function VaultCheckout() {
                     color: '#E4CFB3', fontFamily: 'var(--font-display)',
                     fontStyle: 'italic', fontSize: '17px', lineHeight: 1.4,
                   }}>
-                    "The world grills. The Vault is where the brotherhood keeps the fire."
+                    "The world grills. The Vault is where the community keeps the fire."
                   </p>
                 </div>
               </motion.div>
